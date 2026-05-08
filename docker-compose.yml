@@ -8,8 +8,8 @@ services:
       BACKEND_DOMAIN_NAME: ${BACKEND_DOMAIN_NAME}
       DOMAIN_VALIDATION_KEY: ${DOMAIN_VALIDATION_KEY}
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"      # ← Đã sửa (tránh xung đột cổng 80)
+      - "8443:443"     # ← Đã sửa (tránh xung đột cổng 443)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
@@ -45,6 +45,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
     ports:
-      - 27027:27017
+      - "27027:27017"
     volumes:
       - ${DATA_DIRECTORY}/mongo/data:/data/db
