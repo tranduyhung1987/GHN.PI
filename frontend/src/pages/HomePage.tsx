@@ -6,13 +6,57 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Header chính - Chỉ giữ 1 cái */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {/* ==================== HEADER + LOGO LUNG LINH ==================== */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '40px' 
+      }}>
+        
+        {/* VÙNG LOGO GHN.PI - HIỆU ỨNG LUNG LINH NEON */}
+        <div 
+          onClick={() => navigate('/')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 20px',
+            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+            border: '2px solid #22d3ee',
+            borderRadius: '16px',
+            cursor: 'pointer',
+            transition: 'all 0.4s ease',
+            boxShadow: '0 0 20px rgba(34, 211, 238, 0.6)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = '0 0 35px rgba(34, 211, 238, 0.95)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.borderColor = '#67e8f9';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(34, 211, 238, 0.6)';
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.borderColor = '#22d3ee';
+          }}
+        >
           <div style={{ fontSize: '48px' }}>🚚</div>
           <div>
-            <h1 style={{ fontSize: '34px', fontWeight: 'bold', margin: 0 }}>GHN.PI</h1>
-            <p style={{ color: '#94a3b8', margin: 0 }}>Logistics Ecosystem v14 Pro</p>
+            <h1 style={{ 
+              fontSize: '34px', 
+              fontWeight: 'bold', 
+              margin: 0,
+              textShadow: '0 0 12px #22d3ee'
+            }}>
+              GHN.PI
+            </h1>
+            <p style={{ 
+              color: '#94a3b8', 
+              margin: 0, 
+              fontSize: '14px' 
+            }}>
+              Logistics Ecosystem v14 Pro
+            </p>
           </div>
         </div>
 
@@ -43,6 +87,7 @@ export default function HomePage() {
           🌟 Đăng nhập với Pi
         </button>
       </div>
+      {/* ================================================================== */}
 
       {/* Status Bar */}
       <div style={{
