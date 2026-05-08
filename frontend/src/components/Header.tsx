@@ -1,54 +1,61 @@
-import type { CSSProperties } from "react";
-import type { User } from "../types/pi.ts";
+// src/components/Header.tsx
+import { useNavigate } from 'react-router-dom';
 
-interface HeaderProps {
-  onSignIn: () => void;
-  onSignOut: () => void;
-  onSendTestNotification: () => void;
-  user: User | null;
-  isLoading?: boolean;
-}
+export default function Header() {
+  const navigate = useNavigate();
 
-const headerStyle: CSSProperties = {
-  padding: 8,
-  backgroundColor: "gray",
-  color: "white",
-  width: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-};
-
-const userSectionStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-};
-
-const Header = ({ user, onSignIn, onSignOut, onSendTestNotification, isLoading }: HeaderProps) => {
   return (
-    <header style={headerStyle}>
-      <div style={{ fontWeight: "bold" }}>Pi Bakery</div>
+    <header style={{
+      backgroundColor: '#1e2937',
+      padding: '20px 24px',
+      borderBottom: '1px solid #334155',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100
+    }}>
+      <div style={{ 
+        maxWidth: '640px', 
+        margin: '0 auto', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center' 
+      }}>
+        
+        {/* Logo + Tên App */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }} 
+          onClick={() => navigate('/')}
+        >
+          <span style={{ fontSize: '48px' }}>🚚</span>
+          <div>
+            <h1 style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              margin: 0 
+            }}>GHN.PI</h1>
+            <p style={{ 
+              color: '#94a3b8', 
+              margin: 0, 
+              fontSize: '14px' 
+            }}>Logistics Ecosystem v14 Pro</p>
+          </div>
+        </div>
 
-      <div style={userSectionStyle}>
-        {user ? (
-          <>
-            <span>@{user.username}</span>
-            <button type="button" onClick={onSignOut} disabled={isLoading}>
-              Sign out
-            </button>
-            {user.roles.includes("core_team") && (
-              <button onClick={onSendTestNotification}>Send Test Notification to yourself</button>
-            )}
-          </>
-        ) : (
-          <button onClick={onSignIn} disabled={isLoading}>
-            Sign in
-          </button>
-        )}
+        {/* Nút Đăng nhập Pi */}
+        <button 
+          style={{
+            backgroundColor: '#22d3ee',
+            color: '#0f172a',
+            padding: '12px 28px',
+            borderRadius: '9999px',
+            fontWeight: '600',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Đăng nhập với Pi
+        </button>
       </div>
     </header>
   );
-};
-
-export default Header;
+}
