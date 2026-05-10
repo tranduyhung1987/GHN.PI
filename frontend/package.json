@@ -18,7 +18,7 @@
     "axios": "^1.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.13.1",
+    "react-router-dom": "^7.15.0",
     "styled-components": "^6.3.12"
   },
   "devDependencies": {
@@ -27,6 +27,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react-swc": "^4.3.0",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",

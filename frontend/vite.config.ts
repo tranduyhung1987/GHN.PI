@@ -1,29 +1,12 @@
-import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
-import * as path from "node:path";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
 
-// https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  return {
-    plugins: [
-      react(),
-      {
-        name: "html-env-replace",
-        transformIndexHtml(html) {
-          return html
-            .replace(/\$\$BACKEND_URL\$\$/g, () => env.VITE_BACKEND_URL || "$$BACKEND_URL$$")
-            .replace(/\$\$SANDBOX_SDK\$\$/g, env.VITE_SANDBOX_SDK || "true");
-        },
-      },
-    ],
-    resolve: {
-      alias: {
-        "@mui/styled-engine": path.resolve(__dirname, "node_modules/@mui/styled-engine-sc"),
-      },
-    },
-    server: {
-      port: parseInt(env.PORT) || 3314,
-    },
-  };
-});
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,        // Port mặc định của Vite
+    host: true,        // Cho phép truy cập từ điện thoại cùng mạng
+    strictPort: true
+  }
+})
