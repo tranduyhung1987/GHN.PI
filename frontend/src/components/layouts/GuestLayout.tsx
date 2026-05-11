@@ -8,7 +8,7 @@ export default function GuestLayout() {
       background: 'linear-gradient(135deg, #0f172a 0%, #1e2937 100%)',
       color: 'white'
     }}>
-      {/* Header đã bị xóa hoàn toàn */}
+      {/* ĐÃ XÓA HEADER HOÀN TOÀN */}
       
       <div style={{ padding: '20px', paddingBottom: '100px' }}>
         <Outlet />
