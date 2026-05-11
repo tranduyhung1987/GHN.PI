@@ -8,14 +8,12 @@ export default function GuestLayout() {
       background: 'linear-gradient(135deg, #0f172a 0%, #1e2937 100%)',
       color: 'white'
     }}>
-      {/* ==================== HEADER ĐÃ XÓA ==================== */}
-      
-      {/* Nội dung trang */}
-      <div style={{ paddingBottom: '80px' }}>
+      {/* === HEADER TRẮNG ĐÃ BỊ XÓA HOÀN TOÀN === */}
+
+      <div style={{ padding: '20px', paddingBottom: '100px' }}>
         <Outlet />
       </div>
 
-      {/* Bottom Navigation */}
       <BottomNav />
     </div>
   );
