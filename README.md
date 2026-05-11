@@ -1,27 +1,68 @@
-# Pi Demo App
+# 🚀 GHN.PI - Giao Hàng Nhanh Thanh Toán Bằng Pi
 
-Pi Demo App is an example of how you can implement the various required flows in your app's code.
-It aims to show you how to use Pi Platform API on the backend side and Pi SDK on the frontend side of your app.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Click%20Here-brightgreen?style=for-the-badge)](https://ghn-pi.vercel.app)  
+[![GitHub license](https://img.shields.io/github/license/tranduyhung1987/GHN.PI?style=for-the-badge)](LICENSE.md)  
+[![Pi Network](https://img.shields.io/badge/Powered%20by-Pi%20Network-9B59B6?style=for-the-badge)](https://minepi.com)
 
-It is composed of two major parts:
+**Ứng dụng giao hàng nhanh đầu tiên trên Pi Network** – Kết nối shipper và khách hàng, thanh toán nhanh chóng bằng Pi.
 
-- **frontend**: a single-page frontend app (built with React and Vite)
-- **backend**: a backend app (a very simple JSON API built with Express and Mongo)
+---
 
-## Initial Development
+## ✨ Giới thiệu
 
-Read [`doc/development.md`](./doc/development.md) to get started and learn how to run this app in development.
+**GHN.PI** là dự án **Giao Hàng Nhanh** được xây dựng trên nền tảng **Pi Network**, cho phép người dùng đặt hàng, theo dõi đơn hàng và thanh toán trực tiếp bằng Pi mà không cần chuyển đổi tiền fiat.
 
-> **WARNING**
->
-> The demo app uses express session cookies which, in the Sandbox environment, are not correctly saved on the client on some browsers.
-> To properly test all of the features of the Demo App, use Mozilla Firefox.
+- **Tình trạng**: Đang phát triển (Testnet) → Sắp Mainnet
+- **Phiên bản**: L14Pro (nâng cấp nhiều tính năng)
+- **Fork từ**: [Pi Demo App](https://github.com/pi-apps/demo) chính thức
 
-## Deployment
+---
 
-Read [`doc/deployment.md`](./doc/deployment.md) to learn how to deploy this app on a server using Docker and docker-compose.
+## 🚀 Tính năng nổi bật
 
-## Flows
+### ✅ Đã hoàn thành
+- Xác thực người dùng qua **Pi SDK**
+- Thanh toán **Pi Payment** (User-to-App)
+- Quản lý đơn hàng (tạo, theo dõi, cập nhật trạng thái)
+- Hệ thống shipper (nhận đơn, cập nhật vị trí)
+- Reverse Proxy & Docker support
+- Backend API với Express + MongoDB
 
-To dive into the implementation of the flows that support the demo app features, please refer to
-[Pi Demo App Flows](./FLOWS.md).
+### 🔄 Đang phát triển
+- Bản đồ theo dõi thời gian thực
+- Hệ thống đánh giá & feedback
+- Tích hợp API GHN chính thức (khi có)
+- Multi-language (VN/EN)
+
+---
+
+## 🛠 Công nghệ sử dụng
+
+- **Frontend**: React + Vite + TypeScript
+- **Backend**: Node.js + Express + MongoDB
+- **Container**: Docker + docker-compose
+- **Authentication & Payment**: Pi SDK + Pi Platform API
+- **Deployment**: Vercel / Render / Self-host
+
+---
+
+## 📱 Xem Demo Trực Tiếp
+
+**[→ Mở GHN.PI ngay](https://ghn-pi.vercel.app)** *(thay bằng link Vercel/Netlify thật của bạn)*
+
+---
+
+## 🛠 Hướng dẫn cài đặt & Chạy local
+
+Xem chi tiết trong thư mục [`doc/`](./doc/):
+
+- [Development Guide](./doc/development.md)
+- [Deployment Guide](./doc/deployment.md)
+
+**Cách nhanh nhất:**
+
+```bash
+git clone https://github.com/tranduyhung1987/GHN.PI.git
+cd GHN.PI
+cp .env.example .env
+docker-compose up --build
