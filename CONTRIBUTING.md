@@ -7,39 +7,25 @@ Mọi đóng góp từ cộng đồng đều được hoan nghênh ❤️
 
 ## 📋 Quy trình đóng góp
 
-### 1. Fork dự án
+1. Fork dự án
 - Vào trang GitHub của dự án này.
 - Click nút **"Fork"** ở góc trên bên phải.
 - Chọn tài khoản của bạn để tạo bản sao.
-
-### 2. Clone repo về máy
+2. Clone repo về máy
 ```bash
-git clone https://github.com/your-username/GHN.PI.git
-cd GHN.PI
-(Thay your-username bằng tên tài khoản GitHub của bạn)
-
-### 3. Tạo branch mới
-```bash
+git clone https://github.com/your-username/GHN.PI.git cd GHN.PI
+3. Tạo branch mới
 git checkout -b feature/tinh-nang-moi
-
-### 4. Thực hiện thay đổi
-
+4. Thực hiện thay đổi
 Mở dự án bằng VS Code hoặc editor yêu thích.
 Thêm / sửa code, tài liệu, giao diện...
-Test kỹ bằng lệnh
-```bash
-docker-compose up --build
-
-### 5. Commit thay đổi
-
-Bashgit add .
+Test kỹ bằng lệnh: Bash docker-compose up --build
+5. Commit thay đổi
+git add .
 git commit -m "Add: mô tả ngắn gọn những gì bạn đã làm"
-
-### 6. Push và tạo Pull Request
-
-Bashgit push origin feature/tinh-nang-moi
+6. Push và tạo Pull Request
+git push origin feature/tinh-nang-moi
 Sau đó quay lại GitHub → Click nút "Compare & pull request" → Viết mô tả và submit.
-
 ✅ Những đóng góp được chấp nhận
 
 Sửa lỗi (Bug fix)
@@ -59,5 +45,6 @@ Test trước khi gửi Pull Request
 
 Mở Issue trên GitHub
 Liên hệ @tranduyhung1987 trên Pi Chat / Telegram / Group Pi Việt Nam
+
 Cùng nhau xây dựng GHN.PI trở thành ứng dụng giao hàng nhanh tốt nhất trên Pi Network! 🚀
 Made with ❤️ by @tranduyhung1987
