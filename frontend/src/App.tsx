@@ -58,8 +58,6 @@ function App() {
               <Route path="/khieu-nai" element={<KhieuNaiPage />} />
               <Route path="/ca-nhan" element={<CaNhanPage />} />
               <Route path="/tra-cuu-cuoc" element={<TraCuuCuocPage />} />
-              
-              {/* ADMIN ROUTE */}
               <Route path="/admin" element={<AdminPage />} />
 
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -70,7 +68,7 @@ function App() {
         </div>
       </CurrentLayout>
 
-      {/* ẨN ROLE SELECTOR KHI PRODUCTION (CHỈ HIỂN THỊ TRONG DEV) */}
+      {/* ẨN HOÀN TOÀN ROLE SELECTOR TRÊN LIVE */}
       {import.meta.env.DEV && <RoleSelector />}
     </Router>
   );
