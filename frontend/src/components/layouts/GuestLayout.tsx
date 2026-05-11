@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import BottomNav from '../BottomNav';   // <-- sửa nếu đường dẫn khác
+import BottomNav from '../BottomNav';
 
 interface GuestLayoutProps {
   children: ReactNode;
@@ -7,9 +7,13 @@ interface GuestLayoutProps {
 
 export default function GuestLayout({ children }: GuestLayoutProps) {
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', position: 'relative' }}>
-      {/* Content chính */}
-      <main style={{ paddingBottom: '80px' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#0f172a',
+      position: 'relative'
+    }}>
+      {/* Nội dung chính */}
+      <main style={{ paddingBottom: '90px' }}>
         {children}
       </main>
 
