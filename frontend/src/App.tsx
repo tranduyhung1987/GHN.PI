@@ -1,20 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import GuestLayout from './components/layouts/GuestLayout';
 import HomePage from './pages/HomePage';
 
 function App() {
   return (
     <Router>
-      <div style={{ 
-        minHeight: '100vh', 
-        background: '#0f172a', 
-        color: 'white',
-        paddingBottom: '70px'  // dành chỗ cho bottom nav
-      }}>
+      <GuestLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="*" element={<HomePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
+      </GuestLayout>
     </Router>
   );
 }
