@@ -5,36 +5,12 @@ export default function BottomNav() {
   const location = useLocation();
 
   const navItems = [
-    { 
-      path: '/', 
-      label: 'Trang chủ', 
-      icon: '🏠' 
-    },
-    { 
-      path: '/don-hang', 
-      label: 'Đơn hàng', 
-      icon: '📦' 
-    },
-    { 
-      path: '/chat', 
-      label: 'Chat', 
-      icon: '💬' 
-    },
-    { 
-      path: '/doi-soat', 
-      label: 'Đối soát', 
-      icon: '📊' 
-    },
-    { 
-      path: '/khieu-nai', 
-      label: 'Khiếu nại', 
-      icon: '⚠️' 
-    },
-    { 
-      path: '/ca-nhan', 
-      label: 'Cá nhân', 
-      icon: '👤' 
-    },
+    { path: '/', label: 'Trang chủ', icon: '🏠' },
+    { path: '/don-hang', label: 'Đơn hàng', icon: '📦' },
+    { path: '/chat', label: 'Chat', icon: '💬' },
+    { path: '/doi-soat', label: 'Đối soát', icon: '📊' },
+    { path: '/khieu-nai', label: 'Khiếu nại', icon: '⚠️' },
+    { path: '/ca-nhan', label: 'Cá nhân', icon: '👤' },
   ];
 
   return (
@@ -43,37 +19,44 @@ export default function BottomNav() {
       bottom: 0,
       left: 0,
       right: 0,
+      height: '70px',
       backgroundColor: '#1e2937',
       borderTop: '1px solid #334155',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      padding: '8px 0 4px 0',
-      height: '70px',
       zIndex: 1000,
+      boxShadow: '0 -4px 10px rgba(0,0,0,0.3)'
     }}>
-      {navItems.map((item) => (
-        <div
-          key={item.path}
-          onClick={() => navigate(item.path)}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            color: location.pathname === item.path ? '#22d3ee' : '#94a3b8',
-            cursor: 'pointer',
-            flex: 1,
-          }}
-        >
-          <div style={{ fontSize: '26px', marginBottom: '2px' }}>{item.icon}</div>
-          <div style={{ 
-            fontSize: '11px', 
-            fontWeight: location.pathname === item.path ? '600' : '400' 
-          }}>
-            {item.label}
+      {navItems.map((item) => {
+        const isActive = location.pathname === item.path;
+        return (
+          <div
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: isActive ? '#22d3ee' : '#94a3b8',
+              cursor: 'pointer',
+              flex: 1,
+              padding: '4px 0',
+            }}
+          >
+            <div style={{ fontSize: '28px', marginBottom: '3px' }}>{item.icon}</div>
+            <div style={{ 
+              fontSize: '10.5px', 
+              fontWeight: isActive ? '600' : '400',
+              textAlign: 'center',
+              lineHeight: '1.1'
+            }}>
+              {item.label}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
