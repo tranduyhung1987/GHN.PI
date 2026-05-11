@@ -6,12 +6,11 @@ export default function GuestLayout() {
     <div style={{ 
       minHeight: '100vh', 
       background: 'linear-gradient(135deg, #0f172a 0%, #1e2937 100%)',
-      color: 'white',
-      position: 'relative'
+      color: 'white'
     }}>
-      {/* === HEADER TRẮNG ĐÃ BỊ XÓA HOÀN TOÀN === */}
+      {/* HEADER TRẮNG ĐÃ BỊ XÓA HOÀN TOÀN TẠI ĐÂY */}
 
-      <div style={{ paddingTop: '20px', paddingBottom: '100px' }}>
+      <div style={{ padding: '20px', paddingBottom: '100px' }}>
         <Outlet />
       </div>
 
