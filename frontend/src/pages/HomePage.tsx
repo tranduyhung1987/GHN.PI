@@ -1,4 +1,3 @@
-// src/pages/HomePage.tsx
 import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
@@ -6,36 +5,10 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ==================== HEADER - LOGO ==================== */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        marginBottom: '30px' 
-      }}>
-        <div 
-          onClick={() => navigate('/')}
-          style={neonLogoStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 45px #22d3ee, 0 0 70px rgba(34, 211, 238, 0.8)';
-            e.currentTarget.style.borderColor = '#67e8f9';
-            e.currentTarget.style.transform = 'scale(1.04)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 30px #22d3ee';
-            e.currentTarget.style.borderColor = '#22d3ee';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-        >
-          <div style={{ fontSize: '52px' }}>🚚</div>
-          <div>
-            <h1 style={logoTitleStyle}>GHN.PI</h1>
-            <p style={logoSubtitleStyle}>Logistics Ecosystem v14 Pro</p>
-          </div>
-        </div>
-      </div>
+      {/* ==================== PHẦN HEADER ĐÃ ẨN ==================== */}
 
-      {/* NÚT ĐĂNG NHẬP VỚI PI - ĐÃ DI CHUYỂN XUỐNG DƯỚI */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+      {/* NÚT ĐĂNG NHẬP VỚI PI - GIỮ NGUYÊN VỊ TRÍ */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '40px' }}>
         <button 
           onClick={() => alert('🔗 Đang kết nối với Pi Network...')}
           style={piButtonStyle}
@@ -54,11 +27,12 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* 6 CARDS - GIỮ NGUYÊN */}
+      {/* 6 CARDS - GIỮ NGUYÊN HOÀN TOÀN */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '1fr 1fr', 
-        gap: '20px' 
+        gap: '20px',
+        padding: '0 20px'
       }}>
         {cards.map((card) => (
           <div
@@ -97,33 +71,6 @@ const cards = [
 ];
 
 /* ====================== STYLES ====================== */
-const neonLogoStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '16px',
-  padding: '14px 24px',
-  backgroundColor: 'rgba(15, 23, 42, 0.95)',
-  border: '2px solid #22d3ee',
-  borderRadius: '20px',
-  cursor: 'pointer',
-  boxShadow: '0 0 30px #22d3ee',
-  transition: 'all 0.4s ease',
-};
-
-const logoTitleStyle = {
-  fontSize: '36px',
-  fontWeight: 'bold',
-  margin: 0,
-  color: '#e2e8f0',
-  textShadow: '0 0 20px #22d3ee',
-};
-
-const logoSubtitleStyle = {
-  color: '#94a3b8',
-  margin: 0,
-  fontSize: '14px',
-};
-
 const piButtonStyle = {
   padding: '16px 36px',
   background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
