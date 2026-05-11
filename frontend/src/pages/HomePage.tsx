@@ -5,29 +5,21 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ==================== HEADER ĐÃ BỊ XÓA (PHẦN KHOANH ĐỎ) ==================== */}
+      {/* PHẦN HEADER TRÊN CÙNG ĐÃ BỊ XÓA HOÀN TOÀN */}
 
-      {/* NÚT ĐĂNG NHẬP VỚI PI - GIỮ NGUYÊN */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '40px' }}>
+      {/* NÚT ĐĂNG NHẬP VỚI PI */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '60px', marginBottom: '40px' }}>
         <button 
           onClick={() => alert('🔗 Đang kết nối với Pi Network...')}
           style={piButtonStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 45px #c026d3, 0 0 70px rgba(192, 38, 211, 0.8)';
-            e.currentTarget.style.borderColor = '#e879f9';
-            e.currentTarget.style.transform = 'scale(1.08)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 30px #c026d3';
-            e.currentTarget.style.borderColor = '#c026d3';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
           ⭐ Đăng nhập với Pi
         </button>
       </div>
 
-      {/* 6 CARDS - GIỮ NGUYÊN HOÀN TOÀN */}
+      {/* 6 CARDS */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '1fr 1fr', 
@@ -41,7 +33,7 @@ export default function HomePage() {
             style={neonCardStyle}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = '#22d3ee';
-              e.currentTarget.style.boxShadow = '0 0 35px #22d3ee, 0 0 55px rgba(34, 211, 238, 0.6)';
+              e.currentTarget.style.boxShadow = '0 0 35px #22d3ee';
               e.currentTarget.style.transform = 'translateY(-8px)';
             }}
             onMouseLeave={(e) => {
@@ -60,7 +52,7 @@ export default function HomePage() {
   );
 }
 
-/* ====================== DATA ====================== */
+/* DATA & STYLES GIỮ NGUYÊN */
 const cards = [
   { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn nhanh", path: "/gui-hang" },
   { icon: "📊", title: "TRA CỨU CƯỚC PHÍ", desc: "Ước tính nhanh", path: "/tra-cuu-cuoc" },
@@ -70,7 +62,6 @@ const cards = [
   { icon: "🖐️", title: "NHẬN HÀNG", desc: "Xác nhận đã nhận hàng", path: "/nhan-hang" },
 ];
 
-/* ====================== STYLES ====================== */
 const piButtonStyle = {
   padding: '16px 36px',
   background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
