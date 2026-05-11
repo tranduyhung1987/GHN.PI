@@ -5,9 +5,9 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ==================== PHẦN HEADER ĐÃ ẨN ==================== */}
+      {/* ==================== HEADER ĐÃ BỊ XÓA (PHẦN KHOANH ĐỎ) ==================== */}
 
-      {/* NÚT ĐĂNG NHẬP VỚI PI - GIỮ NGUYÊN VỊ TRÍ */}
+      {/* NÚT ĐĂNG NHẬP VỚI PI - GIỮ NGUYÊN */}
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '40px' }}>
         <button 
           onClick={() => alert('🔗 Đang kết nối với Pi Network...')}
