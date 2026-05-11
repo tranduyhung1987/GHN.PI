@@ -1,7 +1,8 @@
 # 🚀 GHN.PI - Giao Hàng Nhanh Thanh Toán Bằng Pi
 
-![Live Demo](https://img.shields.io/badge/Live_Demo-Click_Here-brightgreen?style=for-the-badge)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Click_Here-brightgreen?style=for-the-badge)](https://ghn-pi.vercel.app)
 [![GitHub license](https://img.shields.io/github/license/tranduyhung1987/GHN.PI)](LICENSE.md)
+[![Stars](https://img.shields.io/github/stars/tranduyhung1987/GHN.PI?style=social)](https://github.com/tranduyhung1987/GHN.PI)
 
 **Ứng dụng giao hàng nhanh đầu tiên trên Pi Network** – Thanh toán bằng Pi, kết nối shipper và khách hàng.
 
@@ -29,7 +30,7 @@ GHN.PI là dự án **Giao Hàng Nhanh** được xây dựng dành riêng cho h
 
 ## 📱 Xem Demo Trực Tiếp
 
-**[→ Mở GHN.PI ngay](https://ghn-pi.vercel.app)** *(cập nhật sau khi deploy)*
+**[→ Mở GHN.PI ngay](https://ghn-pi.vercel.app)**
 
 ---
 
