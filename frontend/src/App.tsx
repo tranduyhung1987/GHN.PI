@@ -1,20 +1,20 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import GuestLayout from './components/layouts/GuestLayout';
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import GuiHangPage from './pages/GuiHangPage';
-// import các page khác nếu cần sau
 
 function App() {
   return (
     <Router>
-      <GuestLayout>
+      <div style={{ 
+        minHeight: '100vh', 
+        background: '#0f172a', 
+        color: 'white',
+        paddingBottom: '70px'  // dành chỗ cho bottom nav
+      }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/gui-hang" element={<GuiHangPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<HomePage />} />
         </Routes>
-      </GuestLayout>
+      </div>
     </Router>
   );
 }

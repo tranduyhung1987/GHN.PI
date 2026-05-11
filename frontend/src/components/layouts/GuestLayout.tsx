@@ -1,19 +1,19 @@
-import { Outlet } from 'react-router-dom';
-import BottomNav from '../BottomNav';
+import { ReactNode } from 'react';
+import BottomNav from '../BottomNav';   // <-- sửa nếu đường dẫn khác
 
-export default function GuestLayout() {
+interface GuestLayoutProps {
+  children: ReactNode;
+}
+
+export default function GuestLayout({ children }: GuestLayoutProps) {
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e2937 100%)',
-      color: 'white'
-    }}>
-      {/* HEADER TRẮNG ĐÃ BỊ XÓA HOÀN TOÀN TẠI ĐÂY */}
+    <div style={{ minHeight: '100vh', background: '#0f172a', position: 'relative' }}>
+      {/* Content chính */}
+      <main style={{ paddingBottom: '80px' }}>
+        {children}
+      </main>
 
-      <div style={{ padding: '20px', paddingBottom: '100px' }}>
-        <Outlet />
-      </div>
-
+      {/* Bottom Navigation */}
       <BottomNav />
     </div>
   );
