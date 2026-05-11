@@ -8,11 +8,13 @@ function App() {
   return (
     <Router>
       <GuestLayout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/gui-hang" element={<GuiHangPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div style={{ minHeight: '100vh', background: '#0f172a', color: 'white' }}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/gui-hang" element={<GuiHangPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </GuestLayout>
     </Router>
   );
