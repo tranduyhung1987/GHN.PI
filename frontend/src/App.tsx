@@ -70,7 +70,8 @@ function App() {
         </div>
       </CurrentLayout>
 
-      <RoleSelector />
+      {/* ẨN ROLE SELECTOR KHI PRODUCTION (CHỈ HIỂN THỊ TRONG DEV) */}
+      {import.meta.env.DEV && <RoleSelector />}
     </Router>
   );
 }
