@@ -12,18 +12,19 @@ Mọi đóng góp từ cộng đồng đều được hoan nghênh ❤️
 - Click nút **"Fork"** ở góc trên bên phải.
 - Chọn tài khoản của bạn để tạo bản sao.
 2. Clone repo về máy
-```bash
-git clone https://github.com/your-username/GHN.PI.git cd GHN.PI
+```bash git clone https://github.com/your-username/GHN.PI.git cd GHN.PI
 3. Tạo branch mới
-git checkout -b feature/tinh-nang-moi
+```bash git checkout -b feature/tinh-nang-moi
 4. Thực hiện thay đổi
 Mở dự án bằng VS Code hoặc editor yêu thích.
 Thêm / sửa code, tài liệu, giao diện...
 Test kỹ bằng lệnh: Bash docker-compose up --build
 5. Commit thay đổi
+```bash
 git add .
 git commit -m "Add: mô tả ngắn gọn những gì bạn đã làm"
 6. Push và tạo Pull Request
+```bash
 git push origin feature/tinh-nang-moi
 Sau đó quay lại GitHub → Click nút "Compare & pull request" → Viết mô tả và submit.
 ✅ Những đóng góp được chấp nhận
