@@ -25,8 +25,8 @@ export default function BottomNav() {
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      zIndex: 9999,
-      boxShadow: '0 -2px 10px rgba(0,0,0,0.4)'
+      zIndex: 10000,
+      boxShadow: '0 -4px 12px rgba(0,0,0,0.5)'
     }}>
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
@@ -38,19 +38,14 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
               color: isActive ? '#22d3ee' : '#94a3b8',
               cursor: 'pointer',
               flex: 1,
-              paddingTop: '4px',
+              padding: '6px 0',
             }}
           >
-            <div style={{ fontSize: '27px', marginBottom: '2px' }}>{item.icon}</div>
-            <div style={{ 
-              fontSize: '10.5px',
-              fontWeight: isActive ? '600' : '500',
-              letterSpacing: '0.3px'
-            }}>
+            <div style={{ fontSize: '28px', marginBottom: '3px' }}>{item.icon}</div>
+            <div style={{ fontSize: '10.5px', fontWeight: isActive ? '700' : '500' }}>
               {item.label}
             </div>
           </div>
