@@ -13,7 +13,7 @@ interface DonHang {
   trangThaiText: string;
   color: string;
   taiXe?: string;
-  repScore?: number;        // Reputation của tài xế/hub
+  repScore?: number;        // Uy tín của tài xế/hub
 }
 
 export default function DonHangPage() {
@@ -80,7 +80,7 @@ export default function DonHangPage() {
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>ĐƠN HÀNG CỦA TÔI</h1>
       </div>
       <p style={{ color: '#94a3b8', marginBottom: '20px' }}>
-        Quản lý tất cả đơn hàng • Tổng {donHangs.length} đơn • Reputation minh bạch
+        Quản lý tất cả đơn hàng • Tổng {donHangs.length} đơn • Uy tín minh bạch
       </p>
 
       {/* TẠO ĐƠN MỚI */}
