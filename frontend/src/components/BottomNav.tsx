@@ -26,8 +26,7 @@ export default function BottomNav() {
       justifyContent: 'space-around',
       alignItems: 'center',
       zIndex: 10000,
-      boxShadow: '0 -4px 12px rgba(0,0,0,0.5)',
-      paddingBottom: '8px',           // Thêm để tránh bị che bởi thanh điều hướng điện thoại
+      boxShadow: '0 -4px 12px rgba(0,0,0,0.5)'
     }}>
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
@@ -42,26 +41,26 @@ export default function BottomNav() {
               color: isActive ? '#22d3ee' : '#94a3b8',
               cursor: 'pointer',
               flex: 1,
-              padding: '8px 4px',
+              padding: '8px 0',           // tăng nhẹ touch area
               userSelect: 'none',
-              WebkitTapHighlightColor: 'transparent',   // Giảm hiệu ứng highlight khi click trên mobile
-              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'rgba(34, 211, 238, 0.3)', // hiệu ứng click trên mobile
+              transition: 'all 0.2s ease',
             }}
-            onTouchStart={(e) => e.currentTarget.style.opacity = '0.7'}
-            onTouchEnd={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'scale(0.92)';
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.92)';
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            <div style={{ 
-              fontSize: '28px', 
-              marginBottom: '3px',
-              transition: 'transform 0.2s'
-            }}>
-              {item.icon}
-            </div>
-            <div style={{ 
-              fontSize: '10.5px', 
-              fontWeight: isActive ? '700' : '500',
-              transition: 'all 0.2s'
-            }}>
+            <div style={{ fontSize: '28px', marginBottom: '3px' }}>{item.icon}</div>
+            <div style={{ fontSize: '10.5px', fontWeight: isActive ? '700' : '500' }}>
               {item.label}
             </div>
           </div>
