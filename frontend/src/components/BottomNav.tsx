@@ -26,7 +26,8 @@ export default function BottomNav() {
       justifyContent: 'space-around',
       alignItems: 'center',
       zIndex: 10000,
-      boxShadow: '0 -4px 12px rgba(0,0,0,0.5)'
+      boxShadow: '0 -4px 12px rgba(0,0,0,0.5)',
+      paddingBottom: '8px',           // Thêm để tránh bị che bởi thanh điều hướng điện thoại
     }}>
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
@@ -41,11 +42,26 @@ export default function BottomNav() {
               color: isActive ? '#22d3ee' : '#94a3b8',
               cursor: 'pointer',
               flex: 1,
-              padding: '6px 0',
+              padding: '8px 4px',
+              userSelect: 'none',
+              WebkitTapHighlightColor: 'transparent',   // Giảm hiệu ứng highlight khi click trên mobile
+              touchAction: 'manipulation',
             }}
+            onTouchStart={(e) => e.currentTarget.style.opacity = '0.7'}
+            onTouchEnd={(e) => e.currentTarget.style.opacity = '1'}
           >
-            <div style={{ fontSize: '28px', marginBottom: '3px' }}>{item.icon}</div>
-            <div style={{ fontSize: '10.5px', fontWeight: isActive ? '700' : '500' }}>
+            <div style={{ 
+              fontSize: '28px', 
+              marginBottom: '3px',
+              transition: 'transform 0.2s'
+            }}>
+              {item.icon}
+            </div>
+            <div style={{ 
+              fontSize: '10.5px', 
+              fontWeight: isActive ? '700' : '500',
+              transition: 'all 0.2s'
+            }}>
               {item.label}
             </div>
           </div>
