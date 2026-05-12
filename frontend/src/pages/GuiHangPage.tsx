@@ -1,4 +1,3 @@
-// src/pages/GuiHangPage.tsx
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,7 +47,6 @@ export default function GuiHangPage() {
 
   const piAmount = calculateFee();
 
-  // ==================== VALIDATION ====================
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -68,8 +66,6 @@ export default function GuiHangPage() {
     if (!validateForm()) return;
 
     setIsProcessing(true);
-
-    // Giả lập thanh toán Pi
     await new Promise(resolve => setTimeout(resolve, 1800));
 
     const newMaDon = `GHN${Date.now().toString().slice(-8)}`;
@@ -81,9 +77,7 @@ export default function GuiHangPage() {
 
   return (
     <>
-      <button onClick={() => navigate('/')} style={backButtonStyle}>
-        ← Quay lại Trang chủ
-      </button>
+      {/* NÚT QUAY LẠI ĐÃ BỊ XÓA */}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
         <div style={{ fontSize: '48px' }}>📦</div>
@@ -193,7 +187,6 @@ export default function GuiHangPage() {
 }
 
 /* ====================== STYLES ====================== */
-// (Giữ nguyên styles cũ của bạn)
 const labelStyle = { display: 'block', marginBottom: '10px', fontWeight: 'bold', color: '#e2e8f0' };
 const smallLabel = { display: 'block', marginBottom: '6px', color: '#94a3b8', fontSize: '14px' };
 
@@ -206,12 +199,6 @@ const inputStyle = {
   color: 'white',
   fontSize: '16px',
   boxSizing: 'border-box' as const
-};
-
-const backButtonStyle = {
-  color: '#ffffff', fontSize: '16px', fontWeight: 'bold', marginBottom: '25px',
-  padding: '14px 28px', backgroundColor: '#1e2937', border: '2px solid #22d3ee',
-  borderRadius: '9999px', cursor: 'pointer'
 };
 
 const activeToggle = {
