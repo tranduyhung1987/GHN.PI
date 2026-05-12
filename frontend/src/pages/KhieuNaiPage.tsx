@@ -220,7 +220,7 @@ export default function KhieuNaiPage() {
               </select>
 
               <label style={labelStyle}>Đánh giá chất lượng (1-5 sao)</label>
-              <div style={{ display: 'flex', gap: '20px', fontSize: '200px', margin: '16px 0', padding: '6px 0'}}>
+              <div style={{ display: 'flex', gap: '20px', fontSize: '200px', margin: '16px 0', padding: '60px 0'}}>
                 {[1,2,3,4,5].map(star => (
                   <button
                     key={star}
