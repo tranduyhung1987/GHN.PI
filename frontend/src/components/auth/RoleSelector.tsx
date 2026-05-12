@@ -2,6 +2,11 @@
 import { useState } from 'react';
 
 export default function RoleSelector() {
+  // Ẩn hoàn toàn trên Production
+  if (import.meta.env.PROD) {
+    return null;
+  }
+
   const [role, setRole] = useState<'guest' | 'shop' | 'driver' | 'warehouse' | 'admin'>('shop');
 
   return (
