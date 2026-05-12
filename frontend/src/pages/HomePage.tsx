@@ -4,12 +4,17 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div style={{
+      minHeight: '100vh',
+      overflowY: 'auto',
+      paddingBottom: '140px',     // ← TĂNG LÊN để lộ rõ 2 card dưới cùng
+      backgroundColor: '#0f172a'
+    }}>
       {/* ==================== HEADER - LOGO ==================== */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
-        marginBottom: '30px',
+        marginBottom: '25px',
         paddingTop: '20px'
       }}>
         <div 
@@ -35,7 +40,7 @@ export default function HomePage() {
       </div>
 
       {/* NÚT ĐĂNG NHẬP VỚI PI */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '35px' }}>
         <button 
           onClick={() => alert('🔗 Đang kết nối với Pi Network...')}
           style={piButtonStyle}
@@ -58,8 +63,8 @@ export default function HomePage() {
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '1fr 1fr', 
-        gap: '20px',
-        padding: '0 20px'
+        gap: '16px',
+        padding: '0 16px'
       }}>
         {cards.map((card) => (
           <div
@@ -83,7 +88,7 @@ export default function HomePage() {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -140,15 +145,30 @@ const piButtonStyle = {
 
 const neonCardStyle = {
   backgroundColor: '#1e2937',
-  padding: '32px 20px',
-  borderRadius: '24px',
+  padding: '24px 16px',
+  borderRadius: '20px',
   border: '2px solid #334155',
   textAlign: 'center' as const,
   cursor: 'pointer',
   transition: 'all 0.4s ease',
-  boxShadow: '0 4px 25px rgba(0, 0, 0, 0.5)',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+  height: '100%',
 };
 
-const iconStyle = { fontSize: '58px', marginBottom: '18px' };
-const titleStyle = { fontSize: '21px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#e2e8f0' };
-const descStyle = { color: '#94a3b8', fontSize: '15px', margin: 0 };
+const iconStyle = { 
+  fontSize: '48px', 
+  marginBottom: '14px' 
+};
+
+const titleStyle = { 
+  fontSize: '18px', 
+  fontWeight: 'bold', 
+  margin: '0 0 6px 0', 
+  color: '#e2e8f0' 
+};
+
+const descStyle = { 
+  color: '#94a3b8', 
+  fontSize: '13.5px', 
+  margin: 0 
+};
