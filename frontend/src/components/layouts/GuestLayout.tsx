@@ -7,17 +7,10 @@ interface GuestLayoutProps {
 
 export default function GuestLayout({ children }: GuestLayoutProps) {
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#0f172a',
-      position: 'relative'
-    }}>
-      {/* Nội dung chính */}
-      <main style={{ paddingBottom: '90px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', position: 'relative' }}>
+      <main style={{ paddingBottom: '85px' }}>
         {children}
       </main>
-
-      {/* Bottom Navigation */}
       <BottomNav />
     </div>
   );

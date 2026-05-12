@@ -4,12 +4,13 @@ export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const items = [
+  const navItems = [
     { path: '/', label: 'Trang chủ', icon: '🏠' },
     { path: '/don-hang', label: 'Đơn hàng', icon: '📦' },
     { path: '/chat', label: 'Chat', icon: '💬' },
-    { path: '/tai-xe', label: 'Tài xế', icon: '🏍️' },
-    { path: '/ca-nhan', label: 'Tôi', icon: '👤' },
+    { path: '/doi-soat', label: 'Đối soát', icon: '📊' },
+    { path: '/khieu-nai', label: 'Khiếu nại', icon: '⚠️' },
+    { path: '/ca-nhan', label: 'Cá nhân', icon: '👤' },
   ];
 
   return (
@@ -18,30 +19,38 @@ export default function BottomNav() {
       bottom: 0,
       left: 0,
       right: 0,
-      height: '70px',
+      height: '72px',
       backgroundColor: '#1e2937',
       borderTop: '1px solid #334155',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      zIndex: 1000,
+      zIndex: 10000,
+      boxShadow: '0 -4px 12px rgba(0,0,0,0.5)'
     }}>
-      {items.map((item) => (
-        <div
-          key={item.path}
-          onClick={() => navigate(item.path)}
-          style={{
-            textAlign: 'center',
-            color: location.pathname === item.path ? '#22d3ee' : '#94a3b8',
-            cursor: 'pointer',
-            padding: '6px 0',
-            flex: 1,
-          }}
-        >
-          <div style={{ fontSize: '26px', marginBottom: '2px' }}>{item.icon}</div>
-          <div style={{ fontSize: '11px' }}>{item.label}</div>
-        </div>
-      ))}
+      {navItems.map((item) => {
+        const isActive = location.pathname === item.path;
+        return (
+          <div
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              color: isActive ? '#22d3ee' : '#94a3b8',
+              cursor: 'pointer',
+              flex: 1,
+              padding: '6px 0',
+            }}
+          >
+            <div style={{ fontSize: '28px', marginBottom: '3px' }}>{item.icon}</div>
+            <div style={{ fontSize: '10.5px', fontWeight: isActive ? '700' : '500' }}>
+              {item.label}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
