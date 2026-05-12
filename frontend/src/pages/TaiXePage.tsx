@@ -1,16 +1,35 @@
 // src/pages/TaiXePage.tsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export default function TaiXePage() {
-  const navigate = useNavigate();
+  // === REPUTATION SYSTEM ===
+  const [reputation, setReputation] = useState(87);
+  const [recentRatings] = useState([  // ← bỏ setRecentRatings vì chưa dùng
+    { don: "GHN17488902", sao: 4, comment: "Giao nhanh, cẩn thận" },
+    { don: "GHN17488754", sao: 2, comment: "Hàng bị móp nhẹ" },
+  ]);
 
+  const getRepColor = (score: number): string => {
+    if (score >= 90) return '#22c55e';
+    if (score >= 75) return '#eab308';
+    if (score >= 60) return '#f59e0b';
+    return '#ef4444';
+  };
+
+  const getRepBadge = (score: number): string => {
+    if (score >= 90) return "🏆 Xuất Sắc";
+    if (score >= 75) return "⭐ Tốt";
+    if (score >= 60) return "⚠️ Trung Bình";
+    return "🔴 Cảnh Báo";
+  };
+
+  // Fake data orders
   const [availableOrders, setAvailableOrders] = useState([
     { maDon: "GHN17489231", loaiDon: "Hỏa Tốc", nguoiGui: "Nguyễn Thị Lan", diaChi: "123 Đường ABC, Quận 1, TP.HCM", khoangCach: "1.2km", phi: 45000 },
     { maDon: "GHN17488902", loaiDon: "Hỏa Tốc", nguoiGui: "Trần Văn Hải", diaChi: "456 Nguyễn Huệ, Quận 3, TP.HCM", khoangCach: "2.8km", phi: 38000 },
   ]);
 
-  const [myCurrentOrders, setMyCurrentOrders] = useState<any[]>([]);
+  const [myCurrentOrders, setMyCurrentOrders] = useState<any[]>([]); // tạm giữ any, sau có thể định type rõ hơn
   const [completedOrders, setCompletedOrders] = useState<any[]>([]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -31,6 +50,14 @@ export default function TaiXePage() {
     }, 7000);
     return () => clearInterval(interval);
   }, []);
+
+  const updateReputation = (isGood: boolean) => {
+    setReputation(prev => {
+      const change = isGood ? Math.floor(Math.random() * 3) + 1 : -Math.floor(Math.random() * 4) - 1;
+      const newRep = Math.max(30, Math.min(100, prev + change));
+      return newRep;
+    });
+  };
 
   const nhanDon = (order: any) => {
     if (!window.confirm(`Nhận đơn ${order.maDon}?\nKhoảng cách: ${order.khoangCach}`)) return;
@@ -66,17 +93,45 @@ export default function TaiXePage() {
     if (completed) {
       setCompletedOrders(prev => [...prev, { ...completed, trangThai: "Đã giao" }]);
       setMyCurrentOrders(prev => prev.filter(o => o.maDon !== maDon));
-      showToast(`🎉 HOÀN THÀNH ĐƠN ${maDon}`);
+      
+      updateReputation(true);
+      showToast(`🎉 HOÀN THÀNH ĐƠN ${maDon} (+ Reputation)`);
     }
   };
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-        <div style={{ fontSize: '48px' }}>🏍️</div>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>TÀI XẾ</h1>
+      {/* === REPUTATION HEADER === */}
+      <div style={reputationHeaderStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ fontSize: '52px' }}>🏍️</div>
+          <div>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>TÀI XẾ</h1>
+            <p style={{ color: '#94a3b8', margin: 0 }}>Reputation System • Minh bạch Web3</p>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '12px' }}>
+          <div style={{ fontSize: '52px', fontWeight: 'bold', color: getRepColor(reputation) }}>
+            {reputation}
+            <span style={{ fontSize: '24px' }}>pts</span>
+          </div>
+          <div style={{ color: getRepColor(reputation), fontWeight: 'bold', marginTop: '4px' }}>
+            {getRepBadge(reputation)}
+          </div>
+        </div>
       </div>
-      <p style={{ color: '#94a3b8', marginBottom: '30px' }}>Nhận đơn & Giao hàng</p>
+
+      {/* Recent Ratings */}
+      <div style={miniCardStyle}>
+        <h4 style={{ color: '#eab308', marginBottom: '12px' }}>Đánh giá gần đây</h4>
+        {recentRatings.map((item, idx) => (
+          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
+            <span>{item.don}</span>
+            <span style={{ color: '#fbbf24' }}>{'★'.repeat(item.sao)}</span>
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
         <div style={{ background: '#1e2937', padding: '12px 20px', borderRadius: '16px', flex: 1 }}>
@@ -89,6 +144,7 @@ export default function TaiXePage() {
         </div>
       </div>
 
+      {/* Các phần còn lại giữ nguyên */}
       {availableOrders.length > 0 && (
         <div style={{ marginBottom: '40px' }}>
           <h3 style={{ marginBottom: '16px', color: '#e2e8f0' }}>Đơn hàng đang chờ gần bạn</h3>
@@ -178,6 +234,23 @@ export default function TaiXePage() {
 }
 
 /* ====================== STYLES ====================== */
+const reputationHeaderStyle = {
+  backgroundColor: '#1e2937',
+  padding: '24px',
+  borderRadius: '20px',
+  border: '2px solid #eab308',
+  marginBottom: '24px',
+  boxShadow: '0 0 25px rgba(234, 179, 8, 0.5)',
+};
+
+const miniCardStyle = {
+  backgroundColor: '#1e2937',
+  padding: '16px',
+  borderRadius: '16px',
+  border: '1px solid #334155',
+  marginBottom: '24px'
+};
+
 const orderCardStyle = {
   backgroundColor: '#1e2937',
   padding: '20px',

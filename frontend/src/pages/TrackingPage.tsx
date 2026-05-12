@@ -1,5 +1,5 @@
 // src/pages/TrackingPage.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface DonHang {
@@ -13,10 +13,12 @@ interface DonHang {
   khoangCach: string;
   thoiGian: string;
   icon: string;
+  repScore?: number;
 }
 
 export default function TrackingPage() {
   const navigate = useNavigate();
+  
   const [donHangs, setDonHangs] = useState<DonHang[]>([
     {
       maDon: "GHN17489231",
@@ -28,7 +30,8 @@ export default function TrackingPage() {
       soPi: 45000,
       khoangCach: "1.2km",
       thoiGian: "Đang cách điểm giao",
-      icon: "🏍️"
+      icon: "🏍️",
+      repScore: 92
     },
     {
       maDon: "GHN17488902",
@@ -40,7 +43,8 @@ export default function TrackingPage() {
       soPi: 28500,
       khoangCach: "Hoàn thành",
       thoiGian: "Giao lúc 14:35",
-      icon: "✅"
+      icon: "✅",
+      repScore: 81
     },
     {
       maDon: "GHN17487654",
@@ -52,17 +56,16 @@ export default function TrackingPage() {
       soPi: 32000,
       khoangCach: "Chờ lấy hàng",
       thoiGian: "Đang chờ tài xế",
-      icon: "⏳"
+      icon: "⏳",
+      repScore: 67
     }
   ]);
 
   const [filter, setFilter] = useState<'All' | 'DangGiao' | 'DaGiao' | 'DangCho' | 'Huy'>('All');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Lọc đơn hàng
   const filteredDonHangs = donHangs.filter(d => filter === 'All' || d.trangThai === filter);
 
-  // Giả lập cập nhật realtime
   const refreshTracking = () => {
     setRefreshing(true);
     setTimeout(() => {
@@ -104,6 +107,18 @@ export default function TrackingPage() {
     }
   };
 
+  const getRepColor = (score?: number) => {
+    if (!score) return '#64748b';
+    if (score >= 90) return '#22c55e';
+    if (score >= 75) return '#eab308';
+    if (score >= 60) return '#f59e0b';
+    return '#ef4444';
+  };
+
+  const handleKhiếuNại = (maDon: string, taiXe: string) => {
+    navigate(`/khieu-nai?maDon=${maDon}&target=${encodeURIComponent(taiXe)}`);
+  };
+
   return (
     <div style={{ padding: '20px 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -112,7 +127,9 @@ export default function TrackingPage() {
           {refreshing ? 'Đang cập nhật...' : '🔄 Cập nhật'}
         </button>
       </div>
-      <p style={{ color: '#94a3b8', marginBottom: '25px' }}>Theo dõi đơn hàng thời gian thực</p>
+      <p style={{ color: '#94a3b8', marginBottom: '25px' }}>
+        Theo dõi đơn hàng thời gian thực • Reputation minh bạch
+      </p>
 
       {/* FILTER */}
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' }}>
@@ -144,8 +161,25 @@ export default function TrackingPage() {
               {don.diaChi}
             </div>
 
-            <div style={{ color: '#94a3b8', marginBottom: '16px' }}>
-              {don.icon} {don.taiXe}
+            {/* REPUTATION + TÀI XẾ */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
+              background: '#0f172a', 
+              padding: '10px 14px', 
+              borderRadius: '12px',
+              marginBottom: '16px'
+            }}>
+              <div>{don.icon} {don.taiXe}</div>
+              <div style={{ 
+                marginLeft: 'auto', 
+                color: getRepColor(don.repScore), 
+                fontWeight: 'bold',
+                fontSize: '15px'
+              }}>
+                {don.repScore} ★
+              </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -156,11 +190,20 @@ export default function TrackingPage() {
                 <div style={{ fontSize: '14px', color: '#94a3b8' }}>{don.khoangCach}</div>
               </div>
 
-              {don.trangThai === 'DangGiao' && (
-                <button onClick={() => huyDon(don.maDon)} style={cancelBtn}>
-                  Hủy đơn
+              <div style={{ display: 'flex', gap: '10px' }}>
+                {don.trangThai === 'DangGiao' && (
+                  <button onClick={() => huyDon(don.maDon)} style={cancelBtn}>
+                    Hủy đơn
+                  </button>
+                )}
+                
+                <button 
+                  onClick={() => handleKhiếuNại(don.maDon, don.taiXe)}
+                  style={complainBtn}
+                >
+                  ⚠️ Khiếu nại
                 </button>
-              )}
+              </div>
             </div>
 
             <div style={{ marginTop: '16px', fontSize: '14px', color: '#64748b' }}>
@@ -221,6 +264,17 @@ const cancelBtn = {
   border: 'none',
   borderRadius: '9999px',
   fontSize: '14px',
+  cursor: 'pointer'
+};
+
+const complainBtn = {
+  padding: '8px 16px',
+  background: '#f59e0b',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontSize: '14px',
+  fontWeight: 'bold',
   cursor: 'pointer'
 };
 

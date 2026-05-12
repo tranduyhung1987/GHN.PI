@@ -10,13 +10,14 @@ export default function AdminPage() {
     totalRevenue: 45280000,
     activeDrivers: 87,
     activeWarehouses: 12,
+    avgReputation: 84,
   };
 
   const users = [
-    { id: 1, name: "Nguyễn Văn A", role: "Shop", email: "shop1@gmail.com", status: "Hoạt động", balance: "245,000 Pi" },
-    { id: 2, name: "Trần Thị B", role: "Driver", email: "driver2@gmail.com", status: "Hoạt động", balance: "89,500 Pi" },
-    { id: 3, name: "Lê Văn C", role: "Warehouse", email: "kho3@gmail.com", status: "Tạm khóa", balance: "12,000 Pi" },
-    { id: 4, name: "Phạm Thị D", role: "Shop", email: "shop4@gmail.com", status: "Hoạt động", balance: "156,000 Pi" },
+    { id: 1, name: "Nguyễn Văn A", role: "Shop", email: "shop1@gmail.com", status: "Hoạt động", balance: "245,000 Pi", rep: 92 },
+    { id: 2, name: "Trần Thị B", role: "Driver", email: "driver2@gmail.com", status: "Hoạt động", balance: "89,500 Pi", rep: 67 },
+    { id: 3, name: "Lê Văn C", role: "Warehouse", email: "kho3@gmail.com", status: "Tạm khóa", balance: "12,000 Pi", rep: 41 },
+    { id: 4, name: "Phạm Thị D", role: "Shop", email: "shop4@gmail.com", status: "Hoạt động", balance: "156,000 Pi", rep: 89 },
   ];
 
   const recentOrders = [
@@ -25,13 +26,22 @@ export default function AdminPage() {
     { maDon: "GHN17487654", shop: "Shop Điện Máy", status: "Chờ xác nhận", pi: 62000, time: "42 phút trước", nguoiNhan: "Lê Thị Hoa" },
   ];
 
+  const getRepColor = (rep: number): string => {
+    if (rep >= 90) return '#22c55e';
+    if (rep >= 75) return '#eab308';
+    if (rep >= 60) return '#f59e0b';
+    return '#ef4444';
+  };
+
   return (
     <div style={{ padding: '20px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
         <span style={{ fontSize: '42px' }}>👑</span>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#ef4444', margin: 0 }}>ADMIN DASHBOARD</h1>
       </div>
-      <p style={{ color: '#94a3b8', marginBottom: '30px' }}>Quản trị hệ thống GHN.PI • Chào Chủ dự án</p>
+      <p style={{ color: '#94a3b8', marginBottom: '30px' }}>
+        Quản trị hệ thống GHN.PI • On-chain • Web3 Governance
+      </p>
 
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
         {/* SIDEBAR */}
@@ -64,17 +74,33 @@ export default function AdminPage() {
         <div style={{ flex: 1, minWidth: '300px' }}>
           {activeTab === 'dashboard' && (
             <>
-              {/* Thống kê */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px' }}>
-                <div style={statCard}><div style={{ color: '#22d3ee', fontSize: '36px', fontWeight: 'bold' }}>{stats.totalOrders}</div><div>Tổng đơn hàng</div></div>
-                <div style={statCard}><div style={{ color: '#22c55e', fontSize: '36px', fontWeight: 'bold' }}>{(stats.totalRevenue/1000000).toFixed(1)}M</div><div>Doanh thu Pi</div></div>
-                <div style={statCard}><div style={{ color: '#eab308', fontSize: '36px', fontWeight: 'bold' }}>{stats.activeDrivers}</div><div>Tài xế online</div></div>
-                <div style={statCard}><div style={{ color: '#a855f7', fontSize: '36px', fontWeight: 'bold' }}>{stats.activeWarehouses}</div><div>Kho hoạt động</div></div>
+                <div style={statCard}>
+                  <div style={{ color: '#22d3ee', fontSize: '36px', fontWeight: 'bold' }}>{stats.totalOrders}</div>
+                  <div>Tổng đơn hàng</div>
+                </div>
+                <div style={statCard}>
+                  <div style={{ color: '#22c55e', fontSize: '36px', fontWeight: 'bold' }}>{(stats.totalRevenue/1000000).toFixed(1)}M</div>
+                  <div>Doanh thu Pi</div>
+                </div>
+                <div style={statCard}>
+                  <div style={{ color: '#eab308', fontSize: '36px', fontWeight: 'bold' }}>{stats.activeDrivers}</div>
+                  <div>Tài xế online</div>
+                </div>
+                <div style={statCard}>
+                  <div style={{ color: '#a855f7', fontSize: '36px', fontWeight: 'bold' }}>{stats.activeWarehouses}</div>
+                  <div>Kho hoạt động</div>
+                </div>
+                <div style={statCard}>
+                  <div style={{ color: getRepColor(stats.avgReputation), fontSize: '36px', fontWeight: 'bold' }}>
+                    {stats.avgReputation}
+                  </div>
+                  <div>Reputation trung bình</div>
+                </div>
               </div>
 
-              {/* Biểu đồ */}
               <div style={{ backgroundColor: '#1e2937', padding: '20px', borderRadius: '20px', marginBottom: '30px' }}>
-                <h3 style={{ marginBottom: '16px' }}>Doanh thu 7 ngày gần nhất</h3>
+                <h3 style={{ marginBottom: '16px' }}>Doanh thu 7 ngày gần nhất (On-chain)</h3>
                 <div style={{ display: 'flex', alignItems: 'flex-end', height: '180px', gap: '8px' }}>
                   {[4.2, 5.8, 3.9, 7.1, 6.5, 8.3, 9.7].map((v, i) => (
                     <div key={i} style={{ flex: 1, background: '#22d3ee', height: `${v * 18}px`, borderRadius: '8px 8px 0 0' }} />
@@ -86,17 +112,19 @@ export default function AdminPage() {
 
           {activeTab === 'users' && (
             <div>
-              <h3>👥 Quản lý Người dùng</h3>
+              <h3>👥 Quản lý Người dùng & Reputation</h3>
               <div style={{ background: '#1e2937', borderRadius: '16px', overflow: 'hidden' }}>
                 {users.map(user => (
                   <div key={user.id} style={{ padding: '16px 20px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontWeight: 'bold' }}>{user.name}</div>
-                      <div style={{ color: '#94a3b8', fontSize: '14px' }}>{user.email}</div>
+                      <div style={{ color: '#94a3b8', fontSize: '14px' }}>{user.email} • {user.role}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ color: user.status === 'Hoạt động' ? '#22c55e' : '#ef4444' }}>{user.status}</div>
-                      <div style={{ fontSize: '13px' }}>{user.role}</div>
+                      <div style={{ color: getRepColor(user.rep), fontWeight: 'bold' }}>
+                        {user.rep} ★
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -122,13 +150,13 @@ export default function AdminPage() {
               <p style={{ fontSize: '28px', color: '#22c55e', fontWeight: 'bold' }}>
                 {(stats.totalRevenue / 1000000).toFixed(1)}M Pi
               </p>
-              <p style={{ color: '#94a3b8' }}>Tổng doanh thu hệ thống</p>
+              <p style={{ color: '#94a3b8' }}>Tổng doanh thu hệ thống • On-chain</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* MODAL CHI TIẾT ĐƠN */}
+      {/* MODAL */}
       {selectedOrder && (
         <div style={modalOverlay} onClick={() => setSelectedOrder(null)}>
           <div style={modalContent} onClick={e => e.stopPropagation()}>
@@ -173,18 +201,35 @@ const orderCard = {
 };
 
 const modalOverlay = {
-  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-  background: 'rgba(0,0,0,0.9)', display: 'flex',
-  alignItems: 'center', justifyContent: 'center', zIndex: 2000
+  position: 'fixed' as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: 'rgba(0,0,0,0.9)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 2000
 };
 
 const modalContent = {
-  background: '#1e2937', padding: '30px', borderRadius: '20px',
-  maxWidth: '420px', width: '90%', border: '2px solid #ef4444'
+  background: '#1e2937',
+  padding: '30px',
+  borderRadius: '20px',
+  maxWidth: '420px',
+  width: '90%',
+  border: '2px solid #ef4444'
 };
 
 const modalBtn = {
-  marginTop: '20px', width: '100%', padding: '14px',
-  background: '#ef4444', color: 'white', border: 'none',
-  borderRadius: '9999px', fontWeight: 'bold', cursor: 'pointer'
+  marginTop: '20px',
+  width: '100%',
+  padding: '14px',
+  background: '#ef4444',
+  color: 'white',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: 'bold',
+  cursor: 'pointer'
 };

@@ -1,17 +1,16 @@
-import React, { type ReactNode } from 'react';
+// src/components/layouts/MemberLayout.tsx
+import { ReactNode } from 'react';
+import BottomNav from '../BottomNav';
 
-interface MemberLayoutProps {
+interface Props {
   children: ReactNode;
 }
 
-const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
+export default function MemberLayout({ children }: Props) {
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {/* HEADER ĐÃ XÓA HOÀN TOÀN */}
-
-      <main className="pb-20">{children}</main>
+    <div className="min-h-screen bg-[#0a0a0a] pb-20">
+      <main>{children}</main>
+      <BottomNav />
     </div>
   );
-};
-
-export default MemberLayout;
+}

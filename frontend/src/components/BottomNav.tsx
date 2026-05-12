@@ -1,3 +1,4 @@
+// src/components/BottomNav.tsx
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function BottomNav() {
@@ -29,7 +30,9 @@ export default function BottomNav() {
       boxShadow: '0 -4px 12px rgba(0,0,0,0.5)'
     }}>
       {navItems.map((item) => {
-        const isActive = location.pathname === item.path;
+        const isActive = location.pathname === item.path || 
+                        (item.path === '/' && location.pathname === '/');
+
         return (
           <div
             key={item.path}
@@ -41,26 +44,29 @@ export default function BottomNav() {
               color: isActive ? '#22d3ee' : '#94a3b8',
               cursor: 'pointer',
               flex: 1,
-              padding: '8px 0',           // tăng nhẹ touch area
-              userSelect: 'none',
-              WebkitTapHighlightColor: 'rgba(34, 211, 238, 0.3)', // hiệu ứng click trên mobile
-              transition: 'all 0.2s ease',
+              padding: '6px 0',
+              transition: 'all 0.25s ease',
             }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'scale(0.92)';
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.15)';
+              if (!isActive) e.currentTarget.style.color = '#67e8f9';
             }}
-            onMouseUp={(e) => {
+            onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
-            }}
-            onTouchStart={(e) => {
-              e.currentTarget.style.transform = 'scale(0.92)';
-            }}
-            onTouchEnd={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
+              if (!isActive) e.currentTarget.style.color = '#94a3b8';
             }}
           >
-            <div style={{ fontSize: '28px', marginBottom: '3px' }}>{item.icon}</div>
-            <div style={{ fontSize: '10.5px', fontWeight: isActive ? '700' : '500' }}>
+            <div style={{ 
+              fontSize: '28px', 
+              marginBottom: '3px',
+              filter: isActive ? 'drop-shadow(0 0 8px #22d3ee)' : 'none'
+            }}>
+              {item.icon}
+            </div>
+            <div style={{ 
+              fontSize: '10.5px', 
+              fontWeight: isActive ? '700' : '500' 
+            }}>
               {item.label}
             </div>
           </div>

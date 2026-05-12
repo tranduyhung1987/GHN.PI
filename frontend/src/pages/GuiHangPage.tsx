@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react';
+// src/pages/GuiHangPage.tsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface DonHangForm {
@@ -41,8 +42,7 @@ export default function GuiHangPage() {
     const volWeight = (form.dai * form.rong * form.cao) / 5000;
     const chargeWeight = Math.max(weight, volWeight);
     let baseFee = form.loaiDon === 'hoatoc' ? chargeWeight * 35000 : chargeWeight * 22000;
-    const serviceFee = 8000;
-    return Math.round(baseFee + serviceFee);
+    return Math.round(baseFee + 8000);
   };
 
   const piAmount = calculateFee();
@@ -61,24 +61,21 @@ export default function GuiHangPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 1800));
-
-    const newMaDon = `GHN${Date.now().toString().slice(-8)}`;
-    setMaDon(newMaDon);
-
-    setIsProcessing(false);
-    setShowSuccess(true);
+    setTimeout(() => {
+      const newMaDon = `GHN${Date.now().toString().slice(-8)}`;
+      setMaDon(newMaDon);
+      setIsProcessing(false);
+      setShowSuccess(true);
+    }, 1500);
   };
 
   return (
     <>
-      {/* NÚT QUAY LẠI ĐÃ BỊ XÓA */}
-
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
         <div style={{ fontSize: '48px' }}>📦</div>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>GỬI HÀNG</h1>
@@ -104,9 +101,9 @@ export default function GuiHangPage() {
         <div>
           <label style={labelStyle}>Người gửi</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <input type="text" placeholder="Họ tên người gửi" value={form.nguoiGui} onChange={(e) => setForm({...form, nguoiGui: e.target.value})} style={inputStyle} required />
+            <input type="text" placeholder="Họ tên người gửi" value={form.nguoiGui} onChange={(e) => setForm({...form, nguoiGui: e.target.value})} style={inputStyle} />
             {errors.nguoiGui && <p style={{ color: 'red', fontSize: '13px' }}>{errors.nguoiGui}</p>}
-            <input type="tel" placeholder="Số điện thoại" value={form.sdtGui} onChange={(e) => setForm({...form, sdtGui: e.target.value})} style={inputStyle} required />
+            <input type="tel" placeholder="Số điện thoại" value={form.sdtGui} onChange={(e) => setForm({...form, sdtGui: e.target.value})} style={inputStyle} />
             {errors.sdtGui && <p style={{ color: 'red', fontSize: '13px' }}>{errors.sdtGui}</p>}
           </div>
         </div>
@@ -115,22 +112,22 @@ export default function GuiHangPage() {
         <div>
           <label style={labelStyle}>Người nhận</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <input type="text" placeholder="Họ tên người nhận" value={form.nguoiNhan} onChange={(e) => setForm({...form, nguoiNhan: e.target.value})} style={inputStyle} required />
+            <input type="text" placeholder="Họ tên người nhận" value={form.nguoiNhan} onChange={(e) => setForm({...form, nguoiNhan: e.target.value})} style={inputStyle} />
             {errors.nguoiNhan && <p style={{ color: 'red', fontSize: '13px' }}>{errors.nguoiNhan}</p>}
-            <input type="tel" placeholder="Số điện thoại người nhận" value={form.sdtNhan} onChange={(e) => setForm({...form, sdtNhan: e.target.value})} style={inputStyle} required />
+            <input type="tel" placeholder="Số điện thoại người nhận" value={form.sdtNhan} onChange={(e) => setForm({...form, sdtNhan: e.target.value})} style={inputStyle} />
             {errors.sdtNhan && <p style={{ color: 'red', fontSize: '13px' }}>{errors.sdtNhan}</p>}
           </div>
-          <input type="text" placeholder="Địa chỉ nhận hàng chi tiết" value={form.diaChiNhan} onChange={(e) => setForm({...form, diaChiNhan: e.target.value})} style={{...inputStyle, marginTop: '12px'}} required />
+          <input type="text" placeholder="Địa chỉ nhận hàng chi tiết" value={form.diaChiNhan} onChange={(e) => setForm({...form, diaChiNhan: e.target.value})} style={{...inputStyle, marginTop: '12px'}} />
           {errors.diaChiNhan && <p style={{ color: 'red', fontSize: '13px' }}>{errors.diaChiNhan}</p>}
         </div>
 
         {/* THÔNG TIN KIỆN HÀNG */}
         <div>
           <label style={labelStyle}>Thông tin kiện hàng</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px' }}>
             <div>
               <label style={smallLabel}>Trọng lượng (kg)</label>
-              <input type="number" min="0.1" step="0.1" value={form.trongLuong} onChange={(e) => setForm({...form, trongLuong: parseFloat(e.target.value) || 1})} style={inputStyle} required />
+              <input type="number" min="0.1" step="0.1" value={form.trongLuong} onChange={(e) => setForm({...form, trongLuong: parseFloat(e.target.value) || 1})} style={inputStyle} />
             </div>
             <div>
               <label style={smallLabel}>Kích thước (cm)</label>
@@ -205,13 +202,13 @@ const activeToggle = {
   flex: 1, padding: '16px', borderRadius: '16px',
   border: '2px solid #22d3ee', background: '#22d3ee', color: '#0f172a',
   fontWeight: 'bold'
-};
+} as const;
 
 const inactiveToggle = {
   flex: 1, padding: '16px', borderRadius: '16px',
   border: '1px solid #475569', background: '#1e2937', color: 'white',
   fontWeight: 'bold'
-};
+} as const;
 
 const feeBoxStyle = {
   backgroundColor: '#1e2937',
@@ -231,10 +228,10 @@ const submitButtonStyle = {
   borderRadius: '9999px',
   cursor: 'pointer',
   boxShadow: '0 4px 15px rgba(34, 211, 238, 0.4)'
-};
+} as const;
 
 const modalOverlay = {
-  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  position: 'fixed' as const, top: 0, left: 0, right: 0, bottom: 0,
   background: 'rgba(0,0,0,0.9)', display: 'flex',
   alignItems: 'center', justifyContent: 'center', zIndex: 1000
 };
@@ -242,7 +239,7 @@ const modalOverlay = {
 const modalContent = {
   background: '#1e2937', padding: '40px', borderRadius: '20px',
   textAlign: 'center', maxWidth: '380px', border: '1px solid #22d3ee'
-};
+} as const;
 
 const modalButton = {
   padding: '16px 32px',
@@ -254,4 +251,4 @@ const modalButton = {
   width: '100%',
   marginTop: '20px',
   cursor: 'pointer'
-};
+} as const;
