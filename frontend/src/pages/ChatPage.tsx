@@ -73,7 +73,6 @@ export default function ChatPage() {
     setInputMessage('');
     removeSelectedFile();
 
-    // Bot reply
     setTimeout(() => {
       const replies = [
         "Cảm ơn bạn! Mình đã ghi nhận.",
@@ -96,73 +95,50 @@ export default function ChatPage() {
   };
 
   return (
-    <div style={{ padding: '20px 0', minHeight: '100vh', background: '#0a0a0a' }}>
-      {/* HEADER NEON */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+    <div style={pageContainer}>
+      {/* Header */}
+      <div style={headerStyle}>
         <div style={{ fontSize: '48px' }}>💬</div>
-        <div style={{
-          padding: '12px 24px',
-          background: 'rgba(30, 41, 55, 0.9)',
-          borderRadius: '16px',
-          border: '2px solid #22d3ee',
-          boxShadow: '0 0 25px rgba(34, 211, 238, 0.5)'
-        }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0, color: '#fff' }}>CHAT HỖ TRỢ</h1>
-          <p style={{ color: '#22d3ee', margin: 0, fontSize: '15px' }}>GHN.PI Neon • Trợ lý On-chain 24/7</p>
+        <div>
+          <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#4c1d95', margin: 0 }}>CHAT HỖ TRỢ</h1>
+          <p style={{ color: '#6b21a8', margin: 0, fontSize: '15px' }}>GHN.PI Neon • Trợ lý On-chain 24/7</p>
         </div>
       </div>
 
-      {/* CHAT CONTAINER */}
-      <div style={{
-        background: '#1e2937',
-        borderRadius: '24px',
-        border: '2px solid #334155',
-        height: 'calc(100vh - 180px)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        boxShadow: '0 0 30px rgba(34, 211, 238, 0.2)'
-      }}>
+      {/* Chat Container */}
+      <div style={chatContainer}>
         {/* Messages Area */}
-        <div style={{
-          flex: 1,
-          padding: '24px',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-          background: 'linear-gradient(180deg, #0f172a 0%, #1e2937 100%)'
-        }}>
+        <div style={messagesArea}>
           {messages.map(msg => (
             <div key={msg.id} style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: msg.isUser ? 'flex-end' : 'flex-start',
-              maxWidth: '80%'
+              maxWidth: '80%',
+              marginBottom: '16px'
             }}>
               <div style={{
                 padding: '14px 18px',
                 borderRadius: '18px',
-                background: msg.isUser ? '#22d3ee' : '#334155',
-                color: msg.isUser ? '#0f172a' : '#e2e8f0',
+                background: msg.isUser ? '#22d3ee' : '#ede9fe',
+                color: msg.isUser ? '#0f172a' : '#4c1d95',
                 borderBottomRightRadius: msg.isUser ? '4px' : '18px',
                 borderBottomLeftRadius: msg.isUser ? '18px' : '4px',
-                boxShadow: msg.isUser ? '0 4px 15px rgba(34, 211, 238, 0.4)' : 'none'
               }}>
-                {msg.text && <p style={{ margin: '0 0 8px 0' }}>{msg.text}</p>}
+                {msg.text && <p style={{ margin: 0 }}>{msg.text}</p>}
                 {msg.file && (
                   <div style={{ marginTop: '8px' }}>
                     {msg.file.type.startsWith('image/') ? (
                       <img src={msg.file.url} alt={msg.file.name} style={{ maxWidth: '100%', borderRadius: '12px' }} />
                     ) : (
-                      <div style={{ padding: '10px', background: '#0f172a', borderRadius: '10px' }}>
+                      <div style={{ padding: '10px', background: '#f3e8ff', borderRadius: '10px' }}>
                         📎 {msg.file.name}
                       </div>
                     )}
                   </div>
                 )}
               </div>
-              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', paddingLeft: '4px' }}>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', paddingLeft: '6px' }}>
                 {msg.time}
               </div>
             </div>
@@ -171,26 +147,19 @@ export default function ChatPage() {
         </div>
 
         {/* Quick Replies */}
-        <div style={{ padding: '12px 20px', display: 'flex', gap: '10px', flexWrap: 'wrap', borderTop: '1px solid #334155' }}>
+        <div style={quickRepliesContainer}>
           {["Cách nhận hàng?", "Thanh toán Pi?", "Khiếu nại đơn", "Tra cứu cước phí"].map((q, i) => (
-            <button key={i} onClick={() => setInputMessage(q)} style={{
-              background: '#0f172a', color: '#22d3ee', border: '1px solid #22d3ee',
-              padding: '8px 16px', borderRadius: '999px', fontSize: '14px', cursor: 'pointer'
-            }}>
+            <button key={i} onClick={() => setInputMessage(q)} style={quickReplyBtn}>
               {q}
             </button>
           ))}
         </div>
 
-        {/* INPUT AREA */}
-        <div style={{ padding: '16px', background: '#1e2937', borderTop: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* Input Area - ĐÃ CHỈNH CÂN ĐỐI */}
+        <div style={inputArea}>
           <div 
             onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} 
-            style={{
-              width: '48px', height: '48px', background: '#0f172a', color: '#22d3ee',
-              border: '2px solid #22d3ee', borderRadius: '50%', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', fontSize: '28px', cursor: 'pointer'
-            }}
+            style={attachmentBtn}
           >
             +
           </div>
@@ -209,18 +178,10 @@ export default function ChatPage() {
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Nhập tin nhắn..."
-            style={{
-              flex: 1, padding: '16px 20px', background: '#0f172a',
-              border: '1px solid #475569', borderRadius: '999px',
-              color: 'white', fontSize: '16px', outline: 'none'
-            }}
+            style={messageInput}
           />
 
-          <button onClick={sendMessage} style={{
-            width: '52px', height: '52px', background: '#22d3ee',
-            color: '#0f172a', border: 'none', borderRadius: '999px',
-            fontSize: '22px', cursor: 'pointer'
-          }}>
+          <button onClick={sendMessage} style={sendBtn}>
             ➤
           </button>
         </div>
@@ -228,3 +189,110 @@ export default function ChatPage() {
     </div>
   );
 }
+
+/* ===================== STYLES ===================== */
+const pageContainer = {
+  minHeight: '100vh',
+  width: '100%',
+  background: '#f3e8ff',
+  padding: '16px 0 80px',
+  boxSizing: 'border-box' as const
+} as const;
+
+const headerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+  padding: '0 14px',
+  marginBottom: '16px'
+} as const;
+
+const chatContainer = {
+  background: '#ede9fe',
+  borderRadius: '24px',
+  margin: '0 14px',
+  height: 'calc(100vh - 140px)',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  overflow: 'hidden',
+  border: '1px solid #c4b5fd'
+} as const;
+
+const messagesArea = {
+  flex: 1,
+  padding: '20px',
+  overflowY: 'auto' as const,
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '16px'
+} as const;
+
+const quickRepliesContainer = {
+  padding: '12px 16px',
+  display: 'flex',
+  gap: '8px',
+  flexWrap: 'wrap' as const,
+  borderTop: '1px solid #c4b5fd',
+  background: '#f3e8ff'
+} as const;
+
+const quickReplyBtn = {
+  background: '#fff',
+  color: '#4c1d95',
+  border: '1px solid #c4b5fd',
+  padding: '8px 16px',
+  borderRadius: '9999px',
+  fontSize: '14px',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap' as const
+} as const;
+
+const inputArea = {
+  padding: '12px 14px',
+  background: '#ede9fe',
+  borderTop: '1px solid #c4b5fd',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px'
+} as const;
+
+const attachmentBtn = {
+  width: '30px',           // ← Giảm kích thước nút +
+  height: '30px',
+  background: '#fff',
+  border: '2px solid #22d3ee',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '22px',        // ← Giảm font size
+  color: '#22d3ee',
+  cursor: 'pointer',
+  flexShrink: 0
+} as const;
+
+const messageInput = {
+  flex: 1,
+  padding: '14px 12px',
+  background: '#fff',
+  border: '1px solid #c4b5fd',
+  borderRadius: '9999px',
+  fontSize: '16px',
+  color: '#4c1d95',
+  outline: 'none'
+} as const;
+
+const sendBtn = {
+  width: '48px',
+  height: '48px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '50%',
+  fontSize: '22px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  flexShrink: 0
+} as const;
