@@ -13,7 +13,7 @@ interface DonHang {
   trangThaiText: string;
   color: string;
   taiXe?: string;
-  repScore?: number;        // Uy tín của tài xế/hub
+  repScore?: number;
 }
 
 export default function DonHangPage() {
@@ -74,44 +74,37 @@ export default function DonHangPage() {
   };
 
   return (
-    <div style={{ padding: '20px 0', minHeight: '100vh', background: '#0a0a0a' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+    <div style={pageContainer}>
+      {/* Header */}
+      <div style={headerStyle}>
         <div style={{ fontSize: '48px' }}>📦</div>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>ĐƠN HÀNG CỦA TÔI</h1>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 }}>ĐƠN HÀNG CỦA TÔI</h1>
+          <p style={{ color: '#6b21a8', margin: 0 }}>Tổng {donHangs.length} đơn • Quản lý & theo dõi</p>
+        </div>
       </div>
-      <p style={{ color: '#94a3b8', marginBottom: '20px' }}>
-        Quản lý tất cả đơn hàng • Tổng {donHangs.length} đơn • Uy tín minh bạch
-      </p>
 
-      {/* TẠO ĐƠN MỚI */}
+      {/* Nút Tạo Đơn */}
       <button 
         onClick={() => navigate('/gui-hang')}
-        style={{
-          width: '100%', padding: '18px', marginBottom: '24px',
-          background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
-          color: '#0f172a', border: 'none', borderRadius: '999px',
-          fontSize: '17px', fontWeight: 'bold', cursor: 'pointer',
-          boxShadow: '0 0 20px rgba(34, 211, 238, 0.5)'
-        }}
+        style={createOrderBtn}
       >
         + TẠO ĐƠN HÀNG MỚI
       </button>
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Tìm mã đơn hoặc tên người nhận..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{
-          width: '100%', padding: '16px 20px', background: '#1e2937',
-          border: '1px solid #475569', borderRadius: '999px',
-          color: 'white', fontSize: '16px', marginBottom: '20px'
-        }}
-      />
+      {/* Search */}
+      <div style={{ padding: '0 14px', marginBottom: '20px' }}>
+        <input
+          type="text"
+          placeholder="Tìm mã đơn hoặc tên người nhận..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={searchInputStyle}
+        />
+      </div>
 
-      {/* FILTER TABS */}
-      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '24px' }}>
+      {/* Filter Tabs */}
+      <div style={filterContainer}>
         {[
           { key: 'All', label: 'Tất cả' },
           { key: 'ChoXacNhan', label: 'Chờ' },
@@ -123,113 +116,69 @@ export default function DonHangPage() {
           <button
             key={item.key}
             onClick={() => setFilter(item.key as any)}
-            style={{
-              padding: '10px 18px',
-              borderRadius: '999px',
-              background: filter === item.key ? '#22d3ee' : '#1e2937',
-              color: filter === item.key ? '#0f172a' : '#94a3b8',
-              border: filter === item.key ? 'none' : '1px solid #475569',
-              fontWeight: 'bold',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer'
-            }}
+            style={filter === item.key ? activeFilterStyle : inactiveFilterStyle}
           >
             {item.label}
           </button>
         ))}
       </div>
 
-      {/* LIST OF ORDERS */}
+      {/* Danh sách đơn hàng */}
       {filteredDonHangs.length === 0 ? (
-        <p style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b' }}>Không tìm thấy đơn hàng nào</p>
+        <div style={emptyState}>Không tìm thấy đơn hàng nào</div>
       ) : (
         filteredDonHangs.map(don => (
-          <div key={don.maDon} style={{
-            background: '#1e2937',
-            borderRadius: '20px',
-            padding: '20px',
-            marginBottom: '16px',
-            border: '1px solid #334155'
-          }}>
+          <div key={don.maDon} style={orderCard}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
               <div>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#22d3ee' }}>{don.maDon}</div>
-                <div style={{ color: '#94a3b8', fontSize: '14px' }}>{don.ngayTao} • {don.loai}</div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#4c1d95' }}>{don.maDon}</div>
+                <div style={{ color: '#6b21a8', fontSize: '14px' }}>{don.ngayTao} • {don.loai}</div>
               </div>
               <span style={{ 
-                color: don.color, 
-                fontWeight: 'bold', 
-                padding: '4px 12px', 
-                background: '#0f172a', 
-                borderRadius: '999px', 
-                fontSize: '13px' 
+                padding: '6px 14px', 
+                borderRadius: '9999px', 
+                backgroundColor: don.color + '20',
+                color: don.color,
+                fontWeight: '600',
+                fontSize: '14px'
               }}>
                 {don.trangThaiText}
               </span>
             </div>
 
-            <div style={{ marginBottom: '12px', color: '#e2e8f0' }}>
+            <div style={{ marginBottom: '14px', lineHeight: '1.5' }}>
               <strong>Người nhận:</strong> {don.nguoiNhan}<br />
-              {don.diaChi}
+              <span style={{ color: '#64748b' }}>{don.diaChi}</span>
             </div>
 
-            {/* REPUTATION SECTION */}
             {don.taiXe && (
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px', 
-                background: '#0f172a', 
-                padding: '10px 14px', 
-                borderRadius: '12px',
-                marginBottom: '16px'
-              }}>
-                <div style={{ color: '#94a3b8', fontSize: '14px' }}>Người thực hiện:</div>
-                <div style={{ fontWeight: 'bold' }}>{don.taiXe}</div>
-                <div style={{ 
-                  color: getRepColor(don.repScore), 
-                  fontWeight: 'bold', 
-                  marginLeft: 'auto' 
-                }}>
-                  {don.repScore} ★
-                </div>
+              <div style={driverBox}>
+                <div>{don.taiXe}</div>
+                {don.repScore && (
+                  <div style={{ color: getRepColor(don.repScore), fontWeight: '700' }}>
+                    {don.repScore} ★
+                  </div>
+                )}
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#22d3ee' }}>
-                {don.soPi.toLocaleString()} <span style={{ fontSize: '18px' }}>Pi</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#22d3ee' }}>
+                {don.soPi.toLocaleString()} <span style={{ fontSize: '16px' }}>Pi</span>
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button 
                   onClick={() => navigate(`/tracking?maDon=${don.maDon}`)}
-                  style={{ 
-                    padding: '10px 20px', 
-                    background: '#22d3ee', 
-                    color: '#0f172a', 
-                    border: 'none', 
-                    borderRadius: '999px', 
-                    fontWeight: 'bold', 
-                    cursor: 'pointer' 
-                  }}
+                  style={trackBtn}
                 >
                   Theo dõi
                 </button>
-
                 <button 
                   onClick={() => handleKhiếuNại(don.maDon, don.taiXe)}
-                  style={{ 
-                    padding: '10px 20px', 
-                    background: '#ef4444', 
-                    color: 'white', 
-                    border: 'none', 
-                    borderRadius: '999px', 
-                    fontWeight: 'bold', 
-                    cursor: 'pointer' 
-                  }}
+                  style={complainBtn}
                 >
-                  Khiếu nại
+                  ⚠️ Khiếu nại
                 </button>
               </div>
             </div>
@@ -239,3 +188,119 @@ export default function DonHangPage() {
     </div>
   );
 }
+
+/* ===================== STYLES ===================== */
+const pageContainer = {
+  minHeight: '100vh',
+  width: '100%',
+  background: '#f3e8ff',
+  padding: '16px 14px 100px',
+  boxSizing: 'border-box' as const
+} as const;
+
+const headerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+  marginBottom: '20px'
+} as const;
+
+const createOrderBtn = {
+  width: '100%',
+  padding: '18px',
+  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontSize: '17px',
+  fontWeight: '700',
+  marginBottom: '24px',
+  cursor: 'pointer'
+} as const;
+
+const searchInputStyle = {
+  width: '100%',
+  padding: '16px 20px',
+  background: '#f3e8ff',
+  border: '1px solid #c4b5fd',
+  borderRadius: '9999px',
+  fontSize: '16px',
+  color: '#4c1d95',
+  boxSizing: 'border-box' as const
+} as const;
+
+const filterContainer = {
+  display: 'flex',
+  gap: '8px',
+  overflowX: 'auto',
+  paddingBottom: '12px',
+  marginBottom: '24px',
+  scrollbarWidth: 'none' as const
+} as const;
+
+const activeFilterStyle = {
+  padding: '10px 20px',
+  borderRadius: '9999px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  fontWeight: '700',
+  whiteSpace: 'nowrap' as const,
+  border: 'none',
+  flexShrink: 0
+} as const;
+
+const inactiveFilterStyle = {
+  padding: '10px 20px',
+  borderRadius: '9999px',
+  background: '#ede9fe',
+  color: '#4c1d95',
+  border: '1px solid #c4b5fd',
+  whiteSpace: 'nowrap' as const,
+  flexShrink: 0
+} as const;
+
+const orderCard = {
+  background: '#ede9fe',
+  borderRadius: '20px',
+  padding: '20px',
+  marginBottom: '16px',
+  border: '1px solid #c4b5fd',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+} as const;
+
+const driverBox = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  background: '#1e2937',
+  color: 'white',
+  padding: '12px 16px',
+  borderRadius: '12px',
+  marginBottom: '16px'
+} as const;
+
+const trackBtn = {
+  padding: '10px 20px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: '600',
+  cursor: 'pointer'
+} as const;
+
+const complainBtn = {
+  padding: '10px 20px',
+  background: '#ef4444',
+  color: 'white',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: '600',
+  cursor: 'pointer'
+} as const;
+
+const emptyState = {
+  textAlign: 'center' as const,
+  padding: '80px 20px',
+  color: '#64748b'
+} as const;
