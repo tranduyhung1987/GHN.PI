@@ -1,212 +1,262 @@
-// src/pages/NhanHangPage.tsx
-import { useState } from 'react';
+// src/pages/KhieuNaiPage.tsx
+import { useState, useRef, useEffect } from 'react';
 
-type Order = {
-  maDon: string;
-  nguoiGui: string;
-  sanPham: string;
-  soLuong: number;
-  giaTri: string;
-  nguoiNhan: string;
-  diaChi: string;
-  trangThai: string;
-  ngayGui?: string;
-  repScore?: number;
-  taiXe?: string;
-};
+export default function KhieuNaiPage() {
+  const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
+  const [rating, setRating] = useState<number>(0);
+  const [selectedTarget, setSelectedTarget] = useState<string>('');
 
-export default function NhanHangPage() {
-  const [activeTab, setActiveTab] = useState<'nhanHang' | 'danhSach' | 'khieuNai'>('nhanHang');
-  
-  const [maDon, setMaDon] = useState('');
-  const [orderInfo, setOrderInfo] = useState<Order | null>(null);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [ratingSeller, setRatingSeller] = useState(0);
-  const [ratingDriver, setRatingDriver] = useState(0);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    maDon: '',
+    lyDo: '',
+    moTa: ''
+  });
 
-  const [danhSachDonHang] = useState<Order[]>([
-    { maDon: "GHN123456", nguoiGui: "Nguyễn Văn A", sanPham: "Điện thoại iPhone 14 Pro 128GB", soLuong: 1, giaTri: "25.000.000 VNĐ", nguoiNhan: "Bạn (Người nhận)", diaChi: "123 Đường ABC, Quận 1, TP.HCM", trangThai: "Đang giao", ngayGui: "08/05/2026", repScore: 88, taiXe: "Anh Minh • BKS 51H-12345" },
-    { maDon: "GHN789012", nguoiGui: "Shop TechZone", sanPham: "Tai nghe AirPods Pro 2", soLuong: 2, giaTri: "12.800.000 VNĐ", nguoiNhan: "Bạn (Người nhận)", diaChi: "123 Đường ABC, Quận 1, TP.HCM", trangThai: "Chờ nhận hàng", ngayGui: "07/05/2026", repScore: 76, taiXe: "Chị Ngọc • BKS 79A-56789" },
-    { maDon: "GHN555888", nguoiGui: "Laptop World", sanPham: "MacBook Air M2 256GB", soLuong: 1, giaTri: "28.500.000 VNĐ", nguoiNhan: "Bạn (Người nhận)", diaChi: "456 Nguyễn Huệ, Quận 1, TP.HCM", trangThai: "Đã nhận", ngayGui: "05/05/2026", repScore: 95, taiXe: "Anh Tuấn • BKS 50F-11223" }
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const [myComplaints, setMyComplaints] = useState([
+    { id: "KN001", maDon: "GHN17488902", lyDo: "Hàng hóa bị hỏng", target: "Tài xế Nguyễn Văn A", rating: 2, trangThai: "Đang xử lý", ngay: "08/05/2026", color: "#eab308" as const },
+    { id: "KN002", maDon: "GHN17488754", lyDo: "Thiếu hàng", target: "Kho Hub Đà Nẵng", rating: 1, trangThai: "Đã giải quyết", ngay: "06/05/2026", color: "#4ade80" as const },
   ]);
 
-  const [khieuNaiInfo, setKhieuNaiInfo] = useState({ maDon: '', lyDo: '', moTa: '' });
-
-  const getRepColor = (score?: number): string => {
-    if (!score) return '#64748b';
-    if (score >= 90) return '#22c55e';
-    if (score >= 75) return '#eab308';
-    return '#ef4444';
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const timDonHang = () => {
-    if (!maDon.trim()) { alert("Vui lòng nhập mã đơn hàng!"); return; }
-    const found = danhSachDonHang.find(o => o.maDon.toUpperCase() === maDon.toUpperCase());
-    setOrderInfo(found || null);
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachments(prev => [...prev, ...files]);
+
+    files.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => setPreviews(prev => [...prev, ev.target!.result as string]);
+        reader.readAsDataURL(file);
+      } else if (file.type.startsWith('video/')) {
+        setPreviews(prev => [...prev, URL.createObjectURL(file)]);
+      }
+    });
   };
 
-  const xacNhanNhanHang = () => {
-    if (!orderInfo) return;
-    if (window.confirm("Bạn xác nhận đã nhận hàng đầy đủ và không hư hỏng?")) setIsConfirmed(true);
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: true });
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        setPreviews(prev => [...prev, url]);
+        setAttachments(prev => [...prev, new File([blob], `video_${Date.now()}.webm`, { type: 'video/webm' })]);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      alert("Không thể truy cập camera/micro!");
+    }
   };
 
-  const submitRating = () => {
-    if (ratingSeller === 0 || ratingDriver === 0) {
-      alert("Vui lòng đánh giá cả người gửi và tài xế!");
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
+    setIsRecording(false);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const removePreview = (index: number) => {
+    const newPreviews = [...previews];
+    const newAttachments = [...attachments];
+    if (newPreviews[index].startsWith('blob:')) URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+    newAttachments.splice(index, 1);
+    setPreviews(newPreviews);
+    setAttachments(newAttachments);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.maDon || !formData.lyDo || !selectedTarget || rating === 0) {
+      alert("Vui lòng điền đầy đủ thông tin và đánh giá sao!");
       return;
     }
-    alert(`✅ Đánh giá đã được ghi nhận on-chain!\nNgười gửi: ${ratingSeller} sao\nTài xế: ${ratingDriver} sao`);
-    setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-      setIsConfirmed(false);
-      setOrderInfo(null);
-      setMaDon('');
-      setRatingSeller(0);
-      setRatingDriver(0);
-    }, 1500);
+
+    setIsSubmitting(true);
+    await new Promise(resolve => setTimeout(resolve, 1400));
+
+    const newComplaint = {
+      id: `KN${String(Date.now()).slice(-4)}`,
+      maDon: formData.maDon,
+      lyDo: formData.lyDo,
+      target: selectedTarget,
+      rating,
+      trangThai: "Đang xử lý",
+      ngay: new Date().toLocaleDateString('vi-VN'),
+      color: "#eab308" as const
+    };
+
+    setMyComplaints(prev => [newComplaint, ...prev]);
+    alert(`✅ Khiếu nại đã được ghi nhận!`);
+
+    setFormData({ maDon: '', lyDo: '', moTa: '' });
+    setRating(0);
+    setSelectedTarget('');
+    setAttachments([]);
+    setPreviews([]);
+    setIsSubmitting(false);
   };
 
-  const guiKhieuNai = () => {
-    if (!khieuNaiInfo.maDon || !khieuNaiInfo.lyDo) {
-      alert("Vui lòng chọn mã đơn và lý do khiếu nại!");
-      return;
-    }
-    alert(`🚨 Khiếu nại cho đơn ${khieuNaiInfo.maDon} đã được gửi on-chain!`);
-    setKhieuNaiInfo({ maDon: '', lyDo: '', moTa: '' });
-  };
+  useEffect(() => {
+    return () => {
+      previews.forEach(url => {
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+      });
+      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
+    };
+  }, [previews]);
 
   return (
     <div style={pageContainer}>
+      {/* Header */}
       <div style={headerStyle}>
-        <div style={{ fontSize: '48px' }}>📦</div>
-        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 }}>NHẬN HÀNG</h1>
+        <div style={{ fontSize: '52px' }}>⚠️</div>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 }}>KHIẾU NẠI & ĐÁNH GIÁ</h1>
+          <p style={{ color: '#6b21a8', margin: 0 }}>Minh bạch • On-chain • Ảnh hưởng Reputation</p>
+        </div>
       </div>
-      <p style={{ color: '#6b21a8', marginBottom: '24px' }}>
-        Xác nhận nhận hàng • Danh sách • Khiếu nại
-      </p>
 
       {/* Tabs */}
       <div style={tabContainerStyle}>
-        <button onClick={() => setActiveTab('nhanHang')} style={activeTab === 'nhanHang' ? activeTabStyle : tabStyle}>Nhận Hàng</button>
-        <button onClick={() => setActiveTab('danhSach')} style={activeTab === 'danhSach' ? activeTabStyle : tabStyle}>Danh sách</button>
-        <button onClick={() => setActiveTab('khieuNai')} style={activeTab === 'khieuNai' ? activeTabStyle : tabStyle}>Khiếu nại</button>
+        <button onClick={() => setActiveTab('new')} style={activeTab === 'new' ? activeTabStyle : tabStyle}>Gửi Khiếu Nại Mới</button>
+        <button onClick={() => setActiveTab('history')} style={activeTab === 'history' ? activeTabStyle : tabStyle}>Lịch sử ({myComplaints.length})</button>
       </div>
 
-      {activeTab === 'nhanHang' && (
-        <>
-          {!orderInfo && !isConfirmed && (
-            <div style={mainCardStyle}>
-              <div style={{ fontSize: '100px', marginBottom: '20px' }}>📦</div>
-              <h2 style={{ color: '#4c1d95' }}>Xác nhận nhận hàng</h2>
-              <p style={{ color: '#6b21a8', marginBottom: '32px' }}>Nhập mã đơn hàng để kiểm tra và xác nhận</p>
-              
-              <input
-                type="text"
-                placeholder="Nhập mã đơn hàng (ví dụ: GHN123456)"
-                value={maDon}
-                onChange={(e) => setMaDon(e.target.value)}
-                style={inputStyle}
-              />
-              <button onClick={timDonHang} style={primaryButtonStyle}>Tìm đơn hàng</button>
-            </div>
-          )}
-
-          {orderInfo && !isConfirmed && (
-            <div style={mainCardStyle}>
-              <h3 style={{ color: '#4c1d95', marginBottom: '20px' }}>Thông tin đơn hàng</h3>
-              <div style={infoBoxStyle}>
-                <strong>Mã đơn:</strong> {orderInfo.maDon}<br />
-                <strong>Người gửi:</strong> {orderInfo.nguoiGui} 
-                {orderInfo.repScore && <span style={{ color: getRepColor(orderInfo.repScore) }}> • {orderInfo.repScore}★</span>}<br />
-                <strong>Sản phẩm:</strong> {orderInfo.sanPham}<br />
-                <strong>Giá trị:</strong> {orderInfo.giaTri}<br />
-                <strong>Tài xế:</strong> {orderInfo.taiXe}<br />
-                <strong>Địa chỉ:</strong> {orderInfo.diaChi}
-              </div>
-              <button onClick={xacNhanNhanHang} style={confirmButtonStyle}>✅ Xác nhận đã nhận hàng</button>
-            </div>
-          )}
-
-          {isConfirmed && (
-            <div style={successCardStyle}>
-              <div style={{ fontSize: '90px', marginBottom: '20px' }}>🎉</div>
-              <h2 style={{ color: '#22c55e' }}>Nhận hàng thành công!</h2>
-              <p style={{ margin: '20px 0 30px', color: '#6b21a8' }}>Hãy đánh giá để xây dựng Reputation</p>
-
-              <div style={{ marginBottom: '28px' }}>
-                <p style={{ color: '#4c1d95' }}>Đánh giá người gửi hàng</p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                  {[1,2,3,4,5].map(s => (
-                    <button key={s} onClick={() => setRatingSeller(s)} style={starStyle(s <= ratingSeller)}>★</button>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '40px' }}>
-                <p style={{ color: '#4c1d95' }}>Đánh giá tài xế</p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                  {[1,2,3,4,5].map(s => (
-                    <button key={s} onClick={() => setRatingDriver(s)} style={starStyle(s <= ratingDriver)}>★</button>
-                  ))}
-                </div>
-              </div>
-
-              <button onClick={submitRating} style={primaryButtonStyle} disabled={ratingSeller === 0 || ratingDriver === 0}>
-                Gửi đánh giá & Hoàn tất
-              </button>
-            </div>
-          )}
-
-          {showSuccess && <div style={successOverlayStyle}>🎉 Đánh giá đã được ghi nhận on-chain!</div>}
-        </>
-      )}
-
-      {activeTab === 'danhSach' && (
+      {activeTab === 'new' && (
         <div style={mainCardStyle}>
-          <h2 style={{ marginBottom: '24px', textAlign: 'center', color: '#4c1d95' }}>📋 Danh sách đơn hàng</h2>
-          {danhSachDonHang.map((order, i) => (
-            <div key={i} style={orderItemStyle}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 'bold', color: '#22d3ee' }}>{order.maDon}</div>
-                <div>{order.sanPham}</div>
-                <div style={{ fontSize: '14px', color: '#64748b' }}>{order.nguoiGui} • {order.ngayGui}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 'bold', color: '#4ade80' }}>{order.giaTri}</div>
-                {order.repScore && <div style={{ color: getRepColor(order.repScore) }}>{order.repScore} ★</div>}
+          <form onSubmit={handleSubmit}>
+            <select name="maDon" value={formData.maDon} onChange={handleChange} style={inputStyle} required>
+              <option value="">Chọn mã đơn hàng</option>
+              <option value="GHN17488902">GHN17488902 - Đà Nẵng → TP.HCM</option>
+              <option value="GHN17488754">GHN17488754 - Hà Nội → Đà Nẵng</option>
+              <option value="GHN17489123">GHN17489123 - TP.HCM → Hà Nội</option>
+            </select>
+
+            <select name="lyDo" value={formData.lyDo} onChange={handleChange} style={inputStyle} required>
+              <option value="">Chọn lý do khiếu nại</option>
+              <option value="Hàng hỏng">Hàng hóa bị hỏng</option>
+              <option value="Thiếu hàng">Thiếu số lượng</option>
+              <option value="Chậm giao">Giao hàng chậm</option>
+              <option value="Không nhận được">Không nhận được hàng</option>
+              <option value="Khác">Khác</option>
+            </select>
+
+            <select value={selectedTarget} onChange={(e) => setSelectedTarget(e.target.value)} style={inputStyle} required>
+              <option value="">Chọn đối tượng bị khiếu nại</option>
+              <option value="Tài xế Nguyễn Văn A">Tài xế Nguyễn Văn A</option>
+              <option value="Kho Hub Đà Nẵng">Kho Hub Đà Nẵng</option>
+              <option value="Kho Hub TP.HCM">Kho Hub TP.HCM</option>
+              <option value="Người gửi">Người gửi</option>
+            </select>
+
+            {/* Đánh giá sao */}
+            <div style={{ margin: '24px 0 16px' }}>
+              <label style={labelStyle}>Đánh giá chất lượng (1-5 sao)</label>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', fontSize: '52px' }}>
+                {[1,2,3,4,5].map(star => (
+                  <button key={star} type="button" onClick={() => setRating(star)} style={starStyle(star <= rating)}>★</button>
+                ))}
               </div>
             </div>
-          ))}
+
+            {/* Mô tả chi tiết */}
+            <label style={labelStyle}>Mô tả chi tiết vấn đề</label>
+            <textarea
+              name="moTa"
+              value={formData.moTa}
+              onChange={handleChange}
+              style={textareaStyle}
+              placeholder="Mô tả chi tiết vấn đề..."
+            />
+
+            {/* Đính kèm - ĐÃ CHỈNH CÂN ĐỐI */}
+            <div style={{ marginTop: '24px' }}>
+              <label style={labelStyle}>📎 Đính kèm ảnh / video</label>
+              
+              <div style={fileUploadContainer}>
+                <input 
+                  type="file" 
+                  accept="image/*,video/*" 
+                  multiple 
+                  onChange={handleFileUpload} 
+                  style={fileInputStyle}
+                />
+                <span style={filePlaceholder}>Không có tệp nào được chọn</span>
+              </div>
+
+              <button 
+                type="button" 
+                onClick={isRecording ? stopRecording : startRecording} 
+                style={cameraButtonStyle}
+              >
+                {isRecording ? '⏹️ Dừng quay' : '📹 Quay video trực tiếp'}
+              </button>
+
+              {previews.length > 0 && (
+                <div style={previewContainerStyle}>
+                  {previews.map((src, i) => (
+                    <div key={i} style={previewWrapperStyle}>
+                      {src.includes('video') || src.startsWith('blob:') ? (
+                        <video src={src} controls style={previewMediaStyle} />
+                      ) : (
+                        <img src={src} alt="preview" style={previewMediaStyle} />
+                      )}
+                      <button type="button" onClick={() => removePreview(i)} style={removeBtnStyle}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button type="submit" style={submitButtonStyle} disabled={isSubmitting}>
+              {isSubmitting ? 'Đang ghi nhận...' : '🚨 GỬI KHIẾU NẠI'}
+            </button>
+          </form>
         </div>
       )}
 
-      {activeTab === 'khieuNai' && (
-        <div style={mainCardStyle}>
-          <h2 style={{ marginBottom: '24px', textAlign: 'center', color: '#4c1d95' }}>🚨 Khiếu nại tranh chấp</h2>
-          
-          <select value={khieuNaiInfo.maDon} onChange={(e) => setKhieuNaiInfo({ ...khieuNaiInfo, maDon: e.target.value })} style={inputStyle}>
-            <option value="">Chọn mã đơn hàng</option>
-            {danhSachDonHang.map((o, i) => <option key={i} value={o.maDon}>{o.maDon} - {o.sanPham}</option>)}
-          </select>
-
-          <select value={khieuNaiInfo.lyDo} onChange={(e) => setKhieuNaiInfo({ ...khieuNaiInfo, lyDo: e.target.value })} style={inputStyle}>
-            <option value="">Chọn lý do khiếu nại</option>
-            <option value="Hàng hỏng">Hàng hóa bị hỏng</option>
-            <option value="Sai sản phẩm">Nhận sai sản phẩm</option>
-            <option value="Thiếu hàng">Thiếu số lượng</option>
-            <option value="Khác">Khác</option>
-          </select>
-
-          <textarea
-            placeholder="Mô tả chi tiết vấn đề..."
-            value={khieuNaiInfo.moTa}
-            onChange={(e) => setKhieuNaiInfo({ ...khieuNaiInfo, moTa: e.target.value })}
-            style={{ ...inputStyle, height: '130px' }}
-          />
-
-          <button onClick={guiKhieuNai} style={primaryButtonStyle}>🚨 Gửi Khiếu Nại</button>
+      {activeTab === 'history' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {myComplaints.map((item) => (
+            <div key={item.id} style={complaintCardStyle}>
+              <div>
+                <div style={{ fontWeight: 'bold', color: '#22d3ee' }}>{item.maDon}</div>
+                <div style={{ color: '#4c1d95' }}>{item.lyDo}</div>
+                <div style={{ color: '#64748b', fontSize: '14px' }}>→ {item.target}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ color: '#fbbf24', fontSize: '20px' }}>{'★'.repeat(item.rating)}</div>
+                <div style={{ color: item.color, fontWeight: '600' }}>{item.trangThai}</div>
+                <div style={{ fontSize: '13px', color: '#64748b' }}>{item.ngay}</div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -214,125 +264,62 @@ export default function NhanHangPage() {
 }
 
 /* ===================== STYLES ===================== */
-const pageContainer = {
-  minHeight: '100vh',
+const pageContainer = { minHeight: '100vh', width: '100%', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' as const } as const;
+
+const headerStyle = { display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' } as const;
+
+const tabContainerStyle = { display: 'flex', background: '#ede9fe', borderRadius: '9999px', padding: '6px', marginBottom: '28px', border: '1px solid #c4b5fd' } as const;
+
+const activeTabStyle = { flex: 1, padding: '14px', borderRadius: '9999px', background: 'linear-gradient(90deg, #22d3ee, #67e8f9)', color: '#0f172a', fontWeight: '700', border: 'none' } as const;
+
+const tabStyle = { flex: 1, padding: '14px', borderRadius: '9999px', background: 'transparent', color: '#4c1d95', border: 'none' } as const;
+
+const mainCardStyle = { background: '#ede9fe', padding: '32px 24px', borderRadius: '24px', border: '1px solid #c4b5fd' } as const;
+
+const inputStyle = { width: '100%', padding: '16px 18px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95', fontSize: '16px', marginBottom: '16px', boxSizing: 'border-box' as const } as const;
+
+const textareaStyle = { width: '100%', padding: '16px 18px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95', fontSize: '16px', minHeight: '140px', resize: 'vertical' as const, boxSizing: 'border-box' as const } as const;
+
+const labelStyle = { color: '#4c1d95', display: 'block', marginBottom: '8px', fontWeight: '600' } as const;
+
+/* Phần đính kèm đã được chỉnh sửa cân đối */
+const fileUploadContainer = {
+  position: 'relative',
   width: '100%',
-  background: '#f3e8ff',
-  padding: '16px 14px 100px',
-  boxSizing: 'border-box' as const
+  marginBottom: '12px'
 } as const;
 
-const headerStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  marginBottom: '8px'
-} as const;
-
-const tabContainerStyle = {
-  display: 'flex',
-  gap: '12px',
-  marginBottom: '32px',
-  justifyContent: 'center',
-  flexWrap: 'wrap' as const
-} as const;
-
-const tabStyle = {
-  padding: '14px 28px',
-  borderRadius: '9999px',
-  border: '2px solid #c4b5fd',
-  backgroundColor: '#ede9fe',
-  color: '#4c1d95',
-  fontWeight: '600',
-  cursor: 'pointer'
-} as const;
-
-const activeTabStyle = {
-  padding: '14px 28px',
-  borderRadius: '9999px',
-  border: '2px solid #22d3ee',
-  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
-  color: '#0f172a',
-  fontWeight: '700',
-  boxShadow: '0 0 20px rgba(34, 211, 238, 0.4)'
-} as const;
-
-const mainCardStyle = {
-  background: '#ede9fe',
-  padding: '32px 24px',
-  borderRadius: '24px',
-  border: '1px solid #c4b5fd',
-  marginBottom: '20px'
-} as const;
-
-const inputStyle = {
+const fileInputStyle = {
   width: '100%',
-  padding: '16px 18px',
+  padding: '14px 16px',
   background: '#f3e8ff',
   border: '1px solid #c4b5fd',
   borderRadius: '12px',
   color: '#4c1d95',
-  fontSize: '16px',
-  marginBottom: '18px',
+  cursor: 'pointer',
   boxSizing: 'border-box' as const
 } as const;
 
-const primaryButtonStyle = {
-  width: '100%',
-  padding: '18px',
-  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
-  color: '#0f172a',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: '700',
-  fontSize: '17px',
-  cursor: 'pointer',
-  marginTop: '12px'
-} as const;
-
-const confirmButtonStyle = { ...primaryButtonStyle, background: '#4ade80' } as const;
-
-const successCardStyle = {
-  background: '#ede9fe',
-  padding: '50px 30px',
-  borderRadius: '24px',
-  textAlign: 'center' as const,
-  border: '2px solid #22c55e'
-} as const;
-
-const successOverlayStyle = {
-  position: 'fixed' as const,
+const filePlaceholder = {
+  position: 'absolute',
   top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  backgroundColor: 'rgba(0,0,0,0.9)',
-  padding: '60px 50px',
-  borderRadius: '24px',
-  textAlign: 'center' as const,
-  border: '3px solid #22c55e',
-  color: 'white',
-  zIndex: 1000
+  left: '16px',
+  transform: 'translateY(-50%)',
+  color: '#94a3b8',
+  pointerEvents: 'none' as const,
+  fontSize: '15px'
 } as const;
 
-const orderItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  background: '#f3e8ff',
-  padding: '18px',
-  borderRadius: '16px',
-  marginBottom: '12px',
-  border: '1px solid #c4b5fd'
-} as const;
+const cameraButtonStyle = { width: '100%', padding: '15px', background: '#1e2937', border: '2px solid #22d3ee', color: '#22d3ee', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', marginBottom: '16px' } as const;
 
-const infoBoxStyle = {
-  background: '#f3e8ff',
-  padding: '20px',
-  borderRadius: '16px',
-  textAlign: 'left' as const,
-  margin: '24px 0',
-  lineHeight: '1.8',
-  border: '1px solid #c4b5fd'
-} as const;
+const previewContainerStyle = { display: 'flex', flexWrap: 'wrap' as const, gap: '12px', marginTop: '12px' } as const;
+const previewWrapperStyle = { position: 'relative' as const } as const;
+const previewMediaStyle = { maxWidth: '160px', maxHeight: '160px', borderRadius: '10px', border: '2px solid #c4b5fd', objectFit: 'cover' as const } as const;
+const removeBtnStyle = { position: 'absolute' as const, top: -8, right: -8, background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: '26px', height: '26px', cursor: 'pointer' } as const;
+
+const submitButtonStyle = { width: '100%', padding: '18px', background: 'linear-gradient(90deg, #ef4444, #f59e0b)', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '700', fontSize: '17px', marginTop: '20px', cursor: 'pointer' } as const;
+
+const complaintCardStyle = { background: '#ede9fe', padding: '20px', borderRadius: '16px', border: '1px solid #c4b5fd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } as const;
 
 const starStyle = (active: boolean) => ({
   background: 'none',
