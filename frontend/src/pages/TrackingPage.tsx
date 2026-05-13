@@ -29,7 +29,7 @@ export default function TrackingPage() {
       trangThai: 'DangGiao',
       soPi: 45000,
       khoangCach: "1.2km",
-      thoiGian: "Đang cách điểm giao",
+      thoiGian: "Đang cách điểm giao 8 phút",
       icon: "🏍️",
       repScore: 92
     },
@@ -42,7 +42,7 @@ export default function TrackingPage() {
       trangThai: 'DaGiao',
       soPi: 28500,
       khoangCach: "Hoàn thành",
-      thoiGian: "Giao lúc 14:35",
+      thoiGian: "Giao lúc 14:35 hôm nay",
       icon: "✅",
       repScore: 81
     },
@@ -71,7 +71,7 @@ export default function TrackingPage() {
     setTimeout(() => {
       setDonHangs(prev => prev.map(d => {
         if (d.trangThai === 'DangGiao') {
-          return { ...d, khoangCach: "0.8km", thoiGian: "Đang đến nơi" };
+          return { ...d, khoangCach: "0.8km", thoiGian: "Đang đến nơi trong 5 phút" };
         }
         return d;
       }));
@@ -120,173 +120,198 @@ export default function TrackingPage() {
   };
 
   return (
-    <div style={{ padding: '20px 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0 }}>📍 TRACKING</h1>
+    <div style={pageContainer}>
+      <div style={headerStyle}>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 }}>📍 TRACKING</h1>
         <button onClick={refreshTracking} disabled={refreshing} style={refreshBtn}>
-          {refreshing ? 'Đang cập nhật...' : '🔄 Cập nhật'}
+          {refreshing ? '🔄 Đang cập nhật...' : '🔄 Cập nhật'}
         </button>
       </div>
-      <p style={{ color: '#94a3b8', marginBottom: '25px' }}>
-        Theo dõi đơn hàng thời gian thực • Reputation minh bạch
+
+      <p style={{ color: '#6b21a8', marginBottom: '20px', fontSize: '15px' }}>
+        Theo dõi đơn hàng thời gian thực • Minh bạch trên blockchain
       </p>
 
-      {/* FILTER */}
-      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' }}>
+      {/* Filter Tabs */}
+      <div style={filterContainer}>
         {(['All', 'DangGiao', 'DaGiao', 'DangCho', 'Huy'] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={filter === f ? activeFilter : inactiveFilter}>
+          <button 
+            key={f} 
+            onClick={() => setFilter(f)} 
+            style={filter === f ? activeFilterStyle : inactiveFilterStyle}
+          >
             {f === 'All' ? 'Tất cả' : getStatusText(f)}
           </button>
         ))}
       </div>
 
-      {/* DANH SÁCH ĐƠN HÀNG */}
+      {/* Danh sách đơn hàng */}
       {filteredDonHangs.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#64748b', padding: '40px' }}>Không có đơn hàng nào</p>
+        <div style={emptyState}>
+          <div style={{ fontSize: '60px', marginBottom: '16px' }}>📦</div>
+          <p>Không có đơn hàng nào phù hợp</p>
+        </div>
       ) : (
         filteredDonHangs.map(don => (
           <div key={don.maDon} style={orderCard}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
               <div>
-                <span style={{ color: '#22d3ee', fontWeight: 'bold', fontSize: '18px' }}>{don.maDon}</span>
-                <span style={{ marginLeft: '12px', color: '#94a3b8' }}>{don.loai}</span>
+                <span style={{ fontSize: '18px', fontWeight: '700', color: '#4c1d95' }}>{don.maDon}</span>
+                <span style={{ marginLeft: '10px', color: '#6b21a8' }}>{don.loai}</span>
               </div>
-              <span style={{ color: getStatusColor(don.trangThai), fontWeight: 'bold' }}>
+              <span style={{ 
+                padding: '4px 12px', 
+                borderRadius: '9999px', 
+                backgroundColor: getStatusColor(don.trangThai) + '20',
+                color: getStatusColor(don.trangThai),
+                fontWeight: '600',
+                fontSize: '14px'
+              }}>
                 {getStatusText(don.trangThai)}
               </span>
             </div>
 
-            <div style={{ marginBottom: '12px', color: '#e2e8f0' }}>
+            <div style={{ marginBottom: '14px', lineHeight: '1.5' }}>
               <strong>Người nhận:</strong> {don.nguoiNhan}<br />
-              {don.diaChi}
+              <span style={{ color: '#64748b' }}>{don.diaChi}</span>
             </div>
 
-            {/* REPUTATION + TÀI XẾ */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px', 
-              background: '#0f172a', 
-              padding: '10px 14px', 
-              borderRadius: '12px',
-              marginBottom: '16px'
-            }}>
+            <div style={driverInfo}>
               <div>{don.icon} {don.taiXe}</div>
-              <div style={{ 
-                marginLeft: 'auto', 
-                color: getRepColor(don.repScore), 
-                fontWeight: 'bold',
-                fontSize: '15px'
-              }}>
-                {don.repScore} ★
-              </div>
+              {don.repScore && (
+                <div style={{ color: getRepColor(don.repScore), fontWeight: '700' }}>
+                  {don.repScore} ★
+                </div>
+              )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
               <div>
-                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#22d3ee' }}>
+                <div style={{ fontSize: '22px', fontWeight: '700', color: '#22d3ee' }}>
                   {don.soPi.toLocaleString()} <span style={{ fontSize: '16px' }}>Pi</span>
                 </div>
-                <div style={{ fontSize: '14px', color: '#94a3b8' }}>{don.khoangCach}</div>
+                <div style={{ color: '#64748b' }}>{don.khoangCach}</div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 {don.trangThai === 'DangGiao' && (
-                  <button onClick={() => huyDon(don.maDon)} style={cancelBtn}>
-                    Hủy đơn
-                  </button>
+                  <button onClick={() => huyDon(don.maDon)} style={cancelBtn}>Hủy đơn</button>
                 )}
-                
-                <button 
-                  onClick={() => handleKhiếuNại(don.maDon, don.taiXe)}
-                  style={complainBtn}
-                >
+                <button onClick={() => handleKhiếuNại(don.maDon, don.taiXe)} style={complainBtn}>
                   ⚠️ Khiếu nại
                 </button>
               </div>
             </div>
 
-            <div style={{ marginTop: '16px', fontSize: '14px', color: '#64748b' }}>
+            <div style={{ marginTop: '14px', fontSize: '14.5px', color: '#64748b' }}>
               {don.thoiGian}
             </div>
           </div>
         ))
       )}
-
-      <button onClick={() => navigate('/gui-hang')} style={newOrderBtn}>
-        + Tạo đơn hàng mới
-      </button>
     </div>
   );
 }
 
-/* ====================== STYLES ====================== */
-const orderCard = {
-  backgroundColor: '#1e2937',
-  borderRadius: '16px',
-  padding: '20px',
-  marginBottom: '16px',
-  border: '1px solid #334155'
-};
+/* ===================== STYLES ===================== */
+const pageContainer = {
+  minHeight: '100vh',
+  width: '100%',
+  background: '#f3e8ff',
+  padding: '16px 14px 100px',
+  boxSizing: 'border-box' as const
+} as const;
 
-const activeFilter = {
-  padding: '10px 18px',
+const headerStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '12px'
+} as const;
+
+const filterContainer = {
+  display: 'flex',
+  gap: '8px',
+  overflowX: 'auto' as const,
+  paddingBottom: '12px',
+  marginBottom: '20px',
+  scrollbarWidth: 'none' as const
+} as const;
+
+const activeFilterStyle = {
+  padding: '10px 20px',
   borderRadius: '9999px',
   background: '#22d3ee',
   color: '#0f172a',
-  fontWeight: 'bold',
+  fontWeight: '700',
   whiteSpace: 'nowrap' as const,
-  border: 'none'
-};
+  border: 'none',
+  flexShrink: 0
+} as const;
 
-const inactiveFilter = {
-  padding: '10px 18px',
+const inactiveFilterStyle = {
+  padding: '10px 20px',
   borderRadius: '9999px',
+  background: '#ede9fe',
+  color: '#4c1d95',
+  border: '1px solid #c4b5fd',
+  whiteSpace: 'nowrap' as const,
+  flexShrink: 0
+} as const;
+
+const orderCard = {
+  background: '#ede9fe',
+  borderRadius: '20px',
+  padding: '20px',
+  marginBottom: '16px',
+  border: '1px solid #c4b5fd',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+} as const;
+
+const driverInfo = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
   background: '#1e2937',
   color: 'white',
-  border: '1px solid #475569',
-  whiteSpace: 'nowrap' as const
-};
-
-const refreshBtn = {
-  padding: '10px 20px',
-  background: '#334155',
-  color: 'white',
-  border: 'none',
-  borderRadius: '9999px',
-  cursor: 'pointer'
-};
+  padding: '12px 16px',
+  borderRadius: '12px',
+  marginBottom: '16px'
+} as const;
 
 const cancelBtn = {
-  padding: '8px 16px',
+  padding: '10px 18px',
   background: '#ef4444',
   color: 'white',
   border: 'none',
   borderRadius: '9999px',
   fontSize: '14px',
   cursor: 'pointer'
-};
+} as const;
 
 const complainBtn = {
-  padding: '8px 16px',
+  padding: '10px 18px',
   background: '#f59e0b',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
   fontSize: '14px',
-  fontWeight: 'bold',
+  fontWeight: '600',
   cursor: 'pointer'
-};
+} as const;
 
-const newOrderBtn = {
-  width: '100%',
-  padding: '18px',
-  background: '#22d3ee',
-  color: '#0f172a',
-  border: 'none',
+const refreshBtn = {
+  padding: '10px 20px',
+  background: '#ede9fe',
+  color: '#4c1d95',
+  border: '1px solid #c4b5fd',
   borderRadius: '9999px',
-  fontSize: '17px',
-  fontWeight: 'bold',
-  marginTop: '20px',
-  cursor: 'pointer'
-};
+  cursor: 'pointer',
+  fontWeight: '600'
+} as const;
+
+const emptyState = {
+  textAlign: 'center' as const,
+  padding: '60px 20px',
+  color: '#64748b'
+} as const;
