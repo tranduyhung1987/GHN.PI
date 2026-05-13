@@ -78,18 +78,19 @@ export default function NhanHangPage() {
   };
 
   return (
-    <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-        <div style={{ fontSize: '48px' }}>👋</div>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>NHẬN HÀNG</h1>
+    <div style={pageContainer}>
+      <div style={headerStyle}>
+        <div style={{ fontSize: '48px' }}>📦</div>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 }}>NHẬN HÀNG</h1>
       </div>
-      <p style={{ color: '#94a3b8', marginBottom: '24px' }}>
-        Xác nhận nhận hàng • Danh sách đơn • Khiếu nại tranh chấp
+      <p style={{ color: '#6b21a8', marginBottom: '24px' }}>
+        Xác nhận nhận hàng • Danh sách • Khiếu nại
       </p>
 
+      {/* Tabs */}
       <div style={tabContainerStyle}>
         <button onClick={() => setActiveTab('nhanHang')} style={activeTab === 'nhanHang' ? activeTabStyle : tabStyle}>Nhận Hàng</button>
-        <button onClick={() => setActiveTab('danhSach')} style={activeTab === 'danhSach' ? activeTabStyle : tabStyle}>Danh sách đơn hàng</button>
+        <button onClick={() => setActiveTab('danhSach')} style={activeTab === 'danhSach' ? activeTabStyle : tabStyle}>Danh sách</button>
         <button onClick={() => setActiveTab('khieuNai')} style={activeTab === 'khieuNai' ? activeTabStyle : tabStyle}>Khiếu nại</button>
       </div>
 
@@ -97,9 +98,10 @@ export default function NhanHangPage() {
         <>
           {!orderInfo && !isConfirmed && (
             <div style={mainCardStyle}>
-              <div style={{ fontSize: '110px', marginBottom: '16px' }}>👋</div>
-              <h2>Xác nhận nhận hàng</h2>
-              <p style={{ color: '#94a3b8', marginBottom: '32px' }}>Nhập mã đơn hàng để kiểm tra và xác nhận</p>
+              <div style={{ fontSize: '100px', marginBottom: '20px' }}>📦</div>
+              <h2 style={{ color: '#4c1d95' }}>Xác nhận nhận hàng</h2>
+              <p style={{ color: '#6b21a8', marginBottom: '32px' }}>Nhập mã đơn hàng để kiểm tra và xác nhận</p>
+              
               <input
                 type="text"
                 placeholder="Nhập mã đơn hàng (ví dụ: GHN123456)"
@@ -113,7 +115,7 @@ export default function NhanHangPage() {
 
           {orderInfo && !isConfirmed && (
             <div style={mainCardStyle}>
-              <h3>Thông tin đơn hàng</h3>
+              <h3 style={{ color: '#4c1d95', marginBottom: '20px' }}>Thông tin đơn hàng</h3>
               <div style={infoBoxStyle}>
                 <strong>Mã đơn:</strong> {orderInfo.maDon}<br />
                 <strong>Người gửi:</strong> {orderInfo.nguoiGui} 
@@ -130,11 +132,11 @@ export default function NhanHangPage() {
           {isConfirmed && (
             <div style={successCardStyle}>
               <div style={{ fontSize: '90px', marginBottom: '20px' }}>🎉</div>
-              <h2>Nhận hàng thành công!</h2>
-              <p style={{ margin: '20px 0 30px' }}>Hãy đánh giá để xây dựng Reputation</p>
+              <h2 style={{ color: '#22c55e' }}>Nhận hàng thành công!</h2>
+              <p style={{ margin: '20px 0 30px', color: '#6b21a8' }}>Hãy đánh giá để xây dựng Reputation</p>
 
               <div style={{ marginBottom: '28px' }}>
-                <p>Đánh giá người gửi hàng</p>
+                <p style={{ color: '#4c1d95' }}>Đánh giá người gửi hàng</p>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                   {[1,2,3,4,5].map(s => (
                     <button key={s} onClick={() => setRatingSeller(s)} style={starStyle(s <= ratingSeller)}>★</button>
@@ -143,7 +145,7 @@ export default function NhanHangPage() {
               </div>
 
               <div style={{ marginBottom: '40px' }}>
-                <p>Đánh giá tài xế</p>
+                <p style={{ color: '#4c1d95' }}>Đánh giá tài xế</p>
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                   {[1,2,3,4,5].map(s => (
                     <button key={s} onClick={() => setRatingDriver(s)} style={starStyle(s <= ratingDriver)}>★</button>
@@ -163,13 +165,13 @@ export default function NhanHangPage() {
 
       {activeTab === 'danhSach' && (
         <div style={mainCardStyle}>
-          <h2 style={{ marginBottom: '24px', textAlign: 'center' }}>📋 Danh sách đơn hàng</h2>
+          <h2 style={{ marginBottom: '24px', textAlign: 'center', color: '#4c1d95' }}>📋 Danh sách đơn hàng</h2>
           {danhSachDonHang.map((order, i) => (
             <div key={i} style={orderItemStyle}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 'bold', color: '#22d3ee' }}>{order.maDon}</div>
                 <div>{order.sanPham}</div>
-                <div style={{ fontSize: '14px', color: '#94a3b8' }}>{order.nguoiGui} • {order.ngayGui}</div>
+                <div style={{ fontSize: '14px', color: '#64748b' }}>{order.nguoiGui} • {order.ngayGui}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontWeight: 'bold', color: '#4ade80' }}>{order.giaTri}</div>
@@ -182,11 +184,13 @@ export default function NhanHangPage() {
 
       {activeTab === 'khieuNai' && (
         <div style={mainCardStyle}>
-          <h2 style={{ marginBottom: '24px', textAlign: 'center' }}>🚨 Khiếu nại tranh chấp</h2>
+          <h2 style={{ marginBottom: '24px', textAlign: 'center', color: '#4c1d95' }}>🚨 Khiếu nại tranh chấp</h2>
+          
           <select value={khieuNaiInfo.maDon} onChange={(e) => setKhieuNaiInfo({ ...khieuNaiInfo, maDon: e.target.value })} style={inputStyle}>
             <option value="">Chọn mã đơn hàng</option>
             {danhSachDonHang.map((o, i) => <option key={i} value={o.maDon}>{o.maDon} - {o.sanPham}</option>)}
           </select>
+
           <select value={khieuNaiInfo.lyDo} onChange={(e) => setKhieuNaiInfo({ ...khieuNaiInfo, lyDo: e.target.value })} style={inputStyle}>
             <option value="">Chọn lý do khiếu nại</option>
             <option value="Hàng hỏng">Hàng hóa bị hỏng</option>
@@ -194,120 +198,148 @@ export default function NhanHangPage() {
             <option value="Thiếu hàng">Thiếu số lượng</option>
             <option value="Khác">Khác</option>
           </select>
+
           <textarea
             placeholder="Mô tả chi tiết vấn đề..."
             value={khieuNaiInfo.moTa}
             onChange={(e) => setKhieuNaiInfo({ ...khieuNaiInfo, moTa: e.target.value })}
             style={{ ...inputStyle, height: '130px' }}
           />
+
           <button onClick={guiKhieuNai} style={primaryButtonStyle}>🚨 Gửi Khiếu Nại</button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
-/* ====================== STYLES ====================== */
-const tabContainerStyle: React.CSSProperties = { display: 'flex', gap: '12px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' };
+/* ===================== STYLES ===================== */
+const pageContainer = {
+  minHeight: '100vh',
+  width: '100%',
+  background: '#f3e8ff',
+  padding: '16px 14px 100px',
+  boxSizing: 'border-box' as const
+} as const;
 
-const tabStyle: React.CSSProperties = {
+const headerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  marginBottom: '8px'
+} as const;
+
+const tabContainerStyle = {
+  display: 'flex',
+  gap: '12px',
+  marginBottom: '32px',
+  justifyContent: 'center',
+  flexWrap: 'wrap' as const
+} as const;
+
+const tabStyle = {
   padding: '14px 28px',
   borderRadius: '9999px',
-  border: '2px solid #334155',
-  backgroundColor: '#1e2937',
-  color: '#94a3b8',
+  border: '2px solid #c4b5fd',
+  backgroundColor: '#ede9fe',
+  color: '#4c1d95',
   fontWeight: '600',
-  cursor: 'pointer',
-  transition: 'all 0.3s ease'
-};
+  cursor: 'pointer'
+} as const;
 
-const activeTabStyle: React.CSSProperties = {
+const activeTabStyle = {
   padding: '14px 28px',
   borderRadius: '9999px',
   border: '2px solid #22d3ee',
   background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
   color: '#0f172a',
-  fontWeight: '600',
-  cursor: 'pointer',
-  boxShadow: '0 0 25px rgba(34, 211, 238, 0.6)'
-};
+  fontWeight: '700',
+  boxShadow: '0 0 20px rgba(34, 211, 238, 0.4)'
+} as const;
 
-const mainCardStyle: React.CSSProperties = {
-  backgroundColor: '#1e2937',
-  padding: '36px 24px',
+const mainCardStyle = {
+  background: '#ede9fe',
+  padding: '32px 24px',
   borderRadius: '24px',
-  border: '2px solid #334155',
-  textAlign: 'center'
-};
+  border: '1px solid #c4b5fd',
+  marginBottom: '20px'
+} as const;
 
-const inputStyle: React.CSSProperties = {
+const inputStyle = {
   width: '100%',
   padding: '16px 18px',
-  backgroundColor: '#0f172a',
-  border: '1px solid #475569',
+  background: '#f3e8ff',
+  border: '1px solid #c4b5fd',
   borderRadius: '12px',
-  color: 'white',
+  color: '#4c1d95',
   fontSize: '16px',
   marginBottom: '18px',
-  boxSizing: 'border-box'
-};
+  boxSizing: 'border-box' as const
+} as const;
 
-const primaryButtonStyle: React.CSSProperties = {
+const primaryButtonStyle = {
   width: '100%',
   padding: '18px',
-  background: 'linear-gradient(90deg, #22d3ee, #06b6d4)',
+  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: 'bold',
+  fontWeight: '700',
   fontSize: '17px',
   cursor: 'pointer',
   marginTop: '12px'
-};
+} as const;
 
-const confirmButtonStyle: React.CSSProperties = { ...primaryButtonStyle, background: '#4ade80' };
+const confirmButtonStyle = { ...primaryButtonStyle, background: '#4ade80' } as const;
 
-const successCardStyle: React.CSSProperties = {
-  backgroundColor: '#1e2937',
+const successCardStyle = {
+  background: '#ede9fe',
   padding: '50px 30px',
   borderRadius: '24px',
-  textAlign: 'center',
-  border: '2px solid #4ade80'
-};
+  textAlign: 'center' as const,
+  border: '2px solid #22c55e'
+} as const;
 
-const successOverlayStyle: React.CSSProperties = {
-  position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-  backgroundColor: 'rgba(0,0,0,0.95)', padding: '60px 50px', borderRadius: '24px',
-  textAlign: 'center', border: '3px solid #22c55e', zIndex: 1000
-};
+const successOverlayStyle = {
+  position: 'fixed' as const,
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  backgroundColor: 'rgba(0,0,0,0.9)',
+  padding: '60px 50px',
+  borderRadius: '24px',
+  textAlign: 'center' as const,
+  border: '3px solid #22c55e',
+  color: 'white',
+  zIndex: 1000
+} as const;
 
-const orderItemStyle: React.CSSProperties = {
+const orderItemStyle = {
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: '#0f172a',
+  background: '#f3e8ff',
   padding: '18px',
   borderRadius: '16px',
   marginBottom: '12px',
-  border: '1px solid #334155',
-  textAlign: 'left'
-};
+  border: '1px solid #c4b5fd'
+} as const;
 
-const infoBoxStyle: React.CSSProperties = {
-  backgroundColor: '#0f172a',
+const infoBoxStyle = {
+  background: '#f3e8ff',
   padding: '20px',
   borderRadius: '16px',
-  textAlign: 'left',
+  textAlign: 'left' as const,
   margin: '24px 0',
   lineHeight: '1.8',
-  border: '1px solid #334155'
-};
+  border: '1px solid #c4b5fd'
+} as const;
 
-const starStyle = (active: boolean): React.CSSProperties => ({
+const starStyle = (active: boolean) => ({
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  color: active ? '#fbbf24' : '#475569',
-  fontSize: '70px',
+  color: active ? '#fbbf24' : '#cbd5e1',
+  fontSize: '52px',
   transition: 'all 0.2s ease',
-  transform: active ? 'scale(1.2)' : 'scale(1)'
+  transform: active ? 'scale(1.15)' : 'scale(1)'
 });
