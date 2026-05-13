@@ -1,86 +1,43 @@
+// src/pages/HomePage.tsx
 import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      overflowY: 'auto',
-      paddingBottom: '140px',     // ← TĂNG LÊN để lộ rõ 2 card dưới cùng
-      backgroundColor: '#0f172a'
-    }}>
-      {/* ==================== HEADER - LOGO ==================== */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        marginBottom: '25px',
-        paddingTop: '20px'
-      }}>
+    <div style={pageContainer}>
+      {/* HEADER - LOGO */}
+      <div style={headerContainer}>
         <div 
           onClick={() => navigate('/')}
-          style={neonLogoStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 45px #22d3ee, 0 0 70px rgba(34, 211, 238, 0.8)';
-            e.currentTarget.style.borderColor = '#67e8f9';
-            e.currentTarget.style.transform = 'scale(1.04)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 30px #22d3ee';
-            e.currentTarget.style.borderColor = '#22d3ee';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
+          style={logoStyle}
         >
-          <div style={{ fontSize: '52px' }}>🚚</div>
+          <div style={{ fontSize: '56px' }}>🚚</div>
           <div>
-            <h1 style={logoTitleStyle}>GHN.PI</h1>
-            <p style={logoSubtitleStyle}>Logistics Ecosystem v14 Pro</p>
+            <h1 style={logoTitle}>GHN.PI</h1>
+            <p style={logoSubtitle}>Logistics Ecosystem • Pi Network</p>
           </div>
         </div>
       </div>
 
-      {/* NÚT ĐĂNG NHẬP VỚI PI */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '35px' }}>
+      {/* NÚT ĐĂNG NHẬP PI - ĐÃ THAY MÀU TÍM & LOGO π */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px', padding: '0 14px' }}>
         <button 
           onClick={() => alert('🔗 Đang kết nối với Pi Network...')}
           style={piButtonStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 45px #c026d3, 0 0 70px rgba(192, 38, 211, 0.8)';
-            e.currentTarget.style.borderColor = '#e879f9';
-            e.currentTarget.style.transform = 'scale(1.08)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 0 30px #c026d3';
-            e.currentTarget.style.borderColor = '#c026d3';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
         >
-          ⭐ Đăng nhập với Pi
+          <div style={piLogoCircle}>π</div>
+          Đăng nhập với Pi Network
         </button>
       </div>
 
-      {/* 6 CARDS */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '16px',
-        padding: '0 16px'
-      }}>
+      {/* SERVICE CARDS */}
+      <div style={gridContainer}>
         {cards.map((card) => (
           <div
             key={card.path}
             onClick={() => navigate(card.path)}
-            style={neonCardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#22d3ee';
-              e.currentTarget.style.boxShadow = '0 0 35px #22d3ee, 0 0 55px rgba(34, 211, 238, 0.6)';
-              e.currentTarget.style.transform = 'translateY(-8px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#334155';
-              e.currentTarget.style.boxShadow = '0 4px 25px rgba(0, 0, 0, 0.5)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
+            style={cardStyle}
           >
             <div style={iconStyle}>{card.icon}</div>
             <h3 style={titleStyle}>{card.title}</h3>
@@ -94,81 +51,117 @@ export default function HomePage() {
 
 /* ====================== DATA ====================== */
 const cards = [
-  { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn nhanh", path: "/gui-hang" },
-  { icon: "📊", title: "TRA CỨU CƯỚC PHÍ", desc: "Ước tính nhanh", path: "/tra-cuu-cuoc" },
-  { icon: "🏬", title: "QUẢN LÝ KHO TRUNG CHUYỂN", desc: "Dành cho Đối tác Kho hàng", path: "/kho-hub" },
-  { icon: "🏍️", title: "TÀI XẾ", desc: "Nhận đơn ngay", path: "/tai-xe" },
-  { icon: "📍", title: "TRACKING", desc: "Theo dõi đơn hàng realtime", path: "/tracking" },
-  { icon: "🖐️", title: "NHẬN HÀNG", desc: "Xác nhận đã nhận hàng", path: "/nhan-hang" },
+  { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn nhanh chóng", path: "/gui-hang" },
+  { icon: "📊", title: "TRA CỨU CƯỚC", desc: "Ước tính ngay lập tức", path: "/tra-cuu-cuoc" },
+  { icon: "🏬", title: "KHO TRUNG CHUYỂN", desc: "Dành cho đối tác kho", path: "/kho-hub" },
+  { icon: "🏍️", title: "TÀI XẾ", desc: "Nhận đơn & giao hàng", path: "/tai-xe" },
+  { icon: "📍", title: "TRACKING", desc: "Theo dõi realtime", path: "/tracking" },
+  { icon: "🖐️", title: "NHẬN HÀNG", desc: "Xác nhận nhận hàng", path: "/nhan-hang" },
 ];
 
 /* ====================== STYLES ====================== */
-const neonLogoStyle = {
+const pageContainer = {
+  minHeight: '100vh',
+  background: '#f3e8ff',
+  paddingBottom: '120px',
+  boxSizing: 'border-box' as const
+} as const;
+
+const headerContainer = {
+  display: 'flex',
+  justifyContent: 'center',
+  padding: '30px 0 20px',
+} as const;
+
+const logoStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '16px',
-  padding: '14px 24px',
-  backgroundColor: 'rgba(15, 23, 42, 0.95)',
-  border: '2px solid #22d3ee',
-  borderRadius: '20px',
+  padding: '16px 28px',
+  background: '#ede9fe',
+  borderRadius: '24px',
+  border: '2px solid #c4b5fd',
   cursor: 'pointer',
-  boxShadow: '0 0 30px #22d3ee',
-  transition: 'all 0.4s ease',
-};
+  boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
+  transition: 'all 0.3s ease'
+} as const;
 
-const logoTitleStyle = {
-  fontSize: '36px',
-  fontWeight: 'bold',
+const logoTitle = {
+  fontSize: '38px',
+  fontWeight: '700',
   margin: 0,
-  color: '#e2e8f0',
-  textShadow: '0 0 20px #22d3ee',
-};
+  color: '#4c1d95'
+} as const;
 
-const logoSubtitleStyle = {
-  color: '#94a3b8',
+const logoSubtitle = {
+  color: '#6b21a8',
   margin: 0,
-  fontSize: '14px',
-};
+  fontSize: '14.5px'
+} as const;
 
 const piButtonStyle = {
-  padding: '16px 36px',
-  background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
-  color: 'white',
-  border: '2px solid #c026d3',
+  padding: '14px 32px',
+  background: 'linear-gradient(90deg, #6b21a8, #7c3aed)',   // Tím Pi Network
+  color: '#fff',
+  border: 'none',
   borderRadius: '9999px',
-  fontWeight: 'bold',
-  fontSize: '16px',
+  fontSize: '17px',
+  fontWeight: '700',
   cursor: 'pointer',
-  boxShadow: '0 0 30px #c026d3',
-  transition: 'all 0.4s ease',
-};
+  boxShadow: '0 8px 25px rgba(107, 33, 168, 0.4)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  transition: 'all 0.3s ease'
+} as const;
 
-const neonCardStyle = {
-  backgroundColor: '#1e2937',
+const piLogoCircle = {
+  width: '28px',
+  height: '28px',
+  borderRadius: '50%',
+  background: '#fff',
+  color: '#6b21a8',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  border: '2px solid #c4b5fd'
+} as const;
+
+const gridContainer = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '16px',
+  padding: '0 14px'
+} as const;
+
+const cardStyle = {
+  background: '#fff',
   padding: '24px 16px',
   borderRadius: '20px',
-  border: '2px solid #334155',
+  border: '1px solid #c4b5fd',
   textAlign: 'center' as const,
   cursor: 'pointer',
-  transition: 'all 0.4s ease',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
-  height: '100%',
-};
+  transition: 'all 0.3s ease',
+  boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
+} as const;
 
 const iconStyle = { 
-  fontSize: '48px', 
-  marginBottom: '14px' 
+  fontSize: '52px', 
+  marginBottom: '12px' 
 };
 
 const titleStyle = { 
-  fontSize: '18px', 
-  fontWeight: 'bold', 
+  fontSize: '17.5px', 
+  fontWeight: '700', 
   margin: '0 0 6px 0', 
-  color: '#e2e8f0' 
+  color: '#4c1d95' 
 };
 
 const descStyle = { 
-  color: '#94a3b8', 
+  color: '#64748b', 
   fontSize: '13.5px', 
-  margin: 0 
-};
+  margin: 0,
+  lineHeight: '1.4'
+} as const;
