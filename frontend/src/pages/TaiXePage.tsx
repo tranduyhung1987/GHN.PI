@@ -2,12 +2,20 @@
 import { useState, useEffect } from 'react';
 
 export default function TaiXePage() {
-  // === REPUTATION SYSTEM ===
   const [reputation, setReputation] = useState(87);
-  const [recentRatings] = useState([  // ← bỏ setRecentRatings vì chưa dùng
+  const [recentRatings] = useState([
     { don: "GHN17488902", sao: 4, comment: "Giao nhanh, cẩn thận" },
     { don: "GHN17488754", sao: 2, comment: "Hàng bị móp nhẹ" },
   ]);
+
+  const [availableOrders, setAvailableOrders] = useState([
+    { maDon: "GHN17489231", loaiDon: "Hỏa Tốc", nguoiGui: "Nguyễn Thị Lan", diaChi: "123 Đường ABC, Quận 1, TP.HCM", khoangCach: "1.2km", phi: 45000 },
+    { maDon: "GHN17488902", loaiDon: "Hỏa Tốc", nguoiGui: "Trần Văn Hải", diaChi: "456 Nguyễn Huệ, Quận 3, TP.HCM", khoangCach: "2.8km", phi: 38000 },
+  ]);
+
+  const [myCurrentOrders, setMyCurrentOrders] = useState<any[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<any[]>([]); // Đã dùng ở dưới
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const getRepColor = (score: number): string => {
     if (score >= 90) return '#22c55e';
@@ -22,16 +30,6 @@ export default function TaiXePage() {
     if (score >= 60) return "⚠️ Trung Bình";
     return "🔴 Cảnh Báo";
   };
-
-  // Fake data orders
-  const [availableOrders, setAvailableOrders] = useState([
-    { maDon: "GHN17489231", loaiDon: "Hỏa Tốc", nguoiGui: "Nguyễn Thị Lan", diaChi: "123 Đường ABC, Quận 1, TP.HCM", khoangCach: "1.2km", phi: 45000 },
-    { maDon: "GHN17488902", loaiDon: "Hỏa Tốc", nguoiGui: "Trần Văn Hải", diaChi: "456 Nguyễn Huệ, Quận 3, TP.HCM", khoangCach: "2.8km", phi: 38000 },
-  ]);
-
-  const [myCurrentOrders, setMyCurrentOrders] = useState<any[]>([]); // tạm giữ any, sau có thể định type rõ hơn
-  const [completedOrders, setCompletedOrders] = useState<any[]>([]);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -54,21 +52,18 @@ export default function TaiXePage() {
   const updateReputation = (isGood: boolean) => {
     setReputation(prev => {
       const change = isGood ? Math.floor(Math.random() * 3) + 1 : -Math.floor(Math.random() * 4) - 1;
-      const newRep = Math.max(30, Math.min(100, prev + change));
-      return newRep;
+      return Math.max(30, Math.min(100, prev + change));
     });
   };
 
   const nhanDon = (order: any) => {
     if (!window.confirm(`Nhận đơn ${order.maDon}?\nKhoảng cách: ${order.khoangCach}`)) return;
-
     setAvailableOrders(prev => prev.filter(o => o.maDon !== order.maDon));
     setMyCurrentOrders(prev => [...prev, {
       ...order,
       trangThai: "Đang lấy hàng",
       thoiGianNhan: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     }]);
-
     showToast(`✅ ĐÃ NHẬN ĐƠN ${order.maDon}`);
   };
 
@@ -88,111 +83,120 @@ export default function TaiXePage() {
 
   const hoanThanhDon = (maDon: string) => {
     if (!window.confirm(`Xác nhận đã giao xong đơn ${maDon}?`)) return;
-    
     const completed = myCurrentOrders.find(o => o.maDon === maDon);
     if (completed) {
       setCompletedOrders(prev => [...prev, { ...completed, trangThai: "Đã giao" }]);
       setMyCurrentOrders(prev => prev.filter(o => o.maDon !== maDon));
-      
       updateReputation(true);
       showToast(`🎉 HOÀN THÀNH ĐƠN ${maDon} (+ Reputation)`);
     }
   };
 
   return (
-    <>
-      {/* === REPUTATION HEADER === */}
-      <div style={reputationHeaderStyle}>
+    <div style={pageContainer}>
+      
+      {/* Reputation Header */}
+      <div style={reputationHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '52px' }}>🏍️</div>
+          <div style={{ fontSize: '58px' }}>🏍️</div>
           <div>
-            <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>TÀI XẾ</h1>
-            <p style={{ color: '#94a3b8', margin: 0 }}>Reputation System • Minh bạch Web3</p>
+            <h1 style={{ fontSize: '27px', fontWeight: '700', color: '#4c1d95', margin: '0 0 4px 0' }}>
+              TÀI XẾ GHN.PI
+            </h1>
+            <p style={{ color: '#6b21a8', margin: 0, fontSize: '15px' }}>
+              Reputation • Minh bạch On-chain
+            </p>
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '12px' }}>
-          <div style={{ fontSize: '52px', fontWeight: 'bold', color: getRepColor(reputation) }}>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <div style={{ fontSize: '62px', fontWeight: '800', color: '#22d3ee', lineHeight: '1' }}>
             {reputation}
-            <span style={{ fontSize: '24px' }}>pts</span>
+            <span style={{ fontSize: '26px', color: '#4c1d95' }}> pts</span>
           </div>
-          <div style={{ color: getRepColor(reputation), fontWeight: 'bold', marginTop: '4px' }}>
+          <div style={{ color: getRepColor(reputation), fontSize: '19px', fontWeight: '700', marginTop: '6px' }}>
             {getRepBadge(reputation)}
           </div>
         </div>
       </div>
 
+      {/* Stats */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <div style={statCard}>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#22d3ee' }}>{availableOrders.length}</div>
+          <div style={{ color: '#6b21a8', fontSize: '14px' }}>Đơn chờ nhận</div>
+        </div>
+        <div style={statCard}>
+          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#eab308' }}>{myCurrentOrders.length}</div>
+          <div style={{ color: '#6b21a8', fontSize: '14px' }}>Đơn đang làm</div>
+        </div>
+      </div>
+
       {/* Recent Ratings */}
-      <div style={miniCardStyle}>
-        <h4 style={{ color: '#eab308', marginBottom: '12px' }}>Đánh giá gần đây</h4>
+      <div style={cardStyle}>
+        <h4 style={{ color: '#4c1d95', marginBottom: '12px' }}>Đánh giá gần đây</h4>
         {recentRatings.map((item, idx) => (
-          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-            <span>{item.don}</span>
-            <span style={{ color: '#fbbf24' }}>{'★'.repeat(item.sao)}</span>
+          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: idx === 0 ? '1px solid #e0e7ff' : 'none' }}>
+            <div>
+              <div style={{ fontWeight: '600' }}>{item.don}</div>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>{item.comment}</div>
+            </div>
+            <div style={{ color: '#fbbf24', fontSize: '18px' }}>{'★'.repeat(item.sao)}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-        <div style={{ background: '#1e2937', padding: '12px 20px', borderRadius: '16px', flex: 1 }}>
-          <div style={{ color: '#22d3ee', fontSize: '22px', fontWeight: 'bold' }}>{availableOrders.length}</div>
-          <div style={{ color: '#94a3b8', fontSize: '14px' }}>Đơn chờ nhận</div>
-        </div>
-        <div style={{ background: '#1e2937', padding: '12px 20px', borderRadius: '16px', flex: 1 }}>
-          <div style={{ color: '#eab308', fontSize: '22px', fontWeight: 'bold' }}>{myCurrentOrders.length}</div>
-          <div style={{ color: '#94a3b8', fontSize: '14px' }}>Đơn đang làm</div>
-        </div>
-      </div>
-
-      {/* Các phần còn lại giữ nguyên */}
+      {/* Available Orders */}
       {availableOrders.length > 0 && (
         <div style={{ marginBottom: '40px' }}>
-          <h3 style={{ marginBottom: '16px', color: '#e2e8f0' }}>Đơn hàng đang chờ gần bạn</h3>
-          {availableOrders.map((order) => (
-            <div key={order.maDon} style={orderCardStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{order.maDon}</div>
-                  <div style={{ color: '#94a3b8', marginTop: '4px' }}>{order.nguoiGui} • {order.diaChi}</div>
+          <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>Đơn hàng gần bạn</h3>
+          {availableOrders.map(order => (
+            <div key={order.maDon} style={orderCard}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '18px', fontWeight: '700', color: '#4c1d95' }}>{order.maDon}</div>
+                  <div style={{ color: '#6b21a8' }}>{order.nguoiGui}</div>
+                  <div style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>{order.diaChi}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ color: '#22d3ee', fontWeight: 'bold' }}>{order.khoangCach}</div>
-                  <div style={{ color: '#eab308', marginTop: '4px' }}>{order.phi.toLocaleString()} Pi</div>
+                  <div style={{ color: '#eab308', fontWeight: '600' }}>{order.phi.toLocaleString()} Pi</div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-                <button onClick={() => nhanDon(order)} style={nhanDonButtonStyle}>Nhận đơn ngay</button>
-                <button onClick={() => tuChoiDon(order.maDon)} style={rejectButtonStyle}>Từ chối</button>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                <button onClick={() => nhanDon(order)} style={acceptBtn}>Nhận đơn ngay</button>
+                <button onClick={() => tuChoiDon(order.maDon)} style={rejectBtn}>Từ chối</button>
               </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Current Orders */}
       {myCurrentOrders.length > 0 && (
         <div style={{ marginBottom: '40px' }}>
-          <h3 style={{ marginBottom: '16px', color: '#e2e8f0' }}>Đơn tôi đang thực hiện</h3>
+          <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>Đơn đang thực hiện</h3>
           {myCurrentOrders.map((order) => (
-            <div key={order.maDon} style={myOrderCardStyle}>
+            <div key={order.maDon} style={myOrderCard}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: '19px', fontWeight: 'bold' }}>{order.maDon}</div>
-                  <div style={{ color: '#94a3b8' }}>{order.nguoiGui}</div>
+                  <div style={{ fontSize: '18px', fontWeight: '700' }}>{order.maDon}</div>
+                  <div style={{ color: '#6b21a8' }}>{order.nguoiGui}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ color: '#22d3ee', fontWeight: '600' }}>{order.trangThai}</div>
-                  <small style={{ color: '#64748b' }}>{order.thoiGianNhan}</small>
+                  <small>{order.thoiGianNhan}</small>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
                 {order.trangThai === "Đang lấy hàng" && (
-                  <button onClick={() => batDauGiao(order.maDon)} style={updateButtonStyle}>Bắt đầu giao hàng</button>
+                  <button onClick={() => batDauGiao(order.maDon)} style={updateBtn}>Bắt đầu giao</button>
                 )}
                 {order.trangThai === "Đang giao hàng" && (
-                  <button onClick={() => hoanThanhDon(order.maDon)} style={completeButtonStyle}>
-                    ✅ Hoàn thành giao hàng
+                  <button onClick={() => hoanThanhDon(order.maDon)} style={completeBtn}>
+                    ✅ Hoàn thành
                   </button>
                 )}
               </div>
@@ -201,11 +205,12 @@ export default function TaiXePage() {
         </div>
       )}
 
+      {/* Completed Orders */}
       {completedOrders.length > 0 && (
         <div>
-          <h3 style={{ marginBottom: '16px', color: '#e2e8f0' }}>Lịch sử đã giao</h3>
+          <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>Lịch sử đã giao</h3>
           {completedOrders.map(order => (
-            <div key={order.maDon} style={{ ...myOrderCardStyle, borderColor: '#22c55e', opacity: 0.9 }}>
+            <div key={order.maDon} style={{ ...myOrderCard, borderColor: '#22c55e' }}>
               <div style={{ color: '#22c55e', fontWeight: 'bold' }}>✅ ĐÃ GIAO {order.maDon}</div>
             </div>
           ))}
@@ -213,105 +218,119 @@ export default function TaiXePage() {
       )}
 
       {toast && (
-        <div style={{
-          position: 'fixed',
-          bottom: '80px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: toast.type === 'success' ? '#22c55e' : '#ef4444',
-          color: 'white',
-          padding: '14px 24px',
-          borderRadius: '12px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-          zIndex: 10000,
-          fontWeight: 'bold'
-        }}>
+        <div style={toastStyle}>
           {toast.message}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
-/* ====================== STYLES ====================== */
-const reputationHeaderStyle = {
-  backgroundColor: '#1e2937',
-  padding: '24px',
-  borderRadius: '20px',
-  border: '2px solid #eab308',
-  marginBottom: '24px',
-  boxShadow: '0 0 25px rgba(234, 179, 8, 0.5)',
+/* ===================== STYLES ===================== */
+const pageContainer = {
+  minHeight: '100vh',
+  width: '100%',
+  background: '#f3e8ff',
+  padding: '16px 14px 120px',
+  boxSizing: 'border-box' as const
 };
 
-const miniCardStyle = {
-  backgroundColor: '#1e2937',
+const reputationHeader = {
+  background: '#ede9fe',
+  padding: '28px 20px',
+  borderRadius: '24px',
+  border: '2px solid #c4b5fd',
+  marginBottom: '24px',
+  boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+};
+
+const statCard = {
+  background: '#ede9fe',
   padding: '16px',
   borderRadius: '16px',
-  border: '1px solid #334155',
+  border: '1px solid #c4b5fd',
+  flex: 1,
+  textAlign: 'center' as const
+};
+
+const cardStyle = {
+  background: '#ede9fe',
+  padding: '20px',
+  borderRadius: '16px',
+  border: '1px solid #c4b5fd',
   marginBottom: '24px'
 };
 
-const orderCardStyle = {
-  backgroundColor: '#1e2937',
+const orderCard = {
+  background: '#ede9fe',
   padding: '20px',
-  borderRadius: '20px',
-  border: '1px solid #334155',
+  borderRadius: '16px',
+  border: '1px solid #c4b5fd',
   marginBottom: '16px'
 };
 
-const nhanDonButtonStyle = {
-  marginTop: '16px',
-  width: '100%',
+const myOrderCard = {
+  background: '#ede9fe',
+  padding: '20px',
+  borderRadius: '16px',
+  border: '2px solid #22d3ee',
+  marginBottom: '16px'
+};
+
+const acceptBtn = {
+  flex: 1,
   padding: '16px',
   background: '#22d3ee',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  boxShadow: '0 4px 15px rgba(34, 211, 238, 0.4)'
+  fontWeight: '700',
+  cursor: 'pointer'
 };
 
-const rejectButtonStyle = {
-  marginTop: '16px',
-  width: '100%',
+const rejectBtn = {
+  flex: 1,
   padding: '16px',
   background: '#ef4444',
   color: 'white',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: 'bold',
+  fontWeight: '600',
   cursor: 'pointer'
 };
 
-const myOrderCardStyle = {
-  backgroundColor: '#1e2937',
-  padding: '20px',
-  borderRadius: '20px',
-  border: '2px solid #22d3ee',
-  marginBottom: '16px'
-};
-
-const updateButtonStyle = {
-  marginTop: '12px',
-  width: '100%',
+const updateBtn = {
+  flex: 1,
   padding: '14px',
   background: '#eab308',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: 'bold',
+  fontWeight: '700',
   cursor: 'pointer'
 };
 
-const completeButtonStyle = {
-  marginTop: '12px',
-  width: '100%',
+const completeBtn = {
+  flex: 1,
   padding: '14px',
   background: '#22c55e',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: 'bold',
+  fontWeight: '700',
   cursor: 'pointer'
+};
+
+const toastStyle = {
+  position: 'fixed' as const,
+  bottom: '90px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  background: '#22c55e',
+  color: 'white',
+  padding: '14px 28px',
+  borderRadius: '9999px',
+  fontWeight: '600',
+  boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+  zIndex: 1000
 };
