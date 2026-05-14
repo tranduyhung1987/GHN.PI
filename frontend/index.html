@@ -1,41 +1,13 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#e30613" />
-    <meta name="description" content="Tạo đơn GHN - Thanh toán bằng Pi Network" />
-
-    <!-- Runtime environment variables -->
-    <script>
-      window.__ENV = {
-        backendURL: "$$BACKEND_URL$$",
-        sandbox: "$$SANDBOX_SDK$$",
-      };
-    </script>
-
-    <!-- === TẠM TẮT PI SDK ĐỂ FIX LỖI HIỂN THỊ === -->
-    <!-- <script src="https://sdk.minepi.com/pi-sdk.js"></script> -->
-
-    <!-- <script>
-      const runSDKInSandboxMode = window.__ENV.sandbox === "true";
-
-      Pi.init({
-        version: "2.0",
-        sandbox: runSDKInSandboxMode,
-      });
-    </script> -->
-
-    <title>GHN.PI - Giao Hàng Nhanh bằng Pi</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" href="/logo.png" type="image/png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>frontend</title>
   </head>
-
   <body>
-    <noscript>Bạn cần bật JavaScript để sử dụng GHN.PI</noscript>
     <div id="root"></div>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
