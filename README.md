@@ -37,7 +37,6 @@ GHN.PI là dự án **Giao Hàng Nhanh** được xây dựng dành riêng cho h
 ## 🛠 Hướng dẫn
 
 - [Development Guide](./doc/development.md)
-- [Deployment Guide](./doc/deployment.md)
 - [Luồng chức năng](./FLOWS.md)
 - [Hướng dẫn đóng góp](./CONTRIBUTING.md)
 
