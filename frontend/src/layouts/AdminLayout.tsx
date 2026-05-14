@@ -1,6 +1,5 @@
 // src/layouts/AdminLayout.tsx
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import BottomNav from '../components/BottomNav';
 
 interface AdminLayoutProps {
@@ -8,7 +7,6 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { role } = useAuth();
 
   return (
     <div style={container}>

@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 const BottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const handleClick = (path: string) => {
     if (!isAuthenticated && path !== '/') {

@@ -2,10 +2,11 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
 import BottomNav from './BottomNav';
-import GuestLayout from '../layouts/GuestLayout';
-import MemberLayout from '../layouts/MemberLayout';
-import AdminLayout from '../layouts/AdminLayout';
+import GuestLayout from '../layouts/GuestLayout.tsx';
+import MemberLayout from '../layouts/MemberLayout.tsx';
+import AdminLayout from '../layouts/AdminLayout.tsx';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { role } = useAuth();
   const location = useLocation();
 
-  // Guest chỉ xem được HomePage
+  // Guest chỉ được xem trang chủ
   if (role === 'guest' && location.pathname !== '/') {
     return <GuestLayout>{children}</GuestLayout>;
   }
@@ -24,6 +25,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     return <AdminLayout>{children}</AdminLayout>;
   }
 
+  // Các vai trò còn lại (shop, driver, warehouse...)
   return (
     <MemberLayout>
       {children}

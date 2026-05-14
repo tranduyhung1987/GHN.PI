@@ -1,72 +1,82 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// src/contexts/AuthContext.tsx
+import React, { 
+  createContext, 
+  useContext, 
+  useState, 
+  useEffect, 
+  type ReactNode   // ← Sửa lỗi đỏ ở đây
+} from 'react';
 
-export type UserRole = 'guest' | 'member' | 'driver' | 'warehouse' | 'admin';
+export type Role = 'guest' | 'shop' | 'driver' | 'warehouse' | 'admin';
 
-interface User {
+export interface User {
   id: string;
   name: string;
-  email?: string;
-  role: UserRole;
-  avatar?: string;
+  role: Role;
   piAddress?: string;
-  points: number;
-  level: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  isLoggedIn: boolean;
-  isLoading: boolean;
-  login: (userData: Partial<User>) => void;
+  role: Role;
+  isAuthenticated: boolean;
+  loginWithPi: () => Promise<void>;
+  setRole: (newRole: Role) => void;
   logout: () => void;
-  updateUser: (newData: Partial<User>) => void;
-  switchRole: (role: UserRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
+  const role = user?.role || 'guest';
+  const isAuthenticated = !!user && role !== 'guest';
+
+  // Load user từ localStorage
   useEffect(() => {
-    const savedUser = localStorage.getItem('ghn_pi_user');
-    if (savedUser) setUser(JSON.parse(savedUser));
-    setIsLoading(false);
+    const savedUser = localStorage.getItem('ghnpi_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('ghn_pi_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('ghn_pi_user');
-    }
-  }, [user]);
-
-  const login = (userData: Partial<User>) => {
-    const newUser: User = {
-      id: userData.id || 'user_' + Date.now(),
-      name: userData.name || 'Người dùng GHN.PI',
-      email: userData.email,
-      role: userData.role || 'member',
-      avatar: userData.avatar,
-      piAddress: userData.piAddress,
-      points: userData.points || 0,
-      level: userData.level || 'Mới bắt đầu',
+  const loginWithPi = async () => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const tempUser: User = {
+      id: 'pi_' + Date.now(),
+      name: 'Người dùng Pi',
+      role: 'guest',
+      piAddress: 'Pi1abc...xyz'
     };
-    setUser(newUser);
+    
+    setUser(tempUser);
+    localStorage.setItem('ghnpi_user', JSON.stringify(tempUser));
   };
 
-  const logout = () => setUser(null);
-  const updateUser = (newData: Partial<User>) => {
-    if (user) setUser({ ...user, ...newData });
+  const setRole = (newRole: Role) => {
+    if (user) {
+      const updatedUser = { ...user, role: newRole };
+      setUser(updatedUser);
+      localStorage.setItem('ghnpi_user', JSON.stringify(updatedUser));
+    }
   };
-  const switchRole = (role: UserRole) => {
-    if (user) setUser({ ...user, role });
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('ghnpi_user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, logout, updateUser, switchRole }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      role, 
+      isAuthenticated, 
+      loginWithPi, 
+      setRole, 
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -74,6 +84,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };

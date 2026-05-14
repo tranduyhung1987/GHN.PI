@@ -31,7 +31,7 @@ const ChatPage: React.FC = () => {
       <div style={chatContainer}>
         {messages.map(msg => (
           <div key={msg.id} style={msg.from === 'me' ? myMessage : adminMessage}>
-            <div style={msgBubble}>
+            <div style={msg.from === 'me' ? myMessageBubble : adminMessageBubble}>
               {msg.text}
             </div>
             <span style={timeStyle}>{msg.time}</span>
