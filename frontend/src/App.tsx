@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState<'tim' | 'cuoc'>('cuoc');
@@ -23,12 +23,10 @@ const App = () => {
     <div style={{ 
       minHeight: '100vh', 
       background: '#f3e8ff', 
-      padding: '20px 10px',
-      fontFamily: 'system-ui, sans-serif',
-      display: 'flex',
-      justifyContent: 'center'
+      padding: '20px',
+      fontFamily: 'system-ui, sans-serif'
     }}>
-      <div style={{ maxWidth: '520px', width: '100%', margin: '0 auto' }}>
+      <div style={{ maxWidth: '520px', margin: '0 auto' }}>
         <h1 style={{ textAlign: 'center', color: '#4c1d95', fontSize: '30px', marginBottom: '24px' }}>
           🔎 TRA CỨU CƯỚC GHN.PI
         </h1>
@@ -76,41 +74,12 @@ const App = () => {
   );
 };
 
-/* ===================== STYLES ===================== */
-const cardStyle = { 
-  background: 'white', 
-  padding: '24px', 
-  borderRadius: '20px', 
-  boxShadow: '0 10px 30px rgba(0,0,0,0.08)' 
-};
+/* Styles */
+const cardStyle = { background: 'white', padding: '24px', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' };
 const subLabel = { color: '#6b21a8', margin: '16px 0 8px', fontWeight: '600' };
-const inputStyle = { 
-  width: '100%', 
-  padding: '12px', 
-  marginBottom: '10px', 
-  border: '1px solid #c4b5fd', 
-  borderRadius: '12px', 
-  background: '#f8fafc',
-  fontSize: '15px'
-};
-const calcButtonStyle = { 
-  width: '100%', 
-  padding: '18px', 
-  background: '#22d3ee', 
-  color: '#0f172a', 
-  border: 'none', 
-  borderRadius: '9999px', 
-  fontSize: '17px', 
-  fontWeight: '700', 
-  marginTop: '12px' 
-};
-const resultStyle = { 
-  textAlign: 'center' as const, 
-  padding: '24px', 
-  background: '#ede9fe', 
-  borderRadius: '16px', 
-  marginTop: '20px' 
-};
+const inputStyle = { width: '100%', padding: '12px', marginBottom: '10px', border: '1px solid #c4b5fd', borderRadius: '12px', background: '#f8fafc' };
+const calcButtonStyle = { width: '100%', padding: '18px', background: '#22d3ee', color: '#0f172a', border: 'none', borderRadius: '9999px', fontSize: '17px', fontWeight: '700', marginTop: '12px' };
+const resultStyle = { textAlign: 'center' as const, padding: '24px', background: '#ede9fe', borderRadius: '16px', marginTop: '20px' };
 const activeTabStyle = { flex: 1, padding: '14px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '700' };
 const inactiveTabStyle = { flex: 1, padding: '14px', background: '#e0e7ff', color: '#4c1d95', borderRadius: '9999px' };
 
