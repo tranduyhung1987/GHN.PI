@@ -8,7 +8,6 @@ interface ModalProps {
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
-  size?: 'sm' | 'md' | 'lg';
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -19,22 +18,20 @@ const Modal: React.FC<ModalProps> = ({
   confirmText = "Xác nhận",
   cancelText = "Đóng",
   onConfirm,
-  size = 'md',
 }) => {
   if (!isOpen) return null;
 
-  const width = size === 'lg' ? 'max-w-lg' : size === 'sm' ? 'max-w-sm' : 'max-w-md';
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-      <div className={`bg-white rounded-3xl w-full ${width} overflow-hidden shadow-2xl`}>
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b">
-          <h3 className="text-2xl font-bold text-purple-700 text-center">{title}</h3>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+        
+        {/* Header gradient đẹp */}
+        <div className="bg-linear-to-r from-purple-600 to-violet-600 px-6 py-6 text-white">
+          <h3 className="text-2xl font-bold text-center tracking-tight">{title}</h3>
         </div>
 
-        {/* Content */}
-        <div className="p-6 text-gray-700">
+        {/* Nội dung */}
+        <div className="p-8 text-center text-gray-700 leading-relaxed">
           {children}
         </div>
 
@@ -42,14 +39,14 @@ const Modal: React.FC<ModalProps> = ({
         <div className="flex border-t">
           <button
             onClick={onClose}
-            className="flex-1 py-4 text-gray-600 font-medium hover:bg-gray-50 transition"
+            className="flex-1 py-5 text-lg font-medium text-gray-500 hover:bg-gray-100 transition"
           >
             {cancelText}
           </button>
           {onConfirm && (
             <button
               onClick={onConfirm}
-              className="flex-1 py-4 bg-purple-600 text-white font-medium hover:bg-purple-700 transition"
+              className="flex-1 py-5 text-lg font-semibold text-white bg-linear-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition"
             >
               {confirmText}
             </button>
