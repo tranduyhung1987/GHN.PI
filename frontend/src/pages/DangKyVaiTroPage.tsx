@@ -1,123 +1,72 @@
-// src/pages/DangKyVaiTroPage.tsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-const DangKyVaiTroPage: React.FC = () => {
-  const navigate = useNavigate();
+interface DangKyVaiTroPageProps {
+  onNavigate?: (page: string) => void;
+}
+
+const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
   const { setRole } = useAuth();
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-  const handleSelectRole = (selectedRole: 'shop' | 'driver' | 'warehouse') => {
-    setRole(selectedRole);
-    alert(`✅ Đã đăng ký vai trò: ${getRoleName(selectedRole)}`);
-    navigate('/');
-  };
-
-  const getRoleName = (role: string) => {
-    if (role === 'shop') return 'Chủ Shop / Người Gửi Hàng';
-    if (role === 'driver') return 'Tài Xế';
-    if (role === 'warehouse') return 'Kho Trung Chuyển';
-    return role;
+  const handleSelectRole = (role: string) => {
+    setSelectedRole(role);
+    setRole(role as any);   // ← Fix lỗi đỏ (type assertion)
+    
+    if (onNavigate) {
+      setTimeout(() => {
+        onNavigate('home');
+      }, 800);
+    } else {
+      alert(`Đã chọn vai trò: ${role}`);
+    }
   };
 
   return (
-    <div style={pageContainer}>
-      <div style={header}>
-        <h1 style={title}>Đăng Ký Vai Trò</h1>
-        <p style={subtitle}>Chọn vai trò bạn muốn tham gia trên GHN.PI</p>
+    <div className="min-h-screen bg-linear-to-br from-purple-50 to-violet-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-purple-900 mb-2">Đăng Ký Vai Trò</h1>
+          <p className="text-gray-600">Chọn vai trò phù hợp với bạn trên GHN.PI</p>
+        </div>
+
+        <div className="space-y-4">
+          <button
+            onClick={() => handleSelectRole('sender')}
+            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
+          >
+            <div className="text-4xl">📦</div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Người Gửi Hàng</div>
+              <div className="text-sm text-gray-500">Tạo đơn hàng, theo dõi vận chuyển</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleSelectRole('receiver')}
+            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
+          >
+            <div className="text-4xl">📬</div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Người Nhận Hàng</div>
+              <div className="text-sm text-gray-500">Nhận hàng, khiếu nại</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleSelectRole('driver')}
+            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
+          >
+            <div className="text-4xl">🏍️</div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Tài Xế</div>
+              <div className="text-sm text-gray-500">Nhận đơn, giao hàng</div>
+            </div>
+          </button>
+        </div>
       </div>
-
-      <div style={cardsContainer}>
-        {/* Vai trò Shop */}
-        <div style={roleCard} onClick={() => handleSelectRole('shop')}>
-          <div style={emoji}>🛒</div>
-          <h3>Chủ Shop / Người Gửi Hàng</h3>
-          <p style={desc}>Tạo đơn gửi hàng, quản lý đơn hàng của bạn</p>
-          <button style={selectButton}>Chọn vai trò này</button>
-        </div>
-
-        {/* Vai trò Tài Xế */}
-        <div style={roleCard} onClick={() => handleSelectRole('driver')}>
-          <div style={emoji}>🏍️</div>
-          <h3>Tài Xế</h3>
-          <p style={desc}>Nhận đơn vận chuyển, kiếm thu nhập từ Pi</p>
-          <button style={selectButton}>Chọn vai trò này</button>
-        </div>
-
-        {/* Vai trò Kho Hub */}
-        <div style={roleCard} onClick={() => handleSelectRole('warehouse')}>
-          <div style={emoji}>🏬</div>
-          <h3>Kho Trung Chuyển</h3>
-          <p style={desc}>Quản lý kho, bến bãi, xe đường dài</p>
-          <button style={selectButton}>Chọn vai trò này</button>
-        </div>
-      </div>
-
-      <button onClick={() => navigate('/')} style={backButton}>
-        ← Quay lại Trang chủ
-      </button>
     </div>
   );
-};
-
-/* ===================== STYLES ===================== */
-const pageContainer = {
-  minHeight: '100vh',
-  background: '#f3e8ff',
-  padding: '20px 14px',
-  boxSizing: 'border-box' as const
-};
-
-const header = { textAlign: 'center' as const, marginBottom: '40px' };
-const title = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
-const subtitle = { color: '#6b21a8', marginTop: '8px' };
-
-const cardsContainer = {
-  display: 'flex',
-  flexDirection: 'column' as const,
-  gap: '16px',
-  maxWidth: '420px',
-  margin: '0 auto'
-};
-
-const roleCard = {
-  background: '#fff',
-  padding: '24px',
-  borderRadius: '20px',
-  border: '2px solid #c4b5fd',
-  textAlign: 'center' as const,
-  cursor: 'pointer',
-  transition: 'all 0.2s'
-};
-
-const emoji = { fontSize: '52px', marginBottom: '12px' };
-const desc = { color: '#6b21a8', fontSize: '14.5px', margin: '8px 0 16px' };
-
-const selectButton = {
-  width: '100%',
-  padding: '14px',
-  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
-  color: '#0f172a',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: '700',
-  fontSize: '15px',
-  cursor: 'pointer'
-};
-
-const backButton = {
-  display: 'block',
-  width: '88%',
-  maxWidth: '280px',
-  margin: '40px auto 0',
-  padding: '14px 20px',
-  background: 'linear-gradient(90deg, #6b21a8, #7c3aed)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: '700',
-  fontSize: '15px',
-  cursor: 'pointer'
 };
 
 export default DangKyVaiTroPage;
