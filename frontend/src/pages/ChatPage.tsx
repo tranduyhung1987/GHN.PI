@@ -1,74 +1,170 @@
-// src/pages/ChatPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
-const ChatPage: React.FC = () => {
-  const [messages, setMessages] = useState([
-    { id: 1, from: "admin", text: "Chào bạn! Bạn cần hỗ trợ gì hôm nay?", time: "10:32" },
-    { id: 2, from: "me", text: "Tôi muốn hỏi về phí vận chuyển đường dài", time: "10:33" },
+interface ChatPageProps {
+  onNavigate: (page: string) => void;
+}
+
+type Message = {
+  id: number;
+  text: string;
+  isUser: boolean;
+  time: string;
+  file?: { name: string; url: string; type: string };
+};
+
+const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 1, text: "Chào bạn! Bạn cần hỗ trợ gì hôm nay?", isUser: false, time: "10:32" },
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sendMessage = () => {
     if (!newMessage.trim()) return;
-    
-    setMessages([...messages, {
+
+    const newMsg: Message = {
       id: Date.now(),
-      from: "me",
       text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }]);
+      isUser: true,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages(prev => [...prev, newMsg]);
     setNewMessage('');
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileUrl = URL.createObjectURL(file);
+    const newMsg: Message = {
+      id: Date.now(),
+      text: '',
+      isUser: true,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      file: {
+        name: file.name,
+        url: fileUrl,
+        type: file.type
+      }
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+    setShowAttachmentMenu(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') sendMessage();
   };
 
   return (
     <div style={pageContainer}>
+      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
       <div style={header}>
         <div style={{ fontSize: '42px' }}>💬</div>
-        <h1 style={title}>HỖ TRỢ CHAT</h1>
-        <p style={subtitle}>CSKH GHN.PI</p>
+        <div>
+          <h1 style={title}>HỖ TRỢ CHAT</h1>
+          <p style={subtitle}>CSKH GHN.PI • Trả lời nhanh 24/7</p>
+        </div>
       </div>
 
+      {/* CHAT AREA */}
       <div style={chatContainer}>
         {messages.map(msg => (
-          <div key={msg.id} style={msg.from === 'me' ? myMessage : adminMessage}>
-            <div style={msg.from === 'me' ? myMessageBubble : adminMessageBubble}>
-              {msg.text}
+          <div key={msg.id} style={msg.isUser ? myMessage : adminMessage}>
+            <div style={msg.isUser ? myMessageBubble : adminMessageBubble}>
+              {msg.text && <p>{msg.text}</p>}
+              {msg.file && (
+                <div style={{ marginTop: '8px' }}>
+                  {msg.file.type.startsWith('image/') ? (
+                    <img src={msg.file.url} alt={msg.file.name} style={previewImage} />
+                  ) : (
+                    <div style={filePreview}>📎 {msg.file.name}</div>
+                  )}
+                </div>
+              )}
             </div>
             <span style={timeStyle}>{msg.time}</span>
           </div>
         ))}
       </div>
 
+      {/* INPUT AREA */}
       <div style={inputArea}>
-        <input 
-          type="text" 
-          value={newMessage} 
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-          placeholder="Nhập tin nhắn..." 
-          style={inputStyle} 
+        <div 
+          onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
+          style={plusButton}
+        >
+          +
+        </div>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          style={{ display: 'none' }}
+          accept="image/*,video/*,.pdf"
         />
+
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Nhập tin nhắn..."
+          style={inputStyle}
+        />
+
         <button onClick={sendMessage} style={sendButton}>Gửi</button>
       </div>
+
+      {/* Attachment Menu */}
+      {showAttachmentMenu && (
+        <div style={attachmentMenu}>
+          <div onClick={() => fileInputRef.current?.click()} style={menuItem}>📷 Ảnh</div>
+          <div onClick={() => fileInputRef.current?.click()} style={menuItem}>🎥 Video</div>
+          <div onClick={() => fileInputRef.current?.click()} style={menuItem}>📄 Tài liệu</div>
+        </div>
+      )}
     </div>
   );
 };
 
 /* ===================== STYLES ===================== */
-const pageContainer = {
+const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
   padding: '16px 14px 90px',
-  boxSizing: 'border-box' as const,
+  boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column' as const
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '20px' };
-const title = { fontSize: '26px', fontWeight: '700', color: '#4c1d95', margin: 0 };
-const subtitle = { color: '#6b21a8' };
+const header: React.CSSProperties = { 
+  display: 'flex', 
+  alignItems: 'center', 
+  gap: '12px', 
+  marginBottom: '20px',
+  justifyContent: 'center' as const
+};
 
-const chatContainer = {
+const title: React.CSSProperties = { 
+  fontSize: '26px', 
+  fontWeight: '700', 
+  color: '#4c1d95', 
+  margin: 0 
+};
+
+const subtitle: React.CSSProperties = { 
+  color: '#6b21a8', 
+  fontSize: '14px',
+  textAlign: 'center' as const
+};
+
+const chatContainer: React.CSSProperties = {
   flex: 1,
   overflowY: 'auto' as const,
   padding: '10px 0',
@@ -77,22 +173,32 @@ const chatContainer = {
   gap: '12px'
 };
 
-const myMessage = { alignSelf: 'flex-end' as const, maxWidth: '75%' };
-const adminMessage = { alignSelf: 'flex-start' as const, maxWidth: '75%' };
+const myMessage: React.CSSProperties = { alignSelf: 'flex-end' as const, maxWidth: '75%' };
+const adminMessage: React.CSSProperties = { alignSelf: 'flex-start' as const, maxWidth: '75%' };
 
-const msgBubble = {
-  padding: '12px 16px',
-  borderRadius: '18px',
-  fontSize: '15.5px'
+const myMessageBubble: React.CSSProperties = { 
+  padding: '12px 16px', 
+  borderRadius: '18px', 
+  background: '#22d3ee', 
+  color: '#0f172a' 
 };
 
-const myMessageBubble = { ...msgBubble, background: '#22d3ee', color: '#0f172a' };
-const adminMessageBubble = { ...msgBubble, background: '#fff', border: '1px solid #c4b5fd', color: '#4c1d95' };
+const adminMessageBubble: React.CSSProperties = { 
+  padding: '12px 16px', 
+  borderRadius: '18px', 
+  background: '#fff', 
+  border: '1px solid #c4b5fd', 
+  color: '#4c1d95' 
+};
 
-const timeStyle = { fontSize: '11px', color: '#64748b', marginTop: '4px', display: 'block' };
+const timeStyle: React.CSSProperties = { 
+  fontSize: '11px', 
+  color: '#64748b', 
+  marginTop: '4px' 
+};
 
-const inputArea = {
-  position: 'fixed' as const,
+const inputArea: React.CSSProperties = {
+  position: 'fixed',
   bottom: '70px',
   left: '14px',
   right: '14px',
@@ -102,7 +208,21 @@ const inputArea = {
   padding: '8px 0'
 };
 
-const inputStyle = {
+const plusButton: React.CSSProperties = {
+  width: '48px',
+  height: '48px',
+  background: '#22d3ee',
+  color: 'white',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '28px',
+  cursor: 'pointer',
+  flexShrink: 0
+};
+
+const inputStyle: React.CSSProperties = {
   flex: 1,
   padding: '14px 16px',
   border: '1px solid #c4b5fd',
@@ -111,13 +231,47 @@ const inputStyle = {
   fontSize: '16px'
 };
 
-const sendButton = {
+const sendButton: React.CSSProperties = {
   padding: '14px 24px',
   background: '#22d3ee',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
   fontWeight: '700'
+};
+
+const attachmentMenu: React.CSSProperties = {
+  position: 'fixed',
+  bottom: '130px',
+  left: '20px',
+  background: 'white',
+  borderRadius: '16px',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+  padding: '10px 0',
+  zIndex: 1001,
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '4px'
+};
+
+const menuItem: React.CSSProperties = {
+  padding: '12px 24px',
+  fontSize: '16px',
+  cursor: 'pointer',
+  borderRadius: '8px'
+};
+
+const previewImage: React.CSSProperties = {
+  maxWidth: '220px',
+  borderRadius: '12px',
+  marginTop: '8px'
+};
+
+const filePreview: React.CSSProperties = {
+  padding: '10px',
+  background: '#f1f5f9',
+  borderRadius: '10px',
+  fontSize: '14px'
 };
 
 export default ChatPage;

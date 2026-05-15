@@ -1,126 +1,185 @@
-// src/pages/CaNhanPage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useRef } from 'react';
 
-const CaNhanPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, role, logout } = useAuth();
+interface CaNhanPageProps {
+  onNavigate: (page: string) => void;
+}
 
-  const [reputation] = useState(94);
+const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
+  const [userId] = useState('154656565');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const getRepColor = (pts: number) => {
-    if (pts >= 90) return '#22d3ee';
-    if (pts >= 70) return '#eab308';
-    return '#ef4444';
-  };
-
-  const handleLogout = () => {
-    if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
-      logout();
-      navigate('/');
-    }
+  const handlePiClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
     <div style={pageContainer}>
-      {/* Header */}
+      {/* HEADER NGẮN - Không có mũi tên ← */}
       <div style={header}>
-        <div style={avatar}>👤</div>
-        <h2 style={name}>{user?.name || 'Người dùng'}</h2>
-        <p style={roleText}>
-          {role === 'shop' && '🛒 Chủ Shop'}
-          {role === 'driver' && '🏍️ Tài Xế'}
-          {role === 'warehouse' && '🏬 Kho Hub'}
-          {role === 'admin' && '👑 Admin'}
-          {role === 'guest' && 'Khách'}
-        </p>
+        <h1 style={title}>Cá Nhân</h1>
       </div>
 
-      {/* Reputation Card */}
-      <div style={repCard}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <p style={{ margin: 0, color: '#6b21a8' }}>Điểm uy tín</p>
-            <p style={{ fontSize: '42px', fontWeight: '700', color: getRepColor(reputation), margin: '4px 0' }}>
-              {reputation} <span style={{ fontSize: '18px' }}>pts</span>
-            </p>
-          </div>
-          <div style={{ fontSize: '52px' }}>🏆</div>
-        </div>
-        <p style={{ margin: '8px 0 0', color: '#22d3ee', fontWeight: '600' }}>Xuất Sắc</p>
-      </div>
-
-      {/* Balance Cards */}
-      <div style={balanceContainer}>
-        <div style={balanceCard}>
-          <p style={{ margin: 0, fontSize: '14px', color: '#6b21a8' }}>Số dư Pi</p>
-          <p style={{ fontSize: '26px', fontWeight: '700', color: '#22d3ee', margin: '4px 0' }}>12.450 Pi</p>
-        </div>
-        <div style={balanceCard}>
-          <p style={{ margin: 0, fontSize: '14px', color: '#6b21a8' }}>Hạn mức tín dụng</p>
-          <p style={{ fontSize: '26px', fontWeight: '700', color: '#eab308', margin: '4px 0' }}>60.000 đ</p>
+      {/* PI LOGO */}
+      <div style={piLogoContainer} onClick={handlePiClick}>
+        <div style={piCircle}>
+          <span style={piSymbol}>π</span>
         </div>
       </div>
 
-      {/* Menu List */}
+      {/* ID và Thông tin */}
+      <div style={infoSection}>
+        <p style={idStyle}>ID: <span style={idNumber}>{userId}</span></p>
+        <p style={roleStyle}>Chủ cửa hàng • Shop</p>
+      </div>
+
+      {/* Điểm uy tín */}
+      <div style={reputationCard}>
+        <div>
+          <div style={repLabel}>Điểm uy tín</div>
+          <div style={points}>94 pts</div>
+          <div style={rank}>Xuất Sắc</div>
+        </div>
+        <div style={trophy}>🏆</div>
+      </div>
+
+      {/* Stats */}
+      <div style={statsContainer}>
+        <div style={statCard}>
+          <div style={statLabel}>Số dư Pi</div>
+          <div style={piAmount}>12.450 Pi</div>
+        </div>
+        <div style={statCard}>
+          <div style={statLabel}>Hạn mức tín dụng</div>
+          <div style={creditAmount}>60.000 đ</div>
+        </div>
+      </div>
+
+      {/* Menu */}
       <div style={menuContainer}>
-        <div style={menuItem} onClick={() => navigate('/tracking')}>📋 Lịch sử đơn hàng</div>
-        <div style={menuItem} onClick={() => alert('Chức năng đang phát triển')}>💰 Ví Pi</div>
-        <div style={menuItem} onClick={() => alert('Chức năng đang phát triển')}>⭐ Đánh giá</div>
-        <div style={menuItem} onClick={() => alert('Chức năng đang phát triển')}>⚙️ Cài đặt</div>
-        <div style={logoutItem} onClick={handleLogout}>🚪 Đăng xuất</div>
+        <MenuItem icon="📋" label="Lịch sử đơn hàng" onClick={() => onNavigate('don-hang')} />
+        <MenuItem icon="💰" label="Ví Pi" />
+        <MenuItem icon="⭐" label="Đánh giá của tôi" />
+        <MenuItem icon="⚙️" label="Cài đặt tài khoản" />
       </div>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };
 
 /* ===================== STYLES ===================== */
-const pageContainer = {
+const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
-  padding: '16px 14px 100px',
-  boxSizing: 'border-box' as const
+  padding: '16px 14px 90px',
+  boxSizing: 'border-box'
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '24px' };
-const avatar = { fontSize: '78px', marginBottom: '8px' };
-const name = { margin: '0 0 4px 0', color: '#4c1d95', fontSize: '24px' };
-const roleText = { margin: 0, color: '#6b21a8', fontWeight: '600' };
+const header: React.CSSProperties = {
+  textAlign: 'center' as const,
+  marginBottom: '20px',
+  paddingTop: '10px'
+};
 
-const repCard = {
-  background: '#fff',
-  padding: '20px',
+const title: React.CSSProperties = {
+  fontSize: '26px',
+  fontWeight: '700',
+  color: '#4c1d95',
+  margin: 0
+};
+
+const piLogoContainer: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+  margin: '10px 0 20px'
+};
+
+const piCircle: React.CSSProperties = {
+  width: '130px',
+  height: '130px',
+  background: 'linear-gradient(135deg, #6b21a8, #4c1d95)',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxShadow: '0 8px 25px rgba(76, 29, 149, 0.3)',
+  cursor: 'pointer',
+  border: '8px solid white'
+};
+
+const piSymbol: React.CSSProperties = {
+  fontSize: '78px',
+  color: '#f3e8ff',
+  fontWeight: 'bold'
+};
+
+const infoSection: React.CSSProperties = { textAlign: 'center' as const, marginBottom: '30px' };
+const idStyle: React.CSSProperties = { fontSize: '17px', color: '#64748b', margin: '0 0 4px' };
+const idNumber: React.CSSProperties = { color: '#4c1d95', fontWeight: '700' };
+const roleStyle: React.CSSProperties = { color: '#6b21a8', fontSize: '16px' };
+
+const reputationCard: React.CSSProperties = {
+  background: 'white',
   borderRadius: '20px',
-  border: '2px solid #22d3ee',
-  marginBottom: '20px'
+  padding: '20px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '20px',
+  border: '1px solid #c4b5fd'
 };
 
-const balanceContainer = { display: 'flex', gap: '12px', marginBottom: '24px' };
-const balanceCard = {
-  flex: 1,
-  background: '#fff',
-  padding: '16px',
+const repLabel: React.CSSProperties = { color: '#64748b', fontSize: '14px' };
+const points: React.CSSProperties = { fontSize: '42px', fontWeight: '700', color: '#22d3ee' };
+const rank: React.CSSProperties = { color: '#15803d', fontWeight: '600' };
+const trophy: React.CSSProperties = { fontSize: '58px' };
+
+const statsContainer: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '12px',
+  marginBottom: '30px'
+};
+
+const statCard: React.CSSProperties = {
+  background: 'white',
+  padding: '18px',
   borderRadius: '16px',
-  border: '1px solid #c4b5fd',
-  textAlign: 'center' as const
+  textAlign: 'center' as const,
+  border: '1px solid #e0d4ff'
 };
 
-const menuContainer = { display: 'flex', flexDirection: 'column' as const, gap: '10px' };
-const menuItem = {
-  background: '#fff',
+const statLabel: React.CSSProperties = { color: '#64748b', fontSize: '14px' };
+const piAmount: React.CSSProperties = { fontSize: '22px', fontWeight: '700', color: '#4c1d95' };
+const creditAmount: React.CSSProperties = { fontSize: '22px', fontWeight: '700', color: '#eab308' };
+
+const menuContainer: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '10px'
+};
+
+const MenuItem = ({ icon, label, onClick }: any) => (
+  <div style={menuItemStyle} onClick={onClick}>
+    <span style={{ fontSize: '26px', marginRight: '16px' }}>{icon}</span>
+    <span>{label}</span>
+  </div>
+);
+
+const menuItemStyle: React.CSSProperties = {
+  background: 'white',
   padding: '16px 20px',
   borderRadius: '16px',
-  border: '1px solid #c4b5fd',
-  fontSize: '16px',
-  cursor: 'pointer'
-};
-
-const logoutItem = {
-  ...menuItem,
-  background: '#fee2e2',
-  color: '#ef4444',
-  borderColor: '#fecaca'
+  display: 'flex',
+  alignItems: 'center',
+  fontSize: '16.5px',
+  cursor: 'pointer',
+  border: '1px solid #e0d4ff'
 };
 
 export default CaNhanPage;

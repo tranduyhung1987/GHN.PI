@@ -1,105 +1,145 @@
-// src/pages/KhoHubPage.tsx
 import React, { useState } from 'react';
 
-const KhoHubPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'incoming' | 'stock' | 'outgoing'>('incoming');
+type Mode = 'welcome' | 'register' | 'myHub' | 'partnerHub';
+
+interface KhoHubPageProps {
+  onNavigate?: (page: string) => void;   // Để quay về trang chủ nếu cần
+}
+
+export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
+  const [mode, setMode] = useState<Mode>('welcome');
+  const [hubReputation] = useState(92);
+
+  const getRepColor = (score: number): string => {
+    if (score >= 90) return '#22c55e';
+    if (score >= 75) return '#eab308';
+    return '#ef4444';
+  };
+
+  const getRepBadge = (score: number): string => {
+    return score >= 90 ? "🏆 Đối tác Xuất Sắc" : score >= 75 ? "⭐ Đối tác Uy Tín" : "📉 Cần cải thiện";
+  };
 
   return (
     <div style={pageContainer}>
-      <div style={header}>
-        <div style={{ fontSize: '42px' }}>🏬</div>
-        <h1 style={title}>KHO HUB</h1>
-        <p style={subtitle}>Quản lý kho trung chuyển & xe đường dài</p>
+      {/* HEADER */}
+      <div style={headerStyle}>
+        <div style={{ fontSize: '48px', cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('home')}>
+          ←
+        </div>
+        <div>
+          <h1 style={titleStyle}>KHO TRUNG CHUYỂN</h1>
+          <p style={subtitleStyle}>Mạng lưới Hub • Minh bạch On-chain</p>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div style={tabContainer}>
-        <button onClick={() => setActiveTab('incoming')} style={activeTab === 'incoming' ? activeTabStyle : inactiveTabStyle}>
-          Hàng về kho
-        </button>
-        <button onClick={() => setActiveTab('stock')} style={activeTab === 'stock' ? activeTabStyle : inactiveTabStyle}>
-          Hàng tồn kho
-        </button>
-        <button onClick={() => setActiveTab('outgoing')} style={activeTab === 'outgoing' ? activeTabStyle : inactiveTabStyle}>
-          Hàng đi
-        </button>
-      </div>
+      {mode === 'welcome' && (
+        <div style={welcomeCard}>
+          <div style={{ fontSize: '110px', marginBottom: '20px' }}>🏪</div>
+          <h2 style={welcomeTitle}>Mạng lưới Kho Trung Chuyển GHN.PI</h2>
+          <p style={welcomeText}>
+            Kết nối kho hàng & bến bãi của bạn với hệ sinh thái GHN.PI<br />
+            Gửi đơn đường dài nhanh • Thanh toán Pi • Minh bạch on-chain
+          </p>
 
-      {activeTab === 'incoming' && (
-        <div style={card}>
-          <h3>📦 Hàng đang về kho</h3>
-          <p style={{ color: '#22d3ee', fontWeight: '600' }}>GHN872134 - Hà Nội → TP.HCM</p>
-          <p>Trọng lượng: 245kg | Dự kiến đến: 2 giờ nữa</p>
-          <button style={actionButton}>Xác nhận nhận hàng</button>
+          <button onClick={() => setMode('partnerHub')} style={mainButton}>
+            + Đăng ký Kho Trung Chuyển ngay
+          </button>
         </div>
       )}
 
-      {activeTab === 'stock' && (
-        <div style={card}>
-          <h3>📦 Hàng tồn kho hiện tại</h3>
-          <p>Tổng kiện: <strong>124 kiện</strong></p>
-          <p>Không gian còn trống: <strong>68%</strong></p>
+      {mode === 'partnerHub' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Reputation */}
+          <div style={repCard}>
+            <div style={{ fontSize: '52px', fontWeight: 'bold', color: getRepColor(hubReputation) }}>
+              {hubReputation} <span style={{ fontSize: '24px' }}>pts</span>
+            </div>
+            <div style={{ color: getRepColor(hubReputation), fontWeight: '700', marginTop: '8px' }}>
+              {getRepBadge(hubReputation)}
+            </div>
+            <p style={{ color: '#64748b', marginTop: '12px' }}>
+              Kho TP.HCM (SG01) • Hoạt động mạnh • 189 đơn đường dài
+            </p>
+          </div>
+
+          {/* Kho của bạn */}
+          <div style={infoCard}>
+            <h3 style={{ color: '#4c1d95', marginBottom: '12px' }}>Kho của bạn</h3>
+            <div style={{ background: '#ede9fe', padding: '18px', borderRadius: '14px' }}>
+              <strong>TP.HCM Hub (SG01)</strong>
+              <p style={{ color: '#22c55e', margin: '6px 0' }}>Đang hoạt động • 24/7</p>
+              <p style={{ color: '#64748b', fontSize: '14px' }}>Dung lượng: 450m² • 12 xe đường dài</p>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => alert('Chức năng quản trị kho đang phát triển...')} 
+            style={mainButton}
+          >
+            Quản trị kho & đơn hàng
+          </button>
         </div>
       )}
-
-      {activeTab === 'outgoing' && (
-        <div style={card}>
-          <h3>🚛 Hàng đang chờ xuất kho</h3>
-          <p>Đang có 8 đơn chờ xe đường dài</p>
-          <button style={actionButton}>Lên lịch xuất kho</button>
-        </div>
-      )}
-
-      <div style={stats}>
-        <p><strong>Hoạt động hôm nay:</strong> 47 đơn</p>
-        <p><strong>Doanh thu Pi:</strong> 1.245.000 Pi</p>
-      </div>
     </div>
   );
-};
+}
 
 /* ===================== STYLES ===================== */
 const pageContainer = {
   minHeight: '100vh',
   background: '#f3e8ff',
   padding: '16px 14px 100px',
-  boxSizing: 'border-box' as const
+  boxSizing: 'border-box' as const,
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '24px' };
-const title = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
-const subtitle = { color: '#6b21a8', marginTop: '4px' };
+const headerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+  marginBottom: '24px'
+};
 
-const tabContainer = { display: 'flex', gap: '8px', marginBottom: '24px' };
-const activeTabStyle = { flex: 1, padding: '12px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '700' };
-const inactiveTabStyle = { flex: 1, padding: '12px', background: '#fff', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px' };
+const titleStyle = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
+const subtitleStyle = { color: '#6b21a8', margin: 0 };
 
-const card = {
-  background: '#fff',
-  padding: '20px',
-  borderRadius: '20px',
+const welcomeCard = {
+  background: '#ede9fe',
+  padding: '60px 24px',
+  borderRadius: '24px',
+  textAlign: 'center' as const,
   border: '1px solid #c4b5fd',
-  marginBottom: '16px'
+  boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
 };
 
-const actionButton = {
+const welcomeTitle = { fontSize: '32px', color: '#4c1d95', marginBottom: '12px' };
+const welcomeText = { color: '#6b21a8', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px' };
+
+const mainButton = {
   width: '100%',
-  padding: '14px',
+  padding: '18px',
+  fontSize: '17px',
+  fontWeight: '700',
   background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: '700',
-  marginTop: '12px'
+  cursor: 'pointer',
+  boxShadow: '0 8px 25px rgba(34,211,238,0.4)'
 };
 
-const stats = {
-  background: '#ede9fe',
-  padding: '16px',
-  borderRadius: '16px',
+const repCard = {
+  background: '#1e2937',
+  color: 'white',
+  padding: '28px 24px',
+  borderRadius: '20px',
   textAlign: 'center' as const,
-  marginTop: '20px',
+  border: '2px solid #eab308'
+};
+
+const infoCard = {
+  background: '#ede9fe',
+  padding: '20px',
+  borderRadius: '16px',
   border: '1px solid #c4b5fd'
 };
-
-export default KhoHubPage;

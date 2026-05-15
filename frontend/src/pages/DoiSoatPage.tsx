@@ -1,51 +1,66 @@
-// src/pages/DoiSoatPage.tsx
 import React, { useState } from 'react';
 
-const DoiSoatPage: React.FC = () => {
-  const [maDon, setMaDon] = useState('');
-  const [showResult, setShowResult] = useState(false);
+interface DoiSoatPageProps {
+  onNavigate: (page: string) => void;
+}
+
+const DoiSoatPage: React.FC<DoiSoatPageProps> = ({ onNavigate }) => {
+  const [maDonHang, setMaDonHang] = useState('');
+  const [ketQua, setKetQua] = useState<any>(null);
 
   const handleDoiSoat = () => {
-    if (!maDon.trim()) {
-      alert("Vui lòng nhập mã đơn hàng!");
+    if (!maDonHang.trim()) {
+      alert('Vui lòng nhập mã đơn hàng!');
       return;
     }
-    setShowResult(true);
+
+    // Mock kết quả
+    setKetQua({
+      maDon: maDonHang.toUpperCase(),
+      trangThai: 'Đã thanh toán',
+      soTien: '245.000 đ',
+      thoiGian: '14/05/2026 09:45',
+      piNhan: '89.3 Pi'
+    });
   };
 
   return (
     <div style={pageContainer}>
+      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
       <div style={header}>
-        <div style={{ fontSize: '42px' }}>💰</div>
-        <h1 style={title}>ĐỐI SOÁT</h1>
-        <p style={subtitle}>Kiểm tra và đối chiếu thanh toán</p>
+        <div style={iconTitle}>💰</div>
+        <div>
+          <h1 style={title}>ĐỐI SOÁT</h1>
+          <p style={subtitle}>Kiểm tra và đối chiếu thanh toán</p>
+        </div>
       </div>
 
-      <div style={formBox}>
-        <label style={label}>Mã đơn hàng cần đối soát</label>
-        <input 
-          type="text" 
-          placeholder="Nhập mã đơn hàng" 
-          value={maDon} 
-          onChange={(e) => setMaDon(e.target.value)}
-          style={inputStyle} 
+      {/* FORM ĐỐI SOÁT */}
+      <div style={card}>
+        <p style={label}>Mã đơn hàng cần đối soát</p>
+        
+        <input
+          type="text"
+          value={maDonHang}
+          onChange={(e) => setMaDonHang(e.target.value)}
+          placeholder="Nhập mã đơn hàng (ví dụ: GHN17489231)"
+          style={input}
         />
 
         <button onClick={handleDoiSoat} style={button}>
-          Kiểm tra đối soát
+          🔍 KIỂM TRA ĐỐI SOÁT
         </button>
       </div>
 
-      {showResult && (
-        <div style={resultBox}>
-          <h3>✅ Kết quả đối soát</h3>
-          <p><strong>Mã đơn:</strong> {maDon}</p>
-          <p><strong>Trạng thái:</strong> <span style={{ color: '#22d3ee' }}>Đã thanh toán đầy đủ</span></p>
-          <p><strong>Số tiền:</strong> 28.450 Pi</p>
-          <p><strong>Thời gian thanh toán:</strong> 14/05/2026 14:32</p>
-          <button onClick={() => { setShowResult(false); setMaDon(''); }} style={newButton}>
-            Đối soát đơn khác
-          </button>
+      {/* KẾT QUẢ */}
+      {ketQua && (
+        <div style={resultCard}>
+          <h3 style={{ margin: '0 0 12px 0', color: '#4c1d95' }}>Kết quả đối soát</h3>
+          <p><strong>Mã đơn:</strong> {ketQua.maDon}</p>
+          <p><strong>Trạng thái:</strong> <span style={{ color: '#22c55e' }}>{ketQua.trangThai}</span></p>
+          <p><strong>Số tiền:</strong> {ketQua.soTien}</p>
+          <p><strong>Thời gian:</strong> {ketQua.thoiGian}</p>
+          <p><strong>Pi nhận:</strong> <span style={{ color: '#4c1d95', fontWeight: '700' }}>{ketQua.piNhan}</span></p>
         </div>
       )}
     </div>
@@ -53,49 +68,79 @@ const DoiSoatPage: React.FC = () => {
 };
 
 /* ===================== STYLES ===================== */
-const pageContainer = {
+const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
-  padding: '16px 14px 100px',
-  boxSizing: 'border-box' as const
+  padding: '16px 14px 90px',
+  boxSizing: 'border-box'
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '30px' };
-const title = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
-const subtitle = { color: '#6b21a8', marginTop: '6px' };
+const header: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center' as const,
+  gap: '12px',
+  marginBottom: '30px'
+};
 
-const formBox = { background: '#fff', padding: '24px', borderRadius: '20px', border: '1px solid #c4b5fd' };
-const label = { display: 'block', marginBottom: '8px', fontWeight: '600', color: '#4c1d95' };
-const inputStyle = { width: '100%', padding: '16px', border: '1px solid #c4b5fd', borderRadius: '12px', background: '#ede9fe', fontSize: '16px' };
+const iconTitle: React.CSSProperties = { fontSize: '42px' };
 
-const button = {
-  width: '100%',
-  padding: '18px',
-  marginTop: '20px',
-  background: 'linear-gradient(90deg, #eab308, #facc15)',
-  color: '#1e2937',
-  border: 'none',
-  borderRadius: '9999px',
+const title: React.CSSProperties = {
+  fontSize: '26px',
   fontWeight: '700',
-  fontSize: '17px'
+  color: '#4c1d95',
+  margin: 0
 };
 
-const resultBox = {
-  marginTop: '24px',
-  background: '#fff',
-  padding: '24px',
-  borderRadius: '20px',
-  border: '2px solid #22d3ee',
+const subtitle: React.CSSProperties = {
+  color: '#6b21a8',
+  fontSize: '14px',
   textAlign: 'center' as const
 };
 
-const newButton = {
-  marginTop: '20px',
-  padding: '14px 32px',
-  background: '#4c1d95',
-  color: '#fff',
+const card: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '20px',
+  padding: '24px',
+  marginBottom: '20px',
+  border: '1px solid #e0d4ff'
+};
+
+const label: React.CSSProperties = {
+  fontSize: '15px',
+  color: '#4c1d95',
+  marginBottom: '8px',
+  fontWeight: '600'
+};
+
+const input: React.CSSProperties = {
+  width: '100%',
+  padding: '14px 16px',
+  border: '1px solid #c4b5fd',
+  borderRadius: '9999px',
+  background: '#f8fafc',
+  fontSize: '16px',
+  marginBottom: '20px'
+};
+
+const button: React.CSSProperties = {
+  width: '100%',
+  padding: '16px',
+  background: '#eab308',
+  color: '#0f172a',
   border: 'none',
-  borderRadius: '9999px'
+  borderRadius: '9999px',
+  fontSize: '17px',
+  fontWeight: '700',
+  cursor: 'pointer'
+};
+
+const resultCard: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '20px',
+  padding: '20px',
+  border: '1px solid #c4b5fd',
+  lineHeight: '1.8'
 };
 
 export default DoiSoatPage;

@@ -1,29 +1,32 @@
-// src/components/AppLayout.tsx
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 import BottomNav from './BottomNav';
 
-// Import các Layout theo tên mới
-import MemberLayout from '../layouts/ShopLayout';        // Member / Shop
+// Import Layouts (giữ nguyên như bạn có)
+import MemberLayout from '../layouts/ShopLayout';
 import AdminLayout from '../layouts/AdminLayout';
-import ShipLayout from '../layouts/ShipLayout';          // Tài Xế
-import KhoHubLayout from '../layouts/KhoHubLayout';      // Kho Trung Chuyển
-import GuestLayout from '../layouts/KhachMoiLayout';     // Khách mới
+import ShipLayout from '../layouts/ShipLayout';
+import KhoHubLayout from '../layouts/KhoHubLayout';
+import GuestLayout from '../layouts/KhachMoiLayout';
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  onNavigate: (page: string) => void;
+  currentPage: string;          // ← Thêm prop này
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ 
+  children, 
+  onNavigate, 
+  currentPage 
+}) => {
   const { role } = useAuth();
 
-  // Nếu là Guest (chưa đăng nhập)
   if (!role || role === 'guest') {
     return <GuestLayout>{children}</GuestLayout>;
   }
 
-  // Theo từng Role
   switch (role) {
     case 'admin':
       return <AdminLayout>{children}</AdminLayout>;
@@ -39,7 +42,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       return (
         <MemberLayout>
           {children}
-          <BottomNav />
+          {/* Truyền đầy đủ props cho BottomNav */}
+          <BottomNav 
+            onNavigate={onNavigate} 
+            currentPage={currentPage} 
+          />
         </MemberLayout>
       );
   }

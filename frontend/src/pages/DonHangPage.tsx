@@ -1,22 +1,74 @@
-// src/pages/DonHangPage.tsx
 import React, { useState } from 'react';
 
-const DonHangPage: React.FC = () => {
+interface DonHangPageProps {
+  onNavigate: (page: string) => void;
+}
+
+const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'shipping' | 'completed'>('all');
 
   const orders = [
-    { id: "GHN872134", status: "shipping", customer: "Nguyễn Văn A", address: "TP.HCM", fee: "28.500 Pi", time: "2 giờ trước" },
-    { id: "GHN654987", status: "pending", customer: "Trần Thị B", address: "Hà Nội", fee: "19.200 Pi", time: "5 giờ trước" },
-    { id: "GHN321456", status: "completed", customer: "Lê Văn C", address: "Đà Nẵng", fee: "32.100 Pi", time: "Hôm qua" },
+    { 
+      id: "GHN17489231", 
+      status: "shipping", 
+      customer: "Nguyễn Thị Lan", 
+      address: "123 Đường ABC, Quận 1, TP.HCM", 
+      fee: "45.000 Pi", 
+      time: "2 giờ trước",
+      loai: "Hỏa Tốc"
+    },
+    { 
+      id: "GHN17488902", 
+      status: "completed", 
+      customer: "Trần Văn Hải", 
+      address: "456 Nguyễn Văn Linh, Quận 7, TP.HCM", 
+      fee: "28.500 Pi", 
+      time: "Hôm qua",
+      loai: "Đường Dài"
+    },
+    { 
+      id: "GHN17487654", 
+      status: "pending", 
+      customer: "Lê Thị Hoa", 
+      address: "89 Lê Lợi, Quận 1, TP.HCM", 
+      fee: "32.000 Pi", 
+      time: "5 giờ trước",
+      loai: "Hỏa Tốc"
+    },
   ];
 
-  const filteredOrders = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+  const filteredOrders = filter === 'all' 
+    ? orders 
+    : orders.filter(o => o.status === filter);
 
   return (
     <div style={pageContainer}>
+      {/* Header */}
       <div style={header}>
-        <div style={{ fontSize: '42px' }}>📋</div>
-        <h1 style={title}>ĐƠN HÀNG</h1>
+        <div style={{ fontSize: '46px' }}>📦</div>
+        <div>
+          <h1 style={title}>ĐƠN HÀNG CỦA TÔI</h1>
+          <p style={subtitle}>Tổng {orders.length} đơn • Quản lý & theo dõi</p>
+        </div>
+      </div>
+
+      {/* Tạo đơn mới */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <button 
+          onClick={() => onNavigate('gui-hang')}
+          style={createButton}
+        >
+          + TẠO ĐƠN HÀNG MỚI
+        </button>
+      </div>
+
+      {/* Search */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <input
+          type="text"
+          placeholder="Tìm mã đơn hoặc tên người nhận..."
+          style={searchInput}
+        />
       </div>
 
       {/* Filter Tabs */}
@@ -27,33 +79,35 @@ const DonHangPage: React.FC = () => {
         <button onClick={() => setFilter('completed')} style={filter === 'completed' ? activeTab : inactiveTab}>Hoàn thành</button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Orders List */}
+      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {filteredOrders.map((order, index) => (
           <div key={index} style={orderCard}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <strong style={{ color: '#4c1d95' }}>{order.id}</strong>
-                <p style={{ margin: '4px 0', color: '#6b21a8' }}>{order.customer}</p>
-                <p style={{ fontSize: '14px' }}>{order.address}</p>
+                <strong style={{ color: '#4c1d95', fontSize: '17px' }}>{order.id}</strong>
+                <p style={{ margin: '6px 0 4px', color: '#6b21a8' }}>{order.customer}</p>
+                <p style={{ fontSize: '14px', color: '#64748b' }}>{order.address}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ color: '#22d3ee', fontWeight: '700' }}>{order.fee}</p>
+                <p style={{ color: '#22d3ee', fontWeight: '700', fontSize: '18px' }}>{order.fee}</p>
                 <p style={{ fontSize: '13px', color: '#64748b' }}>{order.time}</p>
               </div>
             </div>
-            
+
             <div style={statusBadge(order.status)}>
               {order.status === 'pending' && '⏳ Chờ xử lý'}
               {order.status === 'shipping' && '🚛 Đang giao'}
               {order.status === 'completed' && '✅ Hoàn thành'}
             </div>
+
+            <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+              <button onClick={() => onNavigate('tracking')} style={trackButton}>Theo dõi</button>
+              <button onClick={() => onNavigate('khieu-nai')} style={complainButton}>Khiếu nại</button>
+            </div>
           </div>
         ))}
       </div>
-
-      {filteredOrders.length === 0 && (
-        <p style={{ textAlign: 'center', color: '#6b21a8', marginTop: '40px' }}>Không có đơn hàng nào</p>
-      )}
     </div>
   );
 };
@@ -66,28 +120,111 @@ const pageContainer = {
   boxSizing: 'border-box' as const
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '24px' };
-const title = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
+const header = { 
+  display: 'flex', 
+  alignItems: 'center', 
+  gap: '14px', 
+  marginBottom: '20px',
+  padding: '0 10px'
+};
 
-const tabContainer = { display: 'flex', gap: '6px', marginBottom: '20px', flexWrap: 'wrap' as const };
-const activeTab = { padding: '8px 16px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '600' };
-const inactiveTab = { padding: '8px 16px', background: '#fff', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px' };
+const title = { 
+  fontSize: '26px', 
+  fontWeight: '700', 
+  color: '#4c1d95', 
+  margin: 0 
+};
+
+const subtitle = { 
+  color: '#6b21a8', 
+  margin: 0, 
+  fontSize: '15px' 
+};
+
+const createButton = {
+  width: '100%',
+  padding: '17px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontSize: '17px',
+  fontWeight: '700',
+  boxShadow: '0 4px 15px rgba(34, 211, 238, 0.4)'
+};
+
+const searchInput = {
+  width: '100%',
+  padding: '16px 20px',
+  border: '1px solid #c4b5fd',
+  borderRadius: '9999px',
+  background: 'white',
+  fontSize: '16px'
+};
+
+const tabContainer = { 
+  display: 'flex', 
+  gap: '8px', 
+  marginBottom: '24px', 
+  padding: '0 14px',
+  overflowX: 'auto' as const 
+};
+
+const activeTab = { 
+  padding: '10px 20px', 
+  background: '#22d3ee', 
+  color: '#0f172a', 
+  borderRadius: '9999px', 
+  fontWeight: '600',
+  whiteSpace: 'nowrap' as const
+};
+
+const inactiveTab = { 
+  padding: '10px 20px', 
+  background: '#fff', 
+  color: '#6b21a8', 
+  border: '1px solid #c4b5fd', 
+  borderRadius: '9999px',
+  whiteSpace: 'nowrap' as const
+};
 
 const orderCard = {
   background: '#fff',
-  padding: '18px',
-  borderRadius: '18px',
-  border: '1px solid #c4b5fd'
+  padding: '20px',
+  borderRadius: '20px',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+  border: '1px solid #e0d4ff'
 };
 
 const statusBadge = (status: string) => ({
   display: 'inline-block',
-  padding: '4px 12px',
+  padding: '6px 16px',
   borderRadius: '9999px',
-  fontSize: '13px',
+  fontSize: '14px',
   marginTop: '12px',
+  fontWeight: '600',
   background: status === 'completed' ? '#d1fae5' : status === 'shipping' ? '#dbeafe' : '#fef3c7',
   color: status === 'completed' ? '#10b981' : status === 'shipping' ? '#3b82f6' : '#d97706'
 });
+
+const trackButton = {
+  flex: 1,
+  padding: '12px',
+  background: '#22d3ee',
+  color: 'white',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: '600'
+};
+
+const complainButton = {
+  flex: 1,
+  padding: '12px',
+  background: '#ef4444',
+  color: 'white',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: '600'
+};
 
 export default DonHangPage;

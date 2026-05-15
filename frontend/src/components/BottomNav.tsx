@@ -1,78 +1,87 @@
-// src/components/BottomNav.tsx
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
-const BottomNav: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated } = useAuth();
+interface BottomNavProps {
+  onNavigate: (page: string) => void;
+  currentPage: string;
+}
 
-  const handleClick = (path: string) => {
-    if (!isAuthenticated && path !== '/') {
-      alert("Vui lòng đăng nhập với Pi Network trước!");
-      return;
-    }
-    navigate(path);
-  };
-
+const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
   const navItems = [
-    { icon: "🏠", label: "Trang chủ", path: "/" },
-    { icon: "📦", label: "Gửi hàng", path: "/gui-hang" },
-    { icon: "🔎", label: "Tra cước", path: "/tra-cuu-cuoc" },
-    { icon: "🚚", label: "Tracking", path: "/tracking" },
-    { icon: "👤", label: "Cá nhân", path: "/ca-nhan" },
+    { label: 'Trang chủ', icon: '🏠', page: 'home' },
+    { label: 'Đơn hàng', icon: '📦', page: 'don-hang' },
+    { label: 'Chat', icon: '💬', page: 'chat' },
+    { label: 'Đối soát', icon: '📊', page: 'doi-soat' },
+    { label: 'Khiếu nại', icon: '⚠️', page: 'khieu-nai' },
+    { label: 'Cá nhân', icon: '👤', page: 'ca-nhan' },
   ];
 
   return (
-    <div style={navContainer}>
-      {navItems.map((item, index) => (
-        <div 
-          key={index} 
-          style={location.pathname === item.path ? activeNav : navItem}
-          onClick={() => handleClick(item.path)}
-        >
-          <div style={iconStyle}>{item.icon}</div>
-          <span style={labelStyle}>{item.label}</span>
-        </div>
-      ))}
+    <div style={bottomNavStyle}>
+      <div style={navContainer}>
+        {navItems.map((item) => {
+          const isActive = currentPage === item.page;
+          return (
+            <div
+              key={item.page}
+              onClick={() => onNavigate(item.page)}
+              style={isActive ? activeNavItem : navItem}
+            >
+              <div style={iconStyle(isActive)}>{item.icon}</div>
+              <div style={labelStyle(isActive)}>{item.label}</div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-const navContainer = {
-  position: 'fixed' as const,
+/* ===================== STYLES ===================== */
+const bottomNavStyle: React.CSSProperties = {
+  position: 'fixed',
   bottom: 0,
   left: 0,
   right: 0,
-  background: '#f3e8ff',
-  borderTop: '1px solid #c4b5fd',
+  background: 'white',
+  borderTop: '1px solid #e0d4ff',
+  boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
+  zIndex: 1000,
+  padding: '6px 0 2px',
+};
+
+const navContainer: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-around',
-  padding: '8px 0 4px',
-  zIndex: 1000,
-  boxShadow: '0 -4px 12px rgba(0,0,0,0.1)'
-};
-
-const navItem = {
-  display: 'flex',
-  flexDirection: 'column' as const,
   alignItems: 'center',
-  color: '#6b21a8',
-  fontSize: '12px',
+  maxWidth: '600px',
+  margin: '0 auto',
+};
+
+const navItem: React.CSSProperties = {
+  textAlign: 'center',
   cursor: 'pointer',
-  padding: '6px 8px',
-  borderRadius: '12px',
-  flex: 1
+  padding: '6px 4px',
+  flex: 1,
+  transition: 'all 0.25s ease',
 };
 
-const activeNav = {
+const activeNavItem: React.CSSProperties = {
   ...navItem,
-  color: '#4c1d95',
-  background: '#ede9fe'
+  transform: 'scale(1.08)',
 };
 
-const iconStyle = { fontSize: '24px', marginBottom: '2px' };
-const labelStyle = { fontWeight: '600' };
+const iconStyle = (active: boolean): React.CSSProperties => ({
+  fontSize: '27px',
+  marginBottom: '3px',
+  filter: active ? 'drop-shadow(0 0 6px #22d3ee)' : 'none',
+  transition: 'all 0.25s ease',
+});
+
+const labelStyle = (active: boolean): React.CSSProperties => ({
+  fontSize: '12px',
+  fontWeight: active ? '700' : '500',
+  color: active ? '#4c1d95' : '#64748b',
+  transition: 'all 0.25s ease',
+});
 
 export default BottomNav;

@@ -1,66 +1,50 @@
-// src/pages/HomePage.tsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';   // Giữ lại vì có thể dùng JSX
 
-const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const { role, isAuthenticated, loginWithPi } = useAuth();
+interface HomePageProps {
+  onNavigate: (page: string) => void;
+}
 
-  const handlePiLogin = async () => {
-    await loginWithPi();
-    navigate('/dang-ky-vai-tro');
-  };
-
-  const featureCards = [
-    { emoji: "📦", title: "Gửi Hàng", path: "/gui-hang" },
-    { emoji: "🔎", title: "Tra Cước", path: "/tra-cuu-cuoc" },
-    { emoji: "🚚", title: "Tracking", path: "/tracking" },
-    { emoji: "📥", title: "Nhận Hàng", path: "/nhan-hang" },
-    { emoji: "🏍️", title: "Tài Xế", path: "/tai-xe" },
-    { emoji: "🏬", title: "Kho Hub", path: "/kho-hub" },
+const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
+  const cards = [
+    { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn nhanh chóng", page: "gui-hang" },
+    { icon: "📊", title: "TRA CỨU CƯỚC", desc: "Ước tính ngay lập tức", page: "tra-cuu-cuoc" },
+    { icon: "🏬", title: "KHO TRUNG CHUYỂN", desc: "Dành cho đối tác kho", page: "kho-hub" },
+    { icon: "🏍️", title: "TÀI XẾ", desc: "Nhận đơn & giao hàng", page: "tai-xe" },
+    { icon: "📍", title: "TRACKING", desc: "Theo dõi realtime", page: "tracking" },
+    { icon: "🖐️", title: "NHẬN HÀNG", desc: "Xác nhận đã nhận", page: "nhan-hang" },
   ];
 
   return (
     <div style={pageContainer}>
-      {/* Header */}
-      <div style={header}>
-        <h1 style={logo}>GHN.PI</h1>
-        <p style={tagline}>Vận chuyển nhanh • Thanh toán bằng Pi</p>
+      {/* Logo Header */}
+      <div style={logoContainer}>
+        <div style={logoStyle}>
+          🚚 GHN.PI
+        </div>
+        <p style={subtitleStyle}>Logistics Ecosystem • Pi Network</p>
       </div>
 
       {/* Pi Login Button */}
-      {!isAuthenticated && (
-        <button onClick={handlePiLogin} style={piButton}>
-          <span style={piIcon}>π</span>
-          Đăng nhập với Pi Network
+      <div style={piButtonContainer}>
+        <button style={piButton} onClick={() => alert('🔗 Đang kết nối Pi Network...')}>
+          ⭐ Đăng nhập với Pi Network
         </button>
-      )}
+      </div>
 
-      {/* Feature Cards */}
+      {/* 6 Cards */}
       <div style={cardsGrid}>
-        {featureCards.map((card, index) => (
+        {cards.map((card, index) => (
           <div
             key={index}
+            onClick={() => onNavigate(card.page)}
             style={cardStyle}
-            onClick={() => navigate(card.path)}
           >
-            <div style={emojiStyle}>{card.emoji}</div>
+            <div style={iconStyle}>{card.icon}</div>
             <h3 style={cardTitle}>{card.title}</h3>
+            <p style={cardDesc}>{card.desc}</p>
           </div>
         ))}
       </div>
-
-      {/* Welcome Message */}
-      {isAuthenticated && role !== 'guest' && (
-        <div style={welcomeBox}>
-          Chào mừng <strong>
-            {role === 'shop' ? 'Chủ Shop' : 
-             role === 'driver' ? 'Tài Xế' : 
-             role === 'warehouse' ? 'Kho Hub' : 'Admin'}
-          </strong>!
-        </div>
-      )}
     </div>
   );
 };
@@ -68,60 +52,47 @@ const HomePage: React.FC = () => {
 /* ===================== STYLES ===================== */
 const pageContainer = {
   minHeight: '100vh',
-  background: '#f3e8ff',
+  background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)',
   padding: '20px 14px 100px',
-  boxSizing: 'border-box' as const,
+  boxSizing: 'border-box' as const
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '40px' };
-const logo = { fontSize: '48px', fontWeight: '900', color: '#4c1d95', margin: 0, letterSpacing: '-2px' };
-const tagline = { color: '#6b21a8', fontSize: '16px', marginTop: '8px' };
+const logoContainer = { textAlign: 'center' as const, marginBottom: '30px' };
+const logoStyle = { fontSize: '52px', fontWeight: '700', color: '#4c1d95' };
+const subtitleStyle = { color: '#6b21a8', marginTop: '4px' };
 
+const piButtonContainer = { display: 'flex', justifyContent: 'center', marginBottom: '40px' };
 const piButton = {
-  display: 'block',
-  width: '100%',
-  maxWidth: '340px',
-  margin: '0 auto 40px',
-  padding: '16px 24px',
-  background: 'linear-gradient(90deg, #6b21a8, #7c3aed)',
-  color: '#fff',
+  padding: '16px 40px',
+  background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
+  color: 'white',
   border: 'none',
   borderRadius: '9999px',
-  fontSize: '17px',
   fontWeight: '700',
-  boxShadow: '0 10px 30px rgba(124, 58, 237, 0.4)',
+  fontSize: '16px',
   cursor: 'pointer',
+  boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)'
 };
-
-const piIcon = { marginRight: '12px', fontSize: '24px' };
 
 const cardsGrid = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-  gap: '16px',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '16px'
 };
 
 const cardStyle = {
-  background: '#fff',
+  background: 'white',
   padding: '24px 16px',
   borderRadius: '20px',
-  border: '2px solid #c4b5fd',
   textAlign: 'center' as const,
-  cursor: 'pointer',
+  border: '1px solid #e0d4ff',
   boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+  cursor: 'pointer',
+  transition: 'all 0.2s'
 };
 
-const emojiStyle = { fontSize: '42px', marginBottom: '12px' };
-const cardTitle = { margin: 0, fontSize: '15.5px', fontWeight: '700', color: '#4c1d95' };
-
-const welcomeBox = {
-  marginTop: '30px',
-  padding: '16px',
-  background: '#ede9fe',
-  borderRadius: '16px',
-  textAlign: 'center' as const,
-  color: '#4c1d95',
-  fontWeight: '600',
-};
+const iconStyle = { fontSize: '48px', marginBottom: '12px' };
+const cardTitle = { fontSize: '17px', fontWeight: '700', color: '#4c1d95', margin: '0 0 6px 0' };
+const cardDesc = { fontSize: '13.5px', color: '#64748b', margin: 0 };
 
 export default HomePage;

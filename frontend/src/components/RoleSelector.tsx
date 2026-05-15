@@ -1,93 +1,43 @@
-// src/components/RoleSelector.tsx
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const RoleSelector = () => {
-  const { login } = useAuth();   // ← Phải khớp với AuthContext
+  const { setRole } = useAuth();
+  const navigate = useNavigate();
 
   const roles = [
-    { 
-      id: 'member', 
-      label: 'Thành Viên / Shop', 
-      icon: '👤', 
-      color: '#4c1d95',
-      desc: 'Tạo đơn, theo dõi hàng' 
-    },
-    { 
-      id: 'driver', 
-      label: 'Tài Xế', 
-      icon: '🏍️', 
-      color: '#22d3ee',
-      desc: 'Nhận đơn giao hàng' 
-    },
-    { 
-      id: 'warehouse', 
-      label: 'Kho Trung Chuyển', 
-      icon: '🏬', 
-      color: '#a855f7',
-      desc: 'Quản lý kho & vận chuyển' 
-    },
-    { 
-      id: 'admin', 
-      label: 'Quản Trị Viên', 
-      icon: '👑', 
-      color: '#eab308',
-      desc: 'Quản lý hệ thống' 
-    },
+    { id: 'shop', label: 'Thành Viên / Shop', icon: '👤', desc: 'Tạo đơn, theo dõi hàng' },
+    { id: 'driver', label: 'Tài Xế', icon: '🏍️', desc: 'Nhận đơn giao hàng' },
+    { id: 'warehouse', label: 'Kho Trung Chuyển', icon: '🏬', desc: 'Quản lý kho' },
+    { id: 'admin', label: 'Quản Trị Viên', icon: '👑', desc: 'Quản lý hệ thống' },
   ];
 
   const handleSelect = (role: string) => {
-    login({ 
-      role: role as any, 
-      name: `Người dùng ${role}` 
-    });
+    setRole(role as any);
+    navigate('/');           // Quay về trang chủ sau khi chọn role
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%)',
-      padding: '40px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ color: '#4c1d95', fontSize: '32px', marginBottom: '8px' }}>
-          Chào mừng đến GHN.PI
-        </h1>
-        <p style={{ color: '#6b21a8', fontSize: '18px' }}>
-          Vui lòng chọn vai trò của bạn
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-purple-900 mb-3">Chọn vai trò của bạn</h1>
+          <p className="text-purple-600">Bạn sẽ sử dụng GHN.PI với tư cách nào?</p>
+        </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 1fr', 
-        gap: '20px', 
-        width: '100%', 
-        maxWidth: '460px' 
-      }}>
-        {roles.map(role => (
-          <div
-            key={role.id}
-            onClick={() => handleSelect(role.id)}
-            style={{
-              background: 'white',
-              borderRadius: '20px',
-              padding: '28px 20px',
-              textAlign: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-              border: '2px solid transparent'
-            }}
-          >
-            <div style={{ fontSize: '52px', marginBottom: '16px' }}>{role.icon}</div>
-            <h3 style={{ color: '#4c1d95', margin: '0 0 6px 0' }}>{role.label}</h3>
-            <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>{role.desc}</p>
-          </div>
-        ))}
+        <div className="grid grid-cols-1 gap-4">
+          {roles.map((role) => (
+            <div
+              key={role.id}
+              onClick={() => handleSelect(role.id)}
+              className="bg-white p-6 rounded-3xl shadow hover:shadow-xl cursor-pointer transition border border-purple-100 hover:border-primary"
+            >
+              <div className="text-5xl mb-4">{role.icon}</div>
+              <h3 className="font-semibold text-xl text-purple-900">{role.label}</h3>
+              <p className="text-gray-600 mt-1">{role.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

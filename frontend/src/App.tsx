@@ -1,49 +1,62 @@
-// src/App.tsx
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import AppLayout from './components/AppLayout';
+import React, { useState } from 'react'
 
-import HomePage from './pages/HomePage';
-import GuiHangPage from './pages/GuiHangPage';
-import TraCuuCuocPage from './pages/TraCuuCuocPage';
-import TrackingPage from './pages/TrackingPage';
-import CaNhanPage from './pages/CaNhanPage';
-import TaiXePage from './pages/TaiXePage';
-import KhoHubPage from './pages/KhoHubPage';
-import NhanHangPage from './pages/NhanHangPage';
-import DonHangPage from './pages/DonHangPage';
-import KhieuNaiPage from './pages/KhieuNaiPage';
-import DoiSoatPage from './pages/DoiSoatPage';
-import ChatPage from './pages/ChatPage';
-import AdminPage from './pages/AdminPage';
-import DangKyVaiTroPage from './pages/DangKyVaiTroPage';
+// Import tất cả trang
+import HomePage from './pages/HomePage'
+import KhoHubPage from './pages/KhoHubPage'
+import GuiHangPage from './pages/GuiHangPage'
+import TrackingPage from './pages/TrackingPage'
+import NhanHangPage from './pages/NhanHangPage'
+import TraCuuCuocPage from './pages/TraCuuCuocPage'
+import TaiXePage from './pages/TaiXePage'
+import CaNhanPage from './pages/CaNhanPage'
+import DonHangPage from './pages/DonHangPage'
+import DoiSoatPage from './pages/DoiSoatPage'
+import KhieuNaiPage from './pages/KhieuNaiPage'
+import ChatPage from './pages/ChatPage'
 
-const App: React.FC = () => {
+import BottomNav from './components/BottomNav'
+
+type Page = 
+  | 'home' 
+  | 'kho-hub' 
+  | 'gui-hang' 
+  | 'tracking' 
+  | 'nhan-hang' 
+  | 'tra-cuu-cuoc' 
+  | 'tai-xe'
+  | 'ca-nhan'
+  | 'don-hang'
+  | 'doi-soat'
+  | 'khieu-nai'
+  | 'chat'
+
+function App() {
+  const [currentPage, setCurrentPage] = useState<Page>('home')
+
+  const goTo = (page: string) => {
+    setCurrentPage(page as Page)
+  }
+
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
-          <Route path="/gui-hang" element={<AppLayout><GuiHangPage /></AppLayout>} />
-          <Route path="/tra-cuu-cuoc" element={<AppLayout><TraCuuCuocPage /></AppLayout>} />
-          <Route path="/tracking" element={<AppLayout><TrackingPage /></AppLayout>} />
-          <Route path="/ca-nhan" element={<AppLayout><CaNhanPage /></AppLayout>} />
-          <Route path="/tai-xe" element={<AppLayout><TaiXePage /></AppLayout>} />
-          <Route path="/kho-hub" element={<AppLayout><KhoHubPage /></AppLayout>} />
-          <Route path="/nhan-hang" element={<AppLayout><NhanHangPage /></AppLayout>} />
-          <Route path="/don-hang" element={<AppLayout><DonHangPage /></AppLayout>} />
-          <Route path="/khieu-nai" element={<AppLayout><KhieuNaiPage /></AppLayout>} />
-          <Route path="/doi-soat" element={<AppLayout><DoiSoatPage /></AppLayout>} />
-          <Route path="/chat" element={<AppLayout><ChatPage /></AppLayout>} />
-          <Route path="/admin" element={<AppLayout><AdminPage /></AppLayout>} />
-          <Route path="/dang-ky-vai-tro" element={<DangKyVaiTroPage />} />
+    <div className="min-h-screen" style={{ paddingBottom: '80px' }}>   {/* Để BottomNav không che nội dung */}
+      {/* Các trang chính */}
+      {currentPage === 'home' && <HomePage onNavigate={goTo} />}
+      {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
+      {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}
+      {currentPage === 'tracking' && <TrackingPage onNavigate={goTo} />}
+      {currentPage === 'nhan-hang' && <NhanHangPage onNavigate={goTo} />}
+      {currentPage === 'tra-cuu-cuoc' && <TraCuuCuocPage onNavigate={goTo} />}
+      {currentPage === 'tai-xe' && <TaiXePage onNavigate={goTo} />}
+      {currentPage === 'ca-nhan' && <CaNhanPage onNavigate={goTo} />}
+      {currentPage === 'don-hang' && <DonHangPage onNavigate={goTo} />}
+      {currentPage === 'doi-soat' && <DoiSoatPage onNavigate={goTo} />}
+      {currentPage === 'khieu-nai' && <KhieuNaiPage onNavigate={goTo} />}
+      {currentPage === 'chat' && <ChatPage onNavigate={goTo} />}
 
-          <Route path="*" element={<AppLayout><HomePage /></AppLayout>} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
-};
+      {/* BottomNav luôn hiển thị ở tất cả các trang */}
+      <BottomNav onNavigate={goTo} currentPage={currentPage} />
+    </div>
+  )
+}
 
-export default App;
+export default App
