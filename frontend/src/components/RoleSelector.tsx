@@ -1,43 +1,74 @@
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
-const RoleSelector = () => {
-  const { setRole } = useAuth();
-  const navigate = useNavigate();
+interface RoleSelectorProps {
+  onNavigate?: (page: string) => void;
+}
 
-  const roles = [
-    { id: 'shop', label: 'Thành Viên / Shop', icon: '👤', desc: 'Tạo đơn, theo dõi hàng' },
-    { id: 'driver', label: 'Tài Xế', icon: '🏍️', desc: 'Nhận đơn giao hàng' },
-    { id: 'warehouse', label: 'Kho Trung Chuyển', icon: '🏬', desc: 'Quản lý kho' },
-    { id: 'admin', label: 'Quản Trị Viên', icon: '👑', desc: 'Quản lý hệ thống' },
-  ];
+const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-  const handleSelect = (role: string) => {
-    setRole(role as any);
-    navigate('/');           // Quay về trang chủ sau khi chọn role
+  const handleSelectRole = (role: string) => {
+    setSelectedRole(role);
+    console.log(`Đã chọn vai trò: ${role}`);
+    
+    if (onNavigate) {
+      setTimeout(() => {
+        onNavigate('home');
+      }, 800);
+    } else {
+      alert(`Đã chọn vai trò: ${role} - Đang chuyển sang trang chủ...`);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-purple-900 mb-3">Chọn vai trò của bạn</h1>
-          <p className="text-purple-600">Bạn sẽ sử dụng GHN.PI với tư cách nào?</p>
+    <div className="min-h-screen bg-linear-to-br from-purple-50 to-violet-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-purple-900 mb-2">Chào mừng đến với GHN.PI</h1>
+          <p className="text-gray-600">Vui lòng chọn vai trò của bạn</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {roles.map((role) => (
-            <div
-              key={role.id}
-              onClick={() => handleSelect(role.id)}
-              className="bg-white p-6 rounded-3xl shadow hover:shadow-xl cursor-pointer transition border border-purple-100 hover:border-primary"
-            >
-              <div className="text-5xl mb-4">{role.icon}</div>
-              <h3 className="font-semibold text-xl text-purple-900">{role.label}</h3>
-              <p className="text-gray-600 mt-1">{role.desc}</p>
+        <div className="space-y-4">
+          <button
+            onClick={() => handleSelectRole('sender')}
+            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
+          >
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📦</div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Người gửi hàng</div>
+              <div className="text-sm text-gray-500">Tạo đơn, theo dõi vận chuyển</div>
             </div>
-          ))}
+          </button>
+
+          <button
+            onClick={() => handleSelectRole('receiver')}
+            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
+          >
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📬</div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Người nhận hàng</div>
+              <div className="text-sm text-gray-500">Nhận hàng, khiếu nại</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleSelectRole('driver')}
+            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
+          >
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
+            <div className="text-left">
+              <div className="font-semibold text-lg">Tài xế</div>
+              <div className="text-sm text-gray-500">Nhận đơn, giao hàng</div>
+            </div>
+          </button>
         </div>
+
+        {selectedRole && (
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-2xl text-center text-green-700 text-sm">
+            Đã chọn: <strong>{selectedRole === 'sender' ? 'Người gửi hàng' : selectedRole === 'receiver' ? 'Người nhận hàng' : 'Tài xế'}</strong><br />
+            Đang chuyển hướng...
+          </div>
+        )}
       </div>
     </div>
   );
