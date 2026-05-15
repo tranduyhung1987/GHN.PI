@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Skeleton from '../components/Skeleton';
 
 interface DonHangPageProps {
   onNavigate: (page: string) => void;
@@ -6,6 +7,7 @@ interface DonHangPageProps {
 
 const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'shipping' | 'completed'>('all');
+  const [loading, setLoading] = useState(true);   // ← Thêm loading
 
   const orders = [
     { 
@@ -40,6 +42,16 @@ const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
   const filteredOrders = filter === 'all' 
     ? orders 
     : orders.filter(o => o.status === filter);
+
+  // Giả lập loading khi vào trang
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1600); // 1.6 giây loading
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div style={pageContainer}>
@@ -79,34 +91,38 @@ const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
         <button onClick={() => setFilter('completed')} style={filter === 'completed' ? activeTab : inactiveTab}>Hoàn thành</button>
       </div>
 
-      {/* Orders List */}
+      {/* Orders List + Skeleton */}
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {filteredOrders.map((order, index) => (
-          <div key={index} style={orderCard}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
-                <strong style={{ color: '#4c1d95', fontSize: '17px' }}>{order.id}</strong>
-                <p style={{ margin: '6px 0 4px', color: '#6b21a8' }}>{order.customer}</p>
-                <p style={{ fontSize: '14px', color: '#64748b' }}>{order.address}</p>
+        {loading ? (
+          <Skeleton count={3} />
+        ) : (
+          filteredOrders.map((order, index) => (
+            <div key={index} style={orderCard}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <strong style={{ color: '#4c1d95', fontSize: '17px' }}>{order.id}</strong>
+                  <p style={{ margin: '6px 0 4px', color: '#6b21a8' }}>{order.customer}</p>
+                  <p style={{ fontSize: '14px', color: '#64748b' }}>{order.address}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ color: '#22d3ee', fontWeight: '700', fontSize: '18px' }}>{order.fee}</p>
+                  <p style={{ fontSize: '13px', color: '#64748b' }}>{order.time}</p>
+                </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ color: '#22d3ee', fontWeight: '700', fontSize: '18px' }}>{order.fee}</p>
-                <p style={{ fontSize: '13px', color: '#64748b' }}>{order.time}</p>
+
+              <div style={statusBadge(order.status)}>
+                {order.status === 'pending' && '⏳ Chờ xử lý'}
+                {order.status === 'shipping' && '🚛 Đang giao'}
+                {order.status === 'completed' && '✅ Hoàn thành'}
+              </div>
+
+              <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+                <button onClick={() => onNavigate('tracking')} style={trackButton}>Theo dõi</button>
+                <button onClick={() => onNavigate('khieu-nai')} style={complainButton}>Khiếu nại</button>
               </div>
             </div>
-
-            <div style={statusBadge(order.status)}>
-              {order.status === 'pending' && '⏳ Chờ xử lý'}
-              {order.status === 'shipping' && '🚛 Đang giao'}
-              {order.status === 'completed' && '✅ Hoàn thành'}
-            </div>
-
-            <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-              <button onClick={() => onNavigate('tracking')} style={trackButton}>Theo dõi</button>
-              <button onClick={() => onNavigate('khieu-nai')} style={complainButton}>Khiếu nại</button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
