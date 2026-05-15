@@ -1,5 +1,5 @@
 import React from 'react';
-import BottomNav from '../BottomNav';   // ← Đường dẫn đúng
+import BottomNav from '../BottomNav';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

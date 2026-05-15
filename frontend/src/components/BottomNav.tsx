@@ -1,11 +1,14 @@
 import React from 'react';
 
 interface BottomNavProps {
-  onNavigate: (page: string) => void;
-  currentPage: string;
+  onNavigate?: (page: string) => void;     // ← Optional
+  currentPage?: string;                    // ← Optional
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ 
+  onNavigate = () => {}, 
+  currentPage = 'home' 
+}) => {
   const navItems = [
     { label: 'Trang chủ', icon: '🏠', page: 'home' },
     { label: 'Đơn hàng', icon: '📦', page: 'don-hang' },
