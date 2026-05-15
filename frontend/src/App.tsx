@@ -1,6 +1,9 @@
 // src/App.tsx
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import AppLayout from './components/AppLayout';
+
 import HomePage from './pages/HomePage';
 import GuiHangPage from './pages/GuiHangPage';
 import TraCuuCuocPage from './pages/TraCuuCuocPage';
@@ -16,32 +19,31 @@ import ChatPage from './pages/ChatPage';
 import AdminPage from './pages/AdminPage';
 import DangKyVaiTroPage from './pages/DangKyVaiTroPage';
 
-function App() {
+const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/gui-hang" element={<GuiHangPage />} />
-          <Route path="/tra-cuu-cuoc" element={<TraCuuCuocPage />} />
-          <Route path="/tracking" element={<TrackingPage />} />
-          <Route path="/ca-nhan" element={<CaNhanPage />} />
-          <Route path="/tai-xe" element={<TaiXePage />} />
-          <Route path="/kho-hub" element={<KhoHubPage />} />
-          <Route path="/nhan-hang" element={<NhanHangPage />} />
-          <Route path="/don-hang" element={<DonHangPage />} />
-          <Route path="/khieu-nai" element={<KhieuNaiPage />} />
-          <Route path="/doi-soat" element={<DoiSoatPage />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
+          <Route path="/gui-hang" element={<AppLayout><GuiHangPage /></AppLayout>} />
+          <Route path="/tra-cuu-cuoc" element={<AppLayout><TraCuuCuocPage /></AppLayout>} />
+          <Route path="/tracking" element={<AppLayout><TrackingPage /></AppLayout>} />
+          <Route path="/ca-nhan" element={<AppLayout><CaNhanPage /></AppLayout>} />
+          <Route path="/tai-xe" element={<AppLayout><TaiXePage /></AppLayout>} />
+          <Route path="/kho-hub" element={<AppLayout><KhoHubPage /></AppLayout>} />
+          <Route path="/nhan-hang" element={<AppLayout><NhanHangPage /></AppLayout>} />
+          <Route path="/don-hang" element={<AppLayout><DonHangPage /></AppLayout>} />
+          <Route path="/khieu-nai" element={<AppLayout><KhieuNaiPage /></AppLayout>} />
+          <Route path="/doi-soat" element={<AppLayout><DoiSoatPage /></AppLayout>} />
+          <Route path="/chat" element={<AppLayout><ChatPage /></AppLayout>} />
+          <Route path="/admin" element={<AppLayout><AdminPage /></AppLayout>} />
           <Route path="/dang-ky-vai-tro" element={<DangKyVaiTroPage />} />
 
-          {/* Fallback route */}
-          <Route path="*" element={<HomePage />} />
+          <Route path="*" element={<AppLayout><HomePage /></AppLayout>} />
         </Routes>
       </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;
