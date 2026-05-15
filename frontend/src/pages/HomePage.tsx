@@ -33,17 +33,16 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           }}
           className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold text-lg"
         >
-          🧪       {/* Nút test Modal */}
+                  {/* Nút test Modal - Đã fix lỗi vàng */}
       <div className="p-4">
         <button
           onClick={() => {
-            // Gọi Modal từ App.tsx
             window.dispatchEvent(new CustomEvent('openModal', { 
               detail: {
                 title: "Chào mừng đến GHN.PI",
                 children: (
-                  <div className="text-center">
-                    <p className="mb-4">Bạn muốn đăng nhập bằng Pi Network ngay bây giờ?</p>
+                  <div className="text-center py-2">
+                    <p className="mb-4 text-gray-700">Bạn muốn đăng nhập bằng Pi Network ngay bây giờ?</p>
                     <p className="text-sm text-gray-500">Hệ thống sẽ kết nối ví Pi an toàn.</p>
                   </div>
                 ),
@@ -51,7 +50,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               }
             }));
           }}
-          className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold text-lg"
+          className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-lg shadow-lg transition"
         >
           🧪 Test Mở Modal
         </button>
