@@ -24,6 +24,41 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <p style={subtitleStyle}>Logistics Ecosystem • Pi Network</p>
       </div>
 
+      {/* Nút test Modal */}
+      <div className="p-4">
+        <button
+          onClick={() => {
+            // Gọi từ HomePage thông qua onNavigate (sẽ cải tiến sau)
+            alert("Modal sẽ được mở từ App.tsx");
+          }}
+          className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold text-lg"
+        >
+          🧪       {/* Nút test Modal */}
+      <div className="p-4">
+        <button
+          onClick={() => {
+            // Gọi Modal từ App.tsx
+            window.dispatchEvent(new CustomEvent('openModal', { 
+              detail: {
+                title: "Chào mừng đến GHN.PI",
+                children: (
+                  <div className="text-center">
+                    <p className="mb-4">Bạn muốn đăng nhập bằng Pi Network ngay bây giờ?</p>
+                    <p className="text-sm text-gray-500">Hệ thống sẽ kết nối ví Pi an toàn.</p>
+                  </div>
+                ),
+                onConfirm: () => alert("✅ Đang chuyển sang đăng nhập Pi...")
+              }
+            }));
+          }}
+          className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold text-lg"
+        >
+          🧪 Test Mở Modal
+        </button>
+      </div>
+        </button>
+      </div>
+
       {/* Pi Login Button */}
       <div style={piButtonContainer}>
         <button style={piButton} onClick={() => alert('🔗 Đang kết nối Pi Network...')}>
