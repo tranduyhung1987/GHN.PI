@@ -1,4 +1,4 @@
-import React from 'react';   // Giữ lại vì có thể dùng JSX
+import React from 'react';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -24,43 +24,32 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <p style={subtitleStyle}>Logistics Ecosystem • Pi Network</p>
       </div>
 
-      {/* Nút test Modal */}
-      <div className="p-4">
-        <button
-          onClick={() => {
-            // Gọi từ HomePage thông qua onNavigate (sẽ cải tiến sau)
-            alert("Modal sẽ được mở từ App.tsx");
-          }}
-          className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold text-lg"
-        >
-                  {/* Nút test Modal - Đã fix lỗi vàng */}
-      <div className="p-4">
-        <button
+      {/* Nút Đăng nhập Pi Network - Mở Modal */}
+      <div style={piButtonContainer}>
+        <button 
+          style={piButton}
           onClick={() => {
             window.dispatchEvent(new CustomEvent('openModal', { 
               detail: {
                 title: "Chào mừng đến GHN.PI",
                 children: (
-                  <div className="text-center py-2">
-                    <p className="mb-4 text-gray-700">Bạn muốn đăng nhập bằng Pi Network ngay bây giờ?</p>
-                    <p className="text-sm text-gray-500">Hệ thống sẽ kết nối ví Pi an toàn.</p>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ marginBottom: '16px', fontSize: '18px' }}>
+                      Đăng nhập ví Pi Network ngay bây giờ để sử dụng nhiều tính năng?
+                    </p>
+                    <p style={{ fontSize: '14px', color: '#64748b' }}>
+                      Hệ thống sẽ kết nối ví Pi an toàn và nhanh chóng.
+                    </p>
                   </div>
                 ),
-                onConfirm: () => alert("✅ Đang chuyển sang đăng nhập Pi...")
+                confirmText: "🚀 Đăng nhập Pi",
+                onConfirm: () => {
+                  alert("✅ Đang kết nối Pi Network... (Sẽ thay bằng Pi SDK thật sau)");
+                }
               }
             }));
           }}
-          className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-lg shadow-lg transition"
         >
-          🧪 Test Mở Modal
-        </button>
-      </div>
-        </button>
-      </div>
-
-      {/* Pi Login Button */}
-      <div style={piButtonContainer}>
-        <button style={piButton} onClick={() => alert('🔗 Đang kết nối Pi Network...')}>
           ⭐ Đăng nhập với Pi Network
         </button>
       </div>
@@ -95,17 +84,25 @@ const logoContainer = { textAlign: 'center' as const, marginBottom: '30px' };
 const logoStyle = { fontSize: '52px', fontWeight: '700', color: '#4c1d95' };
 const subtitleStyle = { color: '#6b21a8', marginTop: '4px' };
 
-const piButtonContainer = { display: 'flex', justifyContent: 'center', marginBottom: '40px' };
+const piButtonContainer = { 
+  display: 'flex', 
+  justifyContent: 'center', 
+  marginBottom: '40px',
+  padding: '0 14px'
+};
+
 const piButton = {
-  padding: '16px 40px',
-  background: 'linear-gradient(135deg, #7c3aed, #c026d3)',
+  padding: '18px 40px',
+  background: 'linear-gradient(135deg, #4c1d95, #7c3aed)',
   color: 'white',
   border: 'none',
   borderRadius: '9999px',
   fontWeight: '700',
-  fontSize: '16px',
+  fontSize: '17px',
   cursor: 'pointer',
-  boxShadow: '0 4px 15px rgba(124, 58, 237, 0.4)'
+  boxShadow: '0 6px 20px rgba(76, 29, 149, 0.35)',
+  width: '100%',
+  maxWidth: '340px'
 };
 
 const cardsGrid = {

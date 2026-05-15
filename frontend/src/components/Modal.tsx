@@ -22,31 +22,109 @@ const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-        
-        {/* Header gradient đẹp */}
-        <div className="bg-linear-to-r from-purple-600 to-violet-600 px-6 py-6 text-white">
-          <h3 className="text-2xl font-bold text-center tracking-tight">{title}</h3>
+    <div style={{
+      position: 'fixed',
+      top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.75)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      backdropFilter: 'blur(12px)',
+    }}>
+      <div style={{
+        background: '#f3e8ff',           // ← Tím nhạt theo theme app
+        borderRadius: '28px',
+        width: '92%',
+        maxWidth: '420px',
+        overflow: 'hidden',
+        boxShadow: '0 30px 90px rgba(124, 58, 237, 0.45)',
+      }}>
+        {/* Header Gradient */}
+        <div style={{
+          background: 'linear-gradient(135deg, #4c1d95, #7c3aed, #a855f7)',
+          color: 'white',
+          padding: '32px 24px 24px',
+          textAlign: 'center',
+          position: 'relative',
+        }}>
+          <h2 style={{ 
+            margin: 0, 
+            fontSize: '26px', 
+            fontWeight: '800',
+            letterSpacing: '-0.5px'
+          }}>
+            {title}
+          </h2>
+
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.25)',
+              border: 'none',
+              color: 'white',
+              fontSize: '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Nội dung */}
-        <div className="p-8 text-center text-gray-700 leading-relaxed">
+        {/* Nội dung - Tím nhạt */}
+        <div style={{ 
+          padding: '32px 28px', 
+          textAlign: 'center', 
+          color: '#4c1d95', 
+          fontSize: '16.5px',
+          lineHeight: '1.6'
+        }}>
           {children}
         </div>
 
         {/* Footer */}
-        <div className="flex border-t">
+        <div style={{
+          display: 'flex',
+          borderTop: '1px solid #e0d4ff',
+          background: '#f3e8ff',
+        }}>
           <button
             onClick={onClose}
-            className="flex-1 py-5 text-lg font-medium text-gray-500 hover:bg-gray-100 transition"
+            style={{
+              flex: 1,
+              padding: '20px',
+              fontSize: '17px',
+              fontWeight: '600',
+              color: '#6b21a8',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             {cancelText}
           </button>
           {onConfirm && (
             <button
               onClick={onConfirm}
-              className="flex-1 py-5 text-lg font-semibold text-white bg-linear-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition"
+              style={{
+                flex: 1,
+                padding: '20px',
+                fontSize: '17px',
+                fontWeight: '700',
+                color: 'white',
+                background: 'linear-gradient(135deg, #4c1d95, #7c3aed)',
+                border: 'none',
+                cursor: 'pointer',
+              }}
             >
               {confirmText}
             </button>
