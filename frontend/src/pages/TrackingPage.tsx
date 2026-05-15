@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Skeleton from '../components/Skeleton';
 
 interface TrackingPageProps {
   onNavigate: (page: string) => void;
@@ -23,6 +24,7 @@ interface TrackingOrder {
 function TrackingPage({ onNavigate }: TrackingPageProps) {
   const [activeFilter, setActiveFilter] = useState<'All' | OrderStatus>('All');
   const [selectedOrder, setSelectedOrder] = useState<TrackingOrder | null>(null);
+  const [loading, setLoading] = useState(true);   // ← Thêm loading
 
   const [orders] = useState<TrackingOrder[]>([
     {
@@ -76,6 +78,15 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
     return colors[status];
   };
 
+  // Loading skeleton
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1400);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div style={pageContainer}>
       {/* HEADER */}
@@ -99,40 +110,44 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
         ))}
       </div>
 
-      {/* DANH SÁCH ĐƠN */}
-      {filteredOrders.map((order) => (
-        <div key={order.maDon} style={orderCard} onClick={() => setSelectedOrder(order)}>
-          <div style={orderHeader}>
-            <div>
-              <span style={{ fontWeight: '700', fontSize: '17px' }}>{order.maDon}</span>
-              <span style={{ marginLeft: '10px', color: '#6b21a8' }}>{order.loai}</span>
+      {/* DANH SÁCH ĐƠN + SKELETON */}
+      {loading ? (
+        <Skeleton count={2} />
+      ) : (
+        filteredOrders.map((order) => (
+          <div key={order.maDon} style={orderCard} onClick={() => setSelectedOrder(order)}>
+            <div style={orderHeader}>
+              <div>
+                <span style={{ fontWeight: '700', fontSize: '17px' }}>{order.maDon}</span>
+                <span style={{ marginLeft: '10px', color: '#6b21a8' }}>{order.loai}</span>
+              </div>
+              <span style={{ 
+                padding: '4px 12px', 
+                borderRadius: '9999px', 
+                backgroundColor: getStatusColor(order.trangThai) + '20',
+                color: getStatusColor(order.trangThai),
+                fontWeight: '600',
+                fontSize: '14px'
+              }}>
+                {order.trangThai === 'DangGiao' ? 'Đang giao' : 
+                 order.trangThai === 'DaGiao' ? 'Đã giao' : 'Đang xử lý'}
+              </span>
             </div>
-            <span style={{ 
-              padding: '4px 12px', 
-              borderRadius: '9999px', 
-              backgroundColor: getStatusColor(order.trangThai) + '20',
-              color: getStatusColor(order.trangThai),
-              fontWeight: '600',
-              fontSize: '14px'
-            }}>
-              {order.trangThai === 'DangGiao' ? 'Đang giao' : 
-               order.trangThai === 'DaGiao' ? 'Đã giao' : 'Đang xử lý'}
-            </span>
-          </div>
 
-          <div style={infoLine}><strong>Người nhận:</strong> {order.nguoiNhan}</div>
-          <div style={infoLine}><strong>Địa chỉ:</strong> {order.diaChi}</div>
+            <div style={infoLine}><strong>Người nhận:</strong> {order.nguoiNhan}</div>
+            <div style={infoLine}><strong>Địa chỉ:</strong> {order.diaChi}</div>
 
-          <div style={driverLine}>
-            <div>🏍️ {order.taiXe}</div>
-            <div style={{ color: '#eab308' }}>{order.repScore} ★</div>
-          </div>
+            <div style={driverLine}>
+              <div>🏍️ {order.taiXe}</div>
+              <div style={{ color: '#eab308' }}>{order.repScore} ★</div>
+            </div>
 
-          <div style={{ marginTop: '12px', color: '#64748b', fontSize: '14.5px' }}>
-            {order.viTriHienTai}
+            <div style={{ marginTop: '12px', color: '#64748b', fontSize: '14.5px' }}>
+              {order.viTriHienTai}
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }
