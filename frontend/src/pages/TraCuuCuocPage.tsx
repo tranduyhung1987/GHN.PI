@@ -41,7 +41,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 
     setCalculating(true);
 
-    // Giả lập tính toán nhanh
     setTimeout(() => {
       const weightKg = form.khoiLuong / 1000;
       const volWeight = (form.dai * form.rong * form.cao) / 5000;
@@ -88,10 +87,10 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 
       {activeTab === 'cuoc' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Thông tin địa chỉ + Hàng hóa (giữ nguyên bản gốc) */}
+          
+          {/* === PHẦN FORM GIỮ NGUYÊN HOÀN TOÀN === */}
           <div style={cardStyle}>
             <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>📍 Thông tin địa chỉ</h3>
-            {/* ... phần địa chỉ giữ nguyên như file bạn gửi ... */}
             <div style={{ marginBottom: '20px' }}>
               <p style={subLabel}>Địa chỉ gửi</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -125,7 +124,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 
           <div style={cardStyle}>
             <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>📦 Hàng hóa cần gửi</h3>
-            {/* Phần Loại hàng, Khối lượng, Kích thước giữ nguyên */}
             <div style={{ marginBottom: '20px' }}>
               <p style={subLabel}>Loại hàng</p>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -149,7 +147,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
             </div>
           </div>
 
-          {/* NÚT TÍNH CƯỚC ĐÃ NÂNG CẤP */}
+          {/* NÚT TÍNH CƯỚC */}
           <button 
             onClick={tinhCuoc} 
             disabled={calculating}
@@ -158,7 +156,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
             {calculating ? 'ĐANG TÍNH TOÁN...' : 'ƯỚC TÍNH CƯỚC PHÍ'}
           </button>
 
-          {/* KẾT QUẢ CHI TIẾT */}
+          {/* === PHẦN KẾT QUẢ CHI TIẾT + NÚT TẠO ĐƠN (TÍCH HỢP MỚI) === */}
           {ketQua && (
             <div style={resultStyle}>
               <h3 style={{ color: '#4c1d95', textAlign: 'center', marginBottom: '16px' }}>📋 Kết quả ước tính</h3>
@@ -172,6 +170,14 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
               <p style={{ textAlign: 'center', marginTop: '12px', color: '#10b981', fontWeight: '600' }}>
                 ⏱ Thời gian giao dự kiến: {ketQua.thoiGianGiao}
               </p>
+
+              {/* Nút Tạo đơn ngay */}
+              <button 
+                onClick={() => onNavigate('gui-hang')}
+                style={createOrderBtn}
+              >
+                + TẠO ĐƠN HÀNG NGAY
+              </button>
             </div>
           )}
         </div>
@@ -180,7 +186,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
   );
 }
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN + BỔ SUNG) ===================== */
 const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 120px', boxSizing: 'border-box' as const };
 const headerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'center', marginBottom: '20px' };
 const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: '700', color: '#4c1d95' };
@@ -214,6 +220,19 @@ const resultRow: React.CSSProperties = {
 const totalRow: React.CSSProperties = { 
   display: 'flex', justifyContent: 'space-between', padding: '16px 0', marginTop: '8px', 
   borderTop: '2px solid #22d3ee', fontSize: '18px', fontWeight: '700' 
+};
+
+const createOrderBtn: React.CSSProperties = {
+  width: '100%',
+  padding: '16px',
+  marginTop: '16px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontSize: '17px',
+  fontWeight: '700',
+  cursor: 'pointer'
 };
 
 const tabContainer: React.CSSProperties = { display: 'flex', background: '#e0e7ff', borderRadius: '9999px', padding: '6px', marginBottom: '24px' };

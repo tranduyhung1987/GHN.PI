@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ChatPageProps {
@@ -13,37 +13,49 @@ type Message = {
   file?: { name: string; url: string; type: string };
 };
 
-const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
+const ChatPage: React.FC<ChatPageProps> = () => {
   const { isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: "Chào bạn! Bạn cần hỗ trợ gì hôm nay?", isUser: false, time: "10:32" },
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const sendMessage = () => {
-    if (!newMessage.trim() || !isAuthenticated) return;
+    if (!newMessage.trim() || !isAuthenticated || isSending) return;
 
     const newMsg: Message = {
       id: Date.now(),
-      text: newMessage,
+      text: newMessage.trim(),
       isUser: true,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     setMessages(prev => [...prev, newMsg]);
     setNewMessage('');
+    setIsSending(true);
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        text: "Cảm ơn bạn! Đơn hàng của bạn đang được xử lý. Bạn cần hỗ trợ thêm gì không?",
+        text: "Cảm ơn bạn! Đơn hàng của bạn đang được xử lý. Bạn cần hỗ trợ thêm gì không ạ?",
         isUser: false,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
-    }, 800);
+      setIsSending(false);
+    }, 1100);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,31 +113,38 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
             <span style={timeStyle}>{msg.time}</span>
           </div>
         ))}
+        {isSending && <div style={typingIndicator}>CSKH đang trả lời...</div>}
+        <div ref={chatEndRef} />
       </div>
 
-      {/* INPUT AREA - ĐÃ ĐIỀU CHỈNH KHÔNG BỊ CHE */}
+      {/* INPUT AREA - GIỮ NGUYÊN GIAO DIỆN BẠN MUỐN */}
       <div style={inputArea}>
-        <div onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} style={plusButton}>+</div>
+        <div style={inputWrapper}>
+          <div onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} style={plusButtonInside}>+</div>
+          
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Nhập tin nhắn..."
+            style={inputStyle}
+          />
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-          style={{ display: 'none' }}
-          accept="image/*,video/*,.pdf"
-        />
-
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Nhập tin nhắn..."
-          style={inputStyle}
-        />
-
-        <button onClick={sendMessage} style={sendButton}>Gửi</button>
+          <button onClick={sendMessage} style={sendButton} disabled={isSending || !newMessage.trim()}>
+            {isSending ? '⏳' : 'Gửi'}
+          </button>
+        </div>
       </div>
+
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+        accept="image/*,video/*,.pdf,.doc,.docx"
+      />
 
       {/* Attachment Menu */}
       {showAttachmentMenu && (
@@ -143,108 +162,83 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
 const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
-  padding: '16px 14px 160px',   // ← Tăng padding dưới để tránh che
+  padding: '16px 14px 90px',
   boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column' as const
 };
 
 const header: React.CSSProperties = { 
-  display: 'flex', 
-  alignItems: 'center', 
-  gap: '12px', 
-  marginBottom: '20px',
-  justifyContent: 'center' as const
+  display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', justifyContent: 'center' as const 
 };
 
-const title: React.CSSProperties = { 
-  fontSize: '26px', 
-  fontWeight: '700', 
-  color: '#4c1d95', 
-  margin: 0 
-};
-
-const subtitle: React.CSSProperties = { 
-  color: '#6b21a8', 
-  fontSize: '14px',
-  textAlign: 'center' as const
-};
+const title: React.CSSProperties = { fontSize: '26px', fontWeight: '700', color: '#4c1d95', margin: 0 };
+const subtitle: React.CSSProperties = { color: '#6b21a8', fontSize: '14px', textAlign: 'center' as const };
 
 const chatContainer: React.CSSProperties = {
   flex: 1,
-  overflowY: 'auto' as const,
-  padding: '10px 0',
+  overflowY: 'auto',
+  paddingBottom: '20px',
   display: 'flex',
   flexDirection: 'column' as const,
   gap: '12px'
 };
 
-const myMessage: React.CSSProperties = { alignSelf: 'flex-end' as const, maxWidth: '75%' };
-const adminMessage: React.CSSProperties = { alignSelf: 'flex-start' as const, maxWidth: '75%' };
+const myMessage: React.CSSProperties = { alignSelf: 'flex-end' as const, maxWidth: '78%' };
+const adminMessage: React.CSSProperties = { alignSelf: 'flex-start' as const, maxWidth: '78%' };
 
-const myMessageBubble: React.CSSProperties = { 
-  padding: '12px 16px', 
-  borderRadius: '18px', 
-  background: '#22d3ee', 
-  color: '#0f172a' 
-};
+const myMessageBubble: React.CSSProperties = { padding: '12px 16px', borderRadius: '18px', background: '#22d3ee', color: '#0f172a' };
+const adminMessageBubble: React.CSSProperties = { padding: '12px 16px', borderRadius: '18px', background: '#fff', border: '1px solid #c4b5fd', color: '#4c1d95' };
 
-const adminMessageBubble: React.CSSProperties = { 
-  padding: '12px 16px', 
-  borderRadius: '18px', 
-  background: '#fff', 
-  border: '1px solid #c4b5fd', 
-  color: '#4c1d95' 
-};
-
-const timeStyle: React.CSSProperties = { 
-  fontSize: '11px', 
-  color: '#64748b', 
-  marginTop: '4px' 
-};
+const timeStyle: React.CSSProperties = { fontSize: '11px', color: '#64748b', marginTop: '4px' };
+const typingIndicator: React.CSSProperties = { color: '#64748b', fontStyle: 'italic', padding: '8px 0' };
 
 const inputArea: React.CSSProperties = {
   position: 'fixed',
-  bottom: '76px',           // ← Tăng khoảng cách để không bị BottomNav che
-  left: '11px',
-  right: '11px',
-  display: 'flex',
-  gap: '8px',
-  background: '#f3e8ff',
-  padding: '8px 0',
+  bottom: '76px',
+  left: '14px',
+  right: '14px',
   zIndex: 10
 };
 
-const plusButton: React.CSSProperties = {
-  width: '48px',
-  height: '48px',
-  background: '#22d3ee',
-  color: 'white',
+const inputWrapper: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  background: '#f3e8ff',
+  borderRadius: '9999px',
+  padding: '6px',
+  border: '1px solid #c4b5fd'
+};
+
+const plusButtonInside: React.CSSProperties = {
+  width: '42px',
+  height: '42px',
+  background: 'transparent',
+  color: '#64748b',
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '28px',
+  fontSize: '26px',
   cursor: 'pointer',
-  flexShrink: 0
+  marginRight: '6px'
 };
 
 const inputStyle: React.CSSProperties = {
   flex: 1,
-  padding: '14px 16px',
-  border: '1px solid #c4b5fd',
-  borderRadius: '9999px',
-  background: '#ede9fe',
-  fontSize: '16px'
+  padding: '14px 8px',
+  border: 'none',
+  background: 'transparent',
+  fontSize: '16px',
+  outline: 'none'
 };
 
 const sendButton: React.CSSProperties = {
-  padding: '14px 24px',
+  padding: '12px 24px',
   background: '#22d3ee',
   color: '#0f172a',
   border: 'none',
   borderRadius: '9999px',
-  fontWeight: '700'
+  fontWeight: '700',
+  marginLeft: '6px'
 };
 
 const attachmentMenu: React.CSSProperties = {
@@ -261,13 +255,9 @@ const attachmentMenu: React.CSSProperties = {
   gap: '4px'
 };
 
-const menuItem: React.CSSProperties = {
-  padding: '12px 24px',
-  fontSize: '16px',
-  cursor: 'pointer',
-  borderRadius: '8px'
-};
+const menuItem: React.CSSProperties = { padding: '12px 24px', fontSize: '16px', cursor: 'pointer' };
 
+/* === FIX LỖI ĐỎ === */
 const previewImage: React.CSSProperties = {
   maxWidth: '220px',
   borderRadius: '12px',
