@@ -11,8 +11,8 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
 
   const handleSelectRole = (role: string) => {
     setSelectedRole(role);
-    setRole(role as any);   // ← Fix lỗi đỏ (type assertion)
-    
+    setRole?.(role as any);   // ← Fix lỗi đỏ (type assertion)
+
     if (onNavigate) {
       setTimeout(() => {
         onNavigate('home');
