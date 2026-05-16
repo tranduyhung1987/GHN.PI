@@ -11,27 +11,23 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({ onRefresh, children }) =>
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      setStartY(e.touches[0].clientY);
-      setPullDistance(0);
-    };
-
+    const handleTouchStart = (e: TouchEvent) => setStartY(e.touches[0].clientY);
     const handleTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const distance = currentY - startY;
+      const distance = e.touches[0].clientY - startY;
       if (distance > 0 && window.scrollY === 0) {
-        setPullDistance(Math.min(distance * 0.6, 120));
+        setPullDistance(Math.min(distance * 0.6, 85));
       }
     };
 
     const handleTouchEnd = () => {
-      if (pullDistance > 80 && !isRefreshing) {
+      if (pullDistance > 65 && !isRefreshing) {
         setIsRefreshing(true);
         onRefresh();
+        // Tăng thời gian hiển thị để thấy vòng quay rõ
         setTimeout(() => {
           setIsRefreshing(false);
           setPullDistance(0);
-        }, 1200);
+        }, 1500);
       } else {
         setPullDistance(0);
       }
@@ -50,22 +46,26 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({ onRefresh, children }) =>
 
   return (
     <div style={{ position: 'relative' }}>
-      {pullDistance > 0 && (
+      {isRefreshing && (
         <div style={{
           position: 'fixed',
-          top: '80px',
+          top: '70px',
           left: '50%',
-          transform: `translateX(-50%)`,
+          transform: 'translateX(-50%)',
           zIndex: 9999,
-          padding: '10px 24px',
-          background: 'white',
-          borderRadius: '30px',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
-          fontSize: '14px',
-          color: '#4c1d95',
-          whiteSpace: 'nowrap'
+          padding: '12px',
+          background: 'rgba(255,255,255,0.95)',
+          borderRadius: '50%',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
         }}>
-          {isRefreshing ? 'Đang tải mới...' : '↓ Kéo xuống để làm mới'}
+          <div style={{
+            width: '36px',
+            height: '36px',
+            border: '4px solid #e0d4ff',
+            borderTopColor: '#7c3aed',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }} />
         </div>
       )}
       {children}
