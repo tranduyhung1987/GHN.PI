@@ -15,7 +15,8 @@ import KhieuNaiPage from './pages/KhieuNaiPage'
 import ChatPage from './pages/ChatPage'
 
 import BottomNav from './components/BottomNav'
-import Modal from './components/Modal';     // ← Quan trọng
+import Modal from './components/Modal'
+import Toast from './components/Toast'
 
 type Page = 
   | 'home' 
@@ -42,11 +43,24 @@ function App() {
     onConfirm: undefined as (() => void) | undefined,
   });
 
+  // Toast State
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' | 'info' } | null>(null);
+
   const goTo = (page: string) => {
     setCurrentPage(page as Page)
   }
 
-  // Event Listener để mở Modal từ nút ở HomePage
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type });
+  };
+
+  const hideToast = () => setToast(null);
+
+  // Event Listener cho Modal
   useEffect(() => {
     const handleOpenModal = (e: any) => {
       const { title, children, onConfirm } = e.detail || {};
@@ -60,14 +74,22 @@ function App() {
 
     window.addEventListener('openModal', handleOpenModal);
 
-    return () => {
-      window.removeEventListener('openModal', handleOpenModal);
-    };
+    return () => window.removeEventListener('openModal', handleOpenModal);
   }, []);
 
-  const closeModal = () => {
-    setModal(prev => ({ ...prev, isOpen: false }));
-  };
+  // Event Listener cho Toast
+  useEffect(() => {
+    const handleShowToast = (e: any) => {
+      const { message, type } = e.detail || {};
+      if (message) {
+        setToast({ message, type: type || 'success' });
+      }
+    };
+
+    window.addEventListener('showToast', handleShowToast);
+
+    return () => window.removeEventListener('showToast', handleShowToast);
+  }, []);
 
   return (
     <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
@@ -97,6 +119,15 @@ function App() {
       >
         {modal.children}
       </Modal>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={hideToast} 
+        />
+      )}
     </div>
   )
 }
