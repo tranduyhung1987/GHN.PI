@@ -38,7 +38,11 @@ type Page =
   | 'chat'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home')
+  // Lưu trang hiện tại vào localStorage để reload không về trang chủ
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    const savedPage = localStorage.getItem('currentPage') as Page;
+    return savedPage && savedPage !== 'home' ? savedPage : 'home';
+  });
 
   // Modal State
   const [modal, setModal] = useState({
@@ -51,9 +55,15 @@ function App() {
   // Toast State
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' | 'info' } | null>(null);
 
+  // Lưu trang hiện tại vào localStorage mỗi khi chuyển trang
+  useEffect(() => {
+    localStorage.setItem('currentPage', currentPage);
+  }, [currentPage]);
+
   const goTo = (page: string) => {
-    setCurrentPage(page as Page)
-  }
+    setCurrentPage(page as Page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const closeModal = () => {
     setModal(prev => ({ ...prev, isOpen: false }));
@@ -78,7 +88,6 @@ function App() {
     };
 
     window.addEventListener('openModal', handleOpenModal);
-
     return () => window.removeEventListener('openModal', handleOpenModal);
   }, []);
 
@@ -86,13 +95,10 @@ function App() {
   useEffect(() => {
     const handleShowToast = (e: any) => {
       const { message, type } = e.detail || {};
-      if (message) {
-        setToast({ message, type: type || 'success' });
-      }
+      if (message) setToast({ message, type: type || 'success' });
     };
 
     window.addEventListener('showToast', handleShowToast);
-
     return () => window.removeEventListener('showToast', handleShowToast);
   }, []);
 
@@ -103,10 +109,7 @@ function App() {
     };
 
     window.addEventListener('closeModal', handleCloseModal);
-
-    return () => {
-      window.removeEventListener('closeModal', handleCloseModal);
-    };
+    return () => window.removeEventListener('closeModal', handleCloseModal);
   }, []);
 
   return (
@@ -114,7 +117,7 @@ function App() {
       <ThemeProvider>
         <PullToRefresh onRefresh={() => window.location.reload()}>
           <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
-            {/* Các trang chính */}
+            {/* Routing */}
             {currentPage === 'home' && <HomePage onNavigate={goTo} />}
             {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
             {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}

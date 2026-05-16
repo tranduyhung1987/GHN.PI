@@ -205,9 +205,9 @@ const timeStyle: React.CSSProperties = {
 
 const inputArea: React.CSSProperties = {
   position: 'fixed',
-  bottom: '110px',           // ← Tăng khoảng cách để không bị BottomNav che
-  left: '14px',
-  right: '14px',
+  bottom: '76px',           // ← Tăng khoảng cách để không bị BottomNav che
+  left: '11px',
+  right: '11px',
   display: 'flex',
   gap: '8px',
   background: '#f3e8ff',
