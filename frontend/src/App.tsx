@@ -15,7 +15,7 @@ import KhieuNaiPage from './pages/KhieuNaiPage'
 import ChatPage from './pages/ChatPage'
 
 import BottomNav from './components/BottomNav'
-import Modal from './components/Modal';
+import Modal from './components/Modal';     // ← Quan trọng
 
 type Page = 
   | 'home' 
@@ -34,40 +34,26 @@ type Page =
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home')
 
-  // Modal state
-  const [modal, setModal] = useState<{
-    isOpen: boolean;
-    title: string;
-    children: React.ReactNode;
-    onConfirm?: () => void;
-  }>({
+  // Modal State
+  const [modal, setModal] = useState({
     isOpen: false,
     title: '',
-    children: null,
-    onConfirm: undefined,
+    children: null as React.ReactNode,
+    onConfirm: undefined as (() => void) | undefined,
   });
 
   const goTo = (page: string) => {
     setCurrentPage(page as Page)
   }
 
-  // Hàm mở và đóng Modal
-  const openModal = (title: string, children: React.ReactNode, onConfirm?: () => void) => {
-    setModal({ isOpen: true, title, children, onConfirm });
-  };
-
-  const closeModal = () => {
-    setModal(prev => ({ ...prev, isOpen: false }));
-  };
-
-  // Event Listener để mở Modal từ bất kỳ trang nào
+  // Event Listener để mở Modal từ nút ở HomePage
   useEffect(() => {
     const handleOpenModal = (e: any) => {
       const { title, children, onConfirm } = e.detail || {};
       setModal({ 
         isOpen: true, 
         title: title || "Thông báo", 
-        children: children || "Nội dung mặc định", 
+        children: children || null, 
         onConfirm 
       });
     };
@@ -78,6 +64,10 @@ function App() {
       window.removeEventListener('openModal', handleOpenModal);
     };
   }, []);
+
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   return (
     <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
