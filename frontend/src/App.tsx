@@ -19,8 +19,9 @@ import Modal from './components/Modal'
 import Toast from './components/Toast'
 import PullToRefresh from './components/PullToRefresh'
 
-// Import Auth
+// Import Context
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 type Page = 
   | 'home' 
@@ -95,47 +96,62 @@ function App() {
     return () => window.removeEventListener('showToast', handleShowToast);
   }, []);
 
+  // Event Listener cho closeModal
+  useEffect(() => {
+    const handleCloseModal = () => {
+      setModal(prev => ({ ...prev, isOpen: false }));
+    };
+
+    window.addEventListener('closeModal', handleCloseModal);
+
+    return () => {
+      window.removeEventListener('closeModal', handleCloseModal);
+    };
+  }, []);
+
   return (
     <AuthProvider>
-      <PullToRefresh onRefresh={() => window.location.reload()}>
-        <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
-          {/* Các trang chính */}
-          {currentPage === 'home' && <HomePage onNavigate={goTo} />}
-          {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
-          {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}
-          {currentPage === 'tracking' && <TrackingPage onNavigate={goTo} />}
-          {currentPage === 'nhan-hang' && <NhanHangPage onNavigate={goTo} />}
-          {currentPage === 'tra-cuu-cuoc' && <TraCuuCuocPage onNavigate={goTo} />}
-          {currentPage === 'tai-xe' && <TaiXePage onNavigate={goTo} />}
-          {currentPage === 'ca-nhan' && <CaNhanPage onNavigate={goTo} />}
-          {currentPage === 'don-hang' && <DonHangPage onNavigate={goTo} />}
-          {currentPage === 'doi-soat' && <DoiSoatPage onNavigate={goTo} />}
-          {currentPage === 'khieu-nai' && <KhieuNaiPage onNavigate={goTo} />}
-          {currentPage === 'chat' && <ChatPage onNavigate={goTo} />}
+      <ThemeProvider>
+        <PullToRefresh onRefresh={() => window.location.reload()}>
+          <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
+            {/* Các trang chính */}
+            {currentPage === 'home' && <HomePage onNavigate={goTo} />}
+            {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
+            {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}
+            {currentPage === 'tracking' && <TrackingPage onNavigate={goTo} />}
+            {currentPage === 'nhan-hang' && <NhanHangPage onNavigate={goTo} />}
+            {currentPage === 'tra-cuu-cuoc' && <TraCuuCuocPage onNavigate={goTo} />}
+            {currentPage === 'tai-xe' && <TaiXePage onNavigate={goTo} />}
+            {currentPage === 'ca-nhan' && <CaNhanPage onNavigate={goTo} />}
+            {currentPage === 'don-hang' && <DonHangPage onNavigate={goTo} />}
+            {currentPage === 'doi-soat' && <DoiSoatPage onNavigate={goTo} />}
+            {currentPage === 'khieu-nai' && <KhieuNaiPage onNavigate={goTo} />}
+            {currentPage === 'chat' && <ChatPage onNavigate={goTo} />}
 
-          {/* BottomNav */}
-          <BottomNav onNavigate={goTo} currentPage={currentPage} />
+            {/* BottomNav */}
+            <BottomNav onNavigate={goTo} currentPage={currentPage} />
 
-          {/* Modal dùng chung */}
-          <Modal
-            isOpen={modal.isOpen}
-            onClose={closeModal}
-            title={modal.title}
-            onConfirm={modal.onConfirm}
-          >
-            {modal.children}
-          </Modal>
+            {/* Modal dùng chung */}
+            <Modal
+              isOpen={modal.isOpen}
+              onClose={closeModal}
+              title={modal.title}
+              onConfirm={modal.onConfirm}
+            >
+              {modal.children}
+            </Modal>
 
-          {/* Toast Notification */}
-          {toast && (
-            <Toast 
-              message={toast.message} 
-              type={toast.type} 
-              onClose={hideToast} 
-            />
-          )}
-        </div>
-      </PullToRefresh>
+            {/* Toast Notification */}
+            {toast && (
+              <Toast 
+                message={toast.message} 
+                type={toast.type} 
+                onClose={hideToast} 
+              />
+            )}
+          </div>
+        </PullToRefresh>
+      </ThemeProvider>
     </AuthProvider>
   )
 }

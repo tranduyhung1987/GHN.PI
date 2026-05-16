@@ -51,7 +51,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     } 
                   }));
 
-                  // Giả lập login thành công sau 1.2s
+                  // Giả lập đăng nhập thành công
                   setTimeout(() => {
                     window.dispatchEvent(new CustomEvent('showToast', { 
                       detail: { 
@@ -59,6 +59,8 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                         type: "success" 
                       } 
                     }));
+                    // Đóng Modal sau khi đăng nhập thành công
+                   window.dispatchEvent(new CustomEvent('closeModal'));
                   }, 1200);
                 }
               }
@@ -69,6 +71,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </button>
       </div>
 
+      
       {/* 6 Cards */}
       <div style={cardsGrid}>
         {cards.map((card, index) => (
