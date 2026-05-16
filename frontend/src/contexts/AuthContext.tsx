@@ -1,19 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Role = 'guest' | 'member' | 'driver' | 'warehouse' | 'admin' | 'shop';
+
 export interface User {
   id: string;
   name: string;
   role: Role;
   piAddress?: string;
+  balance?: number;
 }
 
 interface AuthContextType {
   user: User | null;
-  role: Role;
   isAuthenticated: boolean;
   loginWithPi: () => Promise<void>;
-  setRole: (newRole: Role) => void;
   logout: () => void;
 }
 
@@ -22,38 +22,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const role = user?.role || 'guest';
-  const isAuthenticated = !!user && role !== 'guest';
-
-  // Load từ localStorage khi mở app
   useEffect(() => {
     const savedUser = localStorage.getItem('ghnpi_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
   const loginWithPi = async () => {
-    // Giả lập kết nối Pi Network
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const newUser: User = {
       id: 'pi_' + Date.now().toString(36),
-      name: 'Người dùng Pi',
-      role: 'member',           // Mặc định là member
-      piAddress: 'Pi1abc...xyz123'
+      name: 'Thành viên Pi',
+      role: 'member',
+      piAddress: 'Pi1abc...xyz',
+      balance: 12450
     };
 
     setUser(newUser);
     localStorage.setItem('ghnpi_user', JSON.stringify(newUser));
-  };
-
-  const setRole = (newRole: Role) => {
-    if (user) {
-      const updatedUser = { ...user, role: newRole };
-      setUser(updatedUser);
-      localStorage.setItem('ghnpi_user', JSON.stringify(updatedUser));
-    }
   };
 
   const logout = () => {
@@ -64,10 +50,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   return (
     <AuthContext.Provider value={{ 
       user, 
-      role, 
-      isAuthenticated, 
+      isAuthenticated: !!user, 
       loginWithPi, 
-      setRole, 
       logout 
     }}>
       {children}
@@ -77,8 +61,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface BottomNavProps {
   onNavigate?: (page: string) => void;
@@ -9,6 +10,8 @@ const BottomNav: React.FC<BottomNavProps> = ({
   onNavigate = () => {}, 
   currentPage = 'home' 
 }) => {
+  const { isAuthenticated } = useAuth();
+
   const navItems = [
     { label: 'Trang chủ', icon: '🏠', page: 'home' },
     { label: 'Đơn hàng', icon: '📦', page: 'don-hang' },
@@ -18,6 +21,27 @@ const BottomNav: React.FC<BottomNavProps> = ({
     { label: 'Cá nhân', icon: '👤', page: 'ca-nhan' },
   ];
 
+    const handleNavigate = (page: string) => {
+    if (page !== 'home' && !isAuthenticated) {
+      window.dispatchEvent(new CustomEvent('openModal', { 
+        detail: {
+          title: "Yêu cầu Đăng nhập",
+          children: (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ marginBottom: '16px', fontSize: '18px' }}>
+                Vui lòng đăng nhập Pi Network để sử dụng tính năng này
+              </p>
+            </div>
+          ),
+          confirmText: "🚀 Đăng nhập ngay",
+          onConfirm: () => {}
+        }
+      }));
+      return;
+    }
+    onNavigate(page);
+  };
+
   return (
     <div style={bottomNavStyle}>
       <div style={navContainer}>
@@ -26,7 +50,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
           return (
             <div
               key={item.page}
-              onClick={() => onNavigate(item.page)}
+              onClick={() => handleNavigate(item.page)}
               style={isActive ? activeNavItem : navItem}
             >
               <div style={iconStyle(isActive)}>{item.icon}</div>
@@ -39,7 +63,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
   );
 };
 
-/* ===================== STYLES TỐI ƯU ===================== */
+/* ===================== STYLES ===================== */
 const bottomNavStyle: React.CSSProperties = {
   position: 'fixed',
   bottom: 0,
@@ -88,7 +112,6 @@ const labelStyle = (active: boolean): React.CSSProperties => ({
   fontWeight: active ? '700' : '500',
   color: active ? '#4c1d95' : '#64748b',
   transition: 'all 0.3s ease',
-  letterSpacing: active ? '-0.3px' : 'normal',
 });
 
 export default BottomNav;

@@ -1,10 +1,13 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
+  const { isAuthenticated, loginWithPi } = useAuth();   // ← Đã thêm loginWithPi
+
   const cards = [
     { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn nhanh chóng", page: "gui-hang" },
     { icon: "📊", title: "TRA CỨU CƯỚC", desc: "Ước tính ngay lập tức", page: "tra-cuu-cuoc" },
@@ -13,6 +16,30 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     { icon: "📍", title: "TRACKING", desc: "Theo dõi realtime", page: "tracking" },
     { icon: "🖐️", title: "NHẬN HÀNG", desc: "Xác nhận đã nhận", page: "nhan-hang" },
   ];
+
+  const handleCardClick = (page: string) => {
+    if (!isAuthenticated) {
+      window.dispatchEvent(new CustomEvent('openModal', { 
+        detail: {
+          title: "Chào mừng đến GHN.PI",
+          children: (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ marginBottom: '16px', fontSize: '18px' }}>
+                Vui lòng đăng nhập để sử dụng tính năng này
+              </p>
+              <p style={{ fontSize: '14.5px', color: '#64748b' }}>
+                Đăng nhập Pi Network để quản lý đơn hàng, theo dõi và nhiều tính năng khác.
+              </p>
+            </div>
+          ),
+          confirmText: "🚀 Đăng nhập Pi Network",
+          onConfirm: () => {}
+        }
+      }));
+      return;
+    }
+    onNavigate(page);
+  };
 
   return (
     <div style={pageContainer}>
@@ -24,7 +51,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <p style={subtitleStyle}>Logistics Ecosystem • Pi Network</p>
       </div>
 
-            {/* Nút Đăng nhập Pi Network */}
+      {/* Nút Đăng nhập Pi Network */}
       <div style={piButtonContainer}>
         <button 
           style={piButton}
@@ -45,23 +72,18 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 confirmText: "🚀 Đăng nhập Pi Network",
                 onConfirm: () => {
                   window.dispatchEvent(new CustomEvent('showToast', { 
-                    detail: { 
-                      message: "Đang kết nối Pi Network...", 
-                      type: "success" 
-                    } 
+                    detail: { message: "Đang kết nối Pi Network...", type: "success" } 
                   }));
 
-                  // Giả lập đăng nhập thành công
                   setTimeout(() => {
+                    loginWithPi();                    // ← Gọi thật từ AuthContext
+
                     window.dispatchEvent(new CustomEvent('showToast', { 
-                      detail: { 
-                        message: "🎉 Đăng nhập Pi Network thành công!", 
-                        type: "success" 
-                      } 
+                      detail: { message: "🎉 Chào mừng Thành viên Pi!", type: "success" } 
                     }));
-                    // Đóng Modal sau khi đăng nhập thành công
-                   window.dispatchEvent(new CustomEvent('closeModal'));
-                  }, 1200);
+                    
+                    window.dispatchEvent(new CustomEvent('closeModal'));
+                  }, 1300);
                 }
               }
             }));
@@ -71,13 +93,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </button>
       </div>
 
-      
       {/* 6 Cards */}
       <div style={cardsGrid}>
         {cards.map((card, index) => (
           <div
             key={index}
-            onClick={() => onNavigate(card.page)}
+            onClick={() => handleCardClick(card.page)}
             style={cardStyle}
           >
             <div style={iconStyle}>{card.icon}</div>
