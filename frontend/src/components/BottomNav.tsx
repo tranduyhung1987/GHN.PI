@@ -10,7 +10,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
   onNavigate = () => {}, 
   currentPage = 'home' 
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loginWithPi } = useAuth();
 
   const navItems = [
     { label: 'Trang chủ', icon: '🏠', page: 'home' },
@@ -21,7 +21,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
     { label: 'Cá nhân', icon: '👤', page: 'ca-nhan' },
   ];
 
-    const handleNavigate = (page: string) => {
+  const handleNavigate = (page: string) => {
     if (page !== 'home' && !isAuthenticated) {
       window.dispatchEvent(new CustomEvent('openModal', { 
         detail: {
@@ -33,8 +33,22 @@ const BottomNav: React.FC<BottomNavProps> = ({
               </p>
             </div>
           ),
-          confirmText: "🚀 Đăng nhập ngay",
-          onConfirm: () => {}
+          confirmText: "🚀 Đăng nhập Pi Network",
+          onConfirm: () => {
+            window.dispatchEvent(new CustomEvent('showToast', { 
+              detail: { message: "Đang kết nối Pi Network...", type: "success" } 
+            }));
+
+            setTimeout(() => {
+              loginWithPi();   // ← Đăng nhập thật
+
+              window.dispatchEvent(new CustomEvent('showToast', { 
+                detail: { message: "🎉 Chào mừng Thành viên Pi!", type: "success" } 
+              }));
+              
+              window.dispatchEvent(new CustomEvent('closeModal'));
+            }, 1300);
+          }
         }
       }));
       return;

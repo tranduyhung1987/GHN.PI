@@ -21,19 +21,30 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     if (!isAuthenticated) {
       window.dispatchEvent(new CustomEvent('openModal', { 
         detail: {
-          title: "Chào mừng đến GHN.PI",
+          title: "Yêu cầu Đăng nhập",
           children: (
             <div style={{ textAlign: 'center' }}>
               <p style={{ marginBottom: '16px', fontSize: '18px' }}>
-                Vui lòng đăng nhập để sử dụng tính năng này
-              </p>
-              <p style={{ fontSize: '14.5px', color: '#64748b' }}>
-                Đăng nhập Pi Network để quản lý đơn hàng, theo dõi và nhiều tính năng khác.
+                Vui lòng đăng nhập Pi Network để sử dụng tính năng này
               </p>
             </div>
           ),
           confirmText: "🚀 Đăng nhập Pi Network",
-          onConfirm: () => {}
+          onConfirm: () => {               // ← Thêm logic login thật
+            window.dispatchEvent(new CustomEvent('showToast', { 
+              detail: { message: "Đang kết nối Pi Network...", type: "success" } 
+            }));
+
+            setTimeout(() => {
+              loginWithPi();
+
+              window.dispatchEvent(new CustomEvent('showToast', { 
+                detail: { message: "🎉 Chào mừng Thành viên Pi!", type: "success" } 
+              }));
+              
+              window.dispatchEvent(new CustomEvent('closeModal'));
+            }, 1300);
+          }
         }
       }));
       return;
