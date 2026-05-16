@@ -1,31 +1,49 @@
 import React from 'react';
 
-interface SkeletonProps {
-  count?: number;
-  className?: string;
-}
-
-const Skeleton: React.FC<SkeletonProps> = ({ count = 3, className = "" }) => {
+const Skeleton: React.FC<{ count?: number }> = ({ count = 3 }) => {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className={`bg-white/70 animate-pulse rounded-3xl p-5 mb-4 shadow-sm ${className}`}
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 bg-gray-200 rounded-2xl"></div>
-            <div className="flex-1 space-y-2">
-              <div className="h-5 bg-gray-200 rounded-xl w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded-xl w-1/2"></div>
-            </div>
-          </div>
-          <div className="h-4 bg-gray-200 rounded-xl w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded-xl w-4/5"></div>
+        <div key={i} style={skeletonCard}>
+          <div style={skeletonHeader} />
+          <div style={skeletonLine} />
+          <div style={skeletonLineShort} />
         </div>
       ))}
     </>
   );
+};
+
+const skeletonCard: React.CSSProperties = {
+  background: '#fff',
+  borderRadius: '20px',
+  padding: '20px',
+  marginBottom: '16px',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+};
+
+const skeletonHeader: React.CSSProperties = {
+  height: '20px',
+  width: '60%',
+  background: 'linear-gradient(90deg, #e0d4ff 25%, #f3e8ff 50%, #e0d4ff 75%)',
+  backgroundSize: '200% 100%',
+  borderRadius: '8px',
+  animation: 'loading 1.4s infinite',
+  marginBottom: '16px',
+};
+
+const skeletonLine: React.CSSProperties = {
+  height: '14px',
+  background: 'linear-gradient(90deg, #e0d4ff 25%, #f3e8ff 50%, #e0d4ff 75%)',
+  backgroundSize: '200% 100%',
+  borderRadius: '8px',
+  animation: 'loading 1.4s infinite',
+  marginBottom: '10px',
+};
+
+const skeletonLineShort: React.CSSProperties = {
+  ...skeletonLine,
+  width: '70%',
 };
 
 export default Skeleton;

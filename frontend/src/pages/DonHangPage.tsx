@@ -7,7 +7,7 @@ interface DonHangPageProps {
 
 const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'shipping' | 'completed'>('all');
-  const [loading, setLoading] = useState(true);   // ← Thêm loading
+  const [loading, setLoading] = useState(true);
 
   const orders = [
     { 
@@ -43,13 +43,10 @@ const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
     ? orders 
     : orders.filter(o => o.status === filter);
 
-  // Giả lập loading khi vào trang
+  // Loading khi vào trang
   useEffect(() => {
     setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1600); // 1.6 giây loading
-
+    const timer = setTimeout(() => setLoading(false), 1350);
     return () => clearTimeout(timer);
   }, []);
 
@@ -91,7 +88,7 @@ const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
         <button onClick={() => setFilter('completed')} style={filter === 'completed' ? activeTab : inactiveTab}>Hoàn thành</button>
       </div>
 
-      {/* Orders List + Skeleton */}
+      {/* Orders List */}
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {loading ? (
           <Skeleton count={3} />
@@ -128,7 +125,7 @@ const DonHangPage: React.FC<DonHangPageProps> = ({ onNavigate }) => {
   );
 };
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN CODE GỐC) ===================== */
 const pageContainer = {
   minHeight: '100vh',
   background: '#f3e8ff',
@@ -145,7 +142,7 @@ const header = {
 };
 
 const title = { 
-  fontSize: '26px', 
+  fontSize: '22px', 
   fontWeight: '700', 
   color: '#4c1d95', 
   margin: 0 

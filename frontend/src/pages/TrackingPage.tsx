@@ -24,7 +24,7 @@ interface TrackingOrder {
 function TrackingPage({ onNavigate }: TrackingPageProps) {
   const [activeFilter, setActiveFilter] = useState<'All' | OrderStatus>('All');
   const [selectedOrder, setSelectedOrder] = useState<TrackingOrder | null>(null);
-  const [loading, setLoading] = useState(true);   // ← Thêm loading
+  const [loading, setLoading] = useState(true);
 
   const [orders] = useState<TrackingOrder[]>([
     {
@@ -78,7 +78,7 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
     return colors[status];
   };
 
-  // Loading skeleton
+  // Loading skeleton khi vào trang
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
@@ -110,7 +110,7 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
         ))}
       </div>
 
-      {/* DANH SÁCH ĐƠN + SKELETON */}
+      {/* DANH SÁCH + SKELETON */}
       {loading ? (
         <Skeleton count={2} />
       ) : (
@@ -152,11 +152,11 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
   );
 }
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN BẢN GỐC) ===================== */
 const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
-  padding: '16px 14px 90px',
+  padding: '16px 14px 100px',
   boxSizing: 'border-box'
 };
 

@@ -26,28 +26,15 @@ const BottomNav: React.FC<BottomNavProps> = ({
       window.dispatchEvent(new CustomEvent('openModal', { 
         detail: {
           title: "Yêu cầu Đăng nhập",
-          children: (
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ marginBottom: '16px', fontSize: '18px' }}>
-                Vui lòng đăng nhập Pi Network để sử dụng tính năng này
-              </p>
-            </div>
-          ),
-          confirmText: "🚀 Đăng nhập Pi Network",
+          children: <div style={{ textAlign: 'center', padding: '10px 0' }}>Vui lòng đăng nhập Pi Network để tiếp tục</div>,
+          confirmText: "🚀 Đăng nhập ngay",
           onConfirm: () => {
-            window.dispatchEvent(new CustomEvent('showToast', { 
-              detail: { message: "Đang kết nối Pi Network...", type: "success" } 
-            }));
-
+            window.dispatchEvent(new CustomEvent('showToast', { detail: { message: "Đang kết nối Pi...", type: "success" } }));
             setTimeout(() => {
-              loginWithPi();   // ← Đăng nhập thật
-
-              window.dispatchEvent(new CustomEvent('showToast', { 
-                detail: { message: "🎉 Chào mừng Thành viên Pi!", type: "success" } 
-              }));
-              
+              loginWithPi();
+              window.dispatchEvent(new CustomEvent('showToast', { detail: { message: "🎉 Chào mừng Thành viên Pi!", type: "success" } }));
               window.dispatchEvent(new CustomEvent('closeModal'));
-            }, 1300);
+            }, 1200);
           }
         }
       }));
@@ -65,9 +52,11 @@ const BottomNav: React.FC<BottomNavProps> = ({
             <div
               key={item.page}
               onClick={() => handleNavigate(item.page)}
-              style={isActive ? activeNavItem : navItem}
+              style={navItem}
             >
-              <div style={iconStyle(isActive)}>{item.icon}</div>
+              <div style={iconWrapper(isActive)}>
+                <span style={iconStyle(isActive)}>{item.icon}</span>
+              </div>
               <div style={labelStyle(isActive)}>{item.label}</div>
             </div>
           );
@@ -77,23 +66,25 @@ const BottomNav: React.FC<BottomNavProps> = ({
   );
 };
 
-/* ===================== STYLES ===================== */
+/* ===================== FIXED & STABLE ANIMATION ===================== */
 const bottomNavStyle: React.CSSProperties = {
   position: 'fixed',
   bottom: 0,
   left: 0,
   right: 0,
+  height: '76px',                    // ← Chiều cao cố định
   background: 'white',
   borderTop: '1px solid #e0d4ff',
   boxShadow: '0 -4px 25px rgba(0, 0, 0, 0.12)',
   zIndex: 1000,
-  padding: '8px 0 4px',
+  padding: '6px 0 0',
 };
 
 const navContainer: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-around',
   alignItems: 'center',
+  height: '100%',
   maxWidth: '600px',
   margin: '0 auto',
 };
@@ -101,31 +92,33 @@ const navContainer: React.CSSProperties = {
 const navItem: React.CSSProperties = {
   textAlign: 'center',
   cursor: 'pointer',
-  padding: '8px 4px',
   flex: 1,
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  borderRadius: '12px',
+  padding: '6px 4px',
+  transition: 'all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1)',
 };
 
-const activeNavItem: React.CSSProperties = {
-  ...navItem,
-  background: '#f3e8ff',
-  transform: 'scale(1.12)',
-  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)',
-};
+const iconWrapper = (active: boolean): React.CSSProperties => ({
+  height: '36px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: '2px',
+  transition: 'transform 0.35s ease',
+  transform: active ? 'scale(1.18)' : 'scale(1)',
+});
 
 const iconStyle = (active: boolean): React.CSSProperties => ({
-  fontSize: active ? '30px' : '26px',
-  marginBottom: '4px',
-  transition: 'all 0.3s ease',
-  filter: active ? 'drop-shadow(0 3px 8px #7c3aed)' : 'none',
+  fontSize: active ? '31px' : '26px',
+  transition: 'all 0.35s ease',
+  filter: active ? 'drop-shadow(0 4px 8px #7c3aed)' : 'none',
 });
 
 const labelStyle = (active: boolean): React.CSSProperties => ({
-  fontSize: '12.5px',
+  fontSize: '12.2px',
   fontWeight: active ? '700' : '500',
   color: active ? '#4c1d95' : '#64748b',
-  transition: 'all 0.3s ease',
+  transition: 'all 0.35s ease',
+  lineHeight: '1',
 });
 
 export default BottomNav;

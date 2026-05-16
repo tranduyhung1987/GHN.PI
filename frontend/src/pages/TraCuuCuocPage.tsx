@@ -21,10 +21,14 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
   const [ketQua, setKetQua] = useState<number | null>(null);
 
   const [form, setForm] = useState<FormData>({
-    tinhGui: '', phuongGui: '',
-    tinhNhan: '', phuongNhan: '',
+    tinhGui: '', 
+    phuongGui: '',
+    tinhNhan: '', 
+    phuongNhan: '',
     khoiLuong: 500,
-    dai: 20, rong: 15, cao: 10,
+    dai: 20, 
+    rong: 15, 
+    cao: 10,
     loaiHang: 'hangthuong',
   });
 
@@ -42,25 +46,30 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 
   return (
     <div style={pageContainer}>
-      {/* HEADER */}
+      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
       <div style={headerStyle}>
-        <div style={{ fontSize: '44px', cursor: 'pointer' }} onClick={() => onNavigate('home')}>←</div>
         <h1 style={titleStyle}>🔎 TRA CỨU CƯỚC</h1>
       </div>
 
       {/* TABS */}
       <div style={tabContainer}>
-        <button onClick={() => setActiveTab('cuoc')} style={activeTab === 'cuoc' ? activeTabStyle : inactiveTabStyle}>
+        <button 
+          onClick={() => setActiveTab('cuoc')} 
+          style={activeTab === 'cuoc' ? activeTabStyle : inactiveTabStyle}
+        >
           Ước tính cước phí
         </button>
-        <button onClick={() => setActiveTab('tim')} style={activeTab === 'tim' ? activeTabStyle : inactiveTabStyle}>
+        <button 
+          onClick={() => setActiveTab('tim')} 
+          style={activeTab === 'tim' ? activeTabStyle : inactiveTabStyle}
+        >
           Tìm bưu cục
         </button>
       </div>
 
       {activeTab === 'cuoc' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Thông tin địa chỉ */}
+          {/* Phần còn lại giữ nguyên như code trước */}
           <div style={cardStyle}>
             <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>📍 Thông tin địa chỉ</h3>
             
@@ -95,7 +104,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
             </div>
           </div>
 
-          {/* Hàng hóa */}
           <div style={cardStyle}>
             <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>📦 Hàng hóa cần gửi</h3>
 
@@ -114,10 +122,19 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 
             <div>
               <p style={subLabel}>Kích thước (cm)</p>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input type="number" placeholder="Dài" value={form.dai} onChange={(e) => setForm({...form, dai: parseInt(e.target.value) || 20})} style={sizeInputStyle} />
-                <input type="number" placeholder="Rộng" value={form.rong} onChange={(e) => setForm({...form, rong: parseInt(e.target.value) || 15})} style={sizeInputStyle} />
-                <input type="number" placeholder="Cao" value={form.cao} onChange={(e) => setForm({...form, cao: parseInt(e.target.value) || 10})} style={sizeInputStyle} />
+              <div style={sizeContainer}>
+                <div style={sizeField}>
+                  <small style={sizeLabel}>Dài</small>
+                  <input type="number" value={form.dai} onChange={(e) => setForm({...form, dai: parseInt(e.target.value) || 20})} style={sizeInput} />
+                </div>
+                <div style={sizeField}>
+                  <small style={sizeLabel}>Rộng</small>
+                  <input type="number" value={form.rong} onChange={(e) => setForm({...form, rong: parseInt(e.target.value) || 15})} style={sizeInput} />
+                </div>
+                <div style={sizeField}>
+                  <small style={sizeLabel}>Cao</small>
+                  <input type="number" value={form.cao} onChange={(e) => setForm({...form, cao: parseInt(e.target.value) || 10})} style={sizeInput} />
+                </div>
               </div>
             </div>
           </div>
@@ -141,23 +158,62 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 }
 
 /* ===================== STYLES ===================== */
-const pageContainer = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 120px', boxSizing: 'border-box' as const };
+const pageContainer: React.CSSProperties = { 
+  minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 120px', boxSizing: 'border-box' as const 
+};
 
-const headerStyle = { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' };
-const titleStyle = { fontSize: '26px', fontWeight: '700', color: '#4c1d95', margin: 0 };
+const headerStyle: React.CSSProperties = { 
+  display: 'flex', 
+  alignItems: 'center', 
+  justifyContent: 'center',   // Căn giữa title
+  marginBottom: '20px' 
+};
+const titleStyle: React.CSSProperties = { 
+  fontSize: '26px', 
+  fontWeight: '700', 
+  color: '#4c1d95', 
+  margin: 0 
+};
 
-const cardStyle = { background: '#ede9fe', padding: '20px', borderRadius: '16px', border: '1px solid #c4b5fd' };
-const subLabel = { color: '#6b21a8', marginBottom: '8px', fontSize: '14.5px', fontWeight: '600' };
-const selectStyle = { width: '100%', padding: '13px 12px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95' };
-const inputStyle = { width: '100%', padding: '13px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95' };
-const sizeInputStyle = { flex: 1, padding: '12px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '10px', textAlign: 'center' as const };
+const cardStyle: React.CSSProperties = { 
+  background: '#ede9fe', padding: '20px', borderRadius: '16px', border: '1px solid #c4b5fd' 
+};
+const subLabel: React.CSSProperties = { 
+  color: '#6b21a8', marginBottom: '8px', fontSize: '14.5px', fontWeight: '600' 
+};
+const selectStyle: React.CSSProperties = { 
+  width: '100%', padding: '13px 12px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95' 
+};
+const inputStyle: React.CSSProperties = { 
+  width: '100%', padding: '13px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95' 
+};
 
-const activeTypeBtn = { flex: 1, padding: '12px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '600' };
-const inactiveTypeBtn = { flex: 1, padding: '12px', background: '#e0e7ff', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px' };
+const sizeContainer: React.CSSProperties = { display: 'flex', gap: '10px' };
+const sizeField: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column' as const };
+const sizeLabel: React.CSSProperties = { fontSize: '12px', color: '#6b21a8', marginBottom: '4px' };
+const sizeInput: React.CSSProperties = { 
+  width: '100%', padding: '10px 8px', background: '#f3e8ff', border: '1px solid #c4b5fd', 
+  borderRadius: '10px', textAlign: 'center' as const, fontSize: '15px' 
+};
 
-const calcButtonStyle = { width: '100%', padding: '18px', fontSize: '17px', fontWeight: '700', background: 'linear-gradient(90deg, #22d3ee, #67e8f9)', color: '#0f172a', border: 'none', borderRadius: '9999px', marginTop: '10px' };
-const resultStyle = { background: '#ede9fe', padding: '24px', borderRadius: '16px', textAlign: 'center' as const, border: '1px solid #22d3ee' };
+const activeTypeBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '600' };
+const inactiveTypeBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#e0e7ff', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px' };
 
-const tabContainer = { display: 'flex', background: '#e0e7ff', borderRadius: '9999px', padding: '6px', marginBottom: '24px' };
-const activeTabStyle = { flex: 1, padding: '14px', borderRadius: '9999px', background: '#22d3ee', color: '#0f172a', fontWeight: '700' };
-const inactiveTabStyle = { flex: 1, padding: '14px', borderRadius: '9999px', background: '#e0e7ff', color: '#4c1d95' };
+const calcButtonStyle: React.CSSProperties = { 
+  width: '100%', padding: '18px', fontSize: '17px', fontWeight: '700', 
+  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)', color: '#0f172a', border: 'none', 
+  borderRadius: '9999px', marginTop: '10px' 
+};
+const resultStyle: React.CSSProperties = { 
+  background: '#ede9fe', padding: '24px', borderRadius: '16px', textAlign: 'center' as const, border: '1px solid #22d3ee' 
+};
+
+const tabContainer: React.CSSProperties = { 
+  display: 'flex', background: '#e0e7ff', borderRadius: '9999px', padding: '6px', marginBottom: '24px' 
+};
+const activeTabStyle: React.CSSProperties = { 
+  flex: 1, padding: '14px', borderRadius: '9999px', background: '#22d3ee', color: '#0f172a', fontWeight: '700' 
+};
+const inactiveTabStyle: React.CSSProperties = { 
+  flex: 1, padding: '14px', borderRadius: '9999px', background: '#e0e7ff', color: '#4c1d95' 
+};
