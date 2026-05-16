@@ -1,13 +1,6 @@
-// src/contexts/AuthContext.tsx
-import React, { 
-  createContext, 
-  useContext, 
-  useState, 
-  useEffect, 
-  type ReactNode   // ← Sửa lỗi đỏ ở đây
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type Role = 'guest' | 'shop' | 'driver' | 'warehouse' | 'admin';
+export type Role = 'guest' | 'member' | 'driver' | 'warehouse' | 'admin';
 
 export interface User {
   id: string;
@@ -33,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const role = user?.role || 'guest';
   const isAuthenticated = !!user && role !== 'guest';
 
-  // Load user từ localStorage
+  // Load từ localStorage khi mở app
   useEffect(() => {
     const savedUser = localStorage.getItem('ghnpi_user');
     if (savedUser) {
@@ -42,17 +35,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const loginWithPi = async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const tempUser: User = {
-      id: 'pi_' + Date.now(),
+    // Giả lập kết nối Pi Network
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    const newUser: User = {
+      id: 'pi_' + Date.now().toString(36),
       name: 'Người dùng Pi',
-      role: 'guest',
-      piAddress: 'Pi1abc...xyz'
+      role: 'member',           // Mặc định là member
+      piAddress: 'Pi1abc...xyz123'
     };
-    
-    setUser(tempUser);
-    localStorage.setItem('ghnpi_user', JSON.stringify(tempUser));
+
+    setUser(newUser);
+    localStorage.setItem('ghnpi_user', JSON.stringify(newUser));
   };
 
   const setRole = (newRole: Role) => {

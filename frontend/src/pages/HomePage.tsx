@@ -24,7 +24,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <p style={subtitleStyle}>Logistics Ecosystem • Pi Network</p>
       </div>
 
-      {/* Nút Đăng nhập Pi Network - Mở Modal + Toast */}
+            {/* Nút Đăng nhập Pi Network */}
       <div style={piButtonContainer}>
         <button 
           style={piButton}
@@ -44,13 +44,22 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 ),
                 confirmText: "🚀 Đăng nhập Pi Network",
                 onConfirm: () => {
-                  // Gọi Toast đẹp thay vì alert
                   window.dispatchEvent(new CustomEvent('showToast', { 
                     detail: { 
                       message: "Đang kết nối Pi Network...", 
                       type: "success" 
                     } 
                   }));
+
+                  // Giả lập login thành công sau 1.2s
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('showToast', { 
+                      detail: { 
+                        message: "🎉 Đăng nhập Pi Network thành công!", 
+                        type: "success" 
+                      } 
+                    }));
+                  }, 1200);
                 }
               }
             }));
