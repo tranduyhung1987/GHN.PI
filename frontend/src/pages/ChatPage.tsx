@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ChatPageProps {
   onNavigate: (page: string) => void;
@@ -13,6 +14,7 @@ type Message = {
 };
 
 const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
+  const { isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: "Chào bạn! Bạn cần hỗ trợ gì hôm nay?", isUser: false, time: "10:32" },
   ]);
@@ -22,7 +24,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sendMessage = () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !isAuthenticated) return;
 
     const newMsg: Message = {
       id: Date.now(),
@@ -33,6 +35,15 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
 
     setMessages(prev => [...prev, newMsg]);
     setNewMessage('');
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        text: "Cảm ơn bạn! Đơn hàng của bạn đang được xử lý. Bạn cần hỗ trợ thêm gì không?",
+        isUser: false,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    }, 800);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,11 +56,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
       text: '',
       isUser: true,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      file: {
-        name: file.name,
-        url: fileUrl,
-        type: file.type
-      }
+      file: { name: file.name, url: fileUrl, type: file.type }
     };
 
     setMessages(prev => [...prev, newMsg]);
@@ -60,9 +67,13 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
     if (e.key === 'Enter') sendMessage();
   };
 
+  if (!isAuthenticated) {
+    return <div style={{ padding: '40px 20px', textAlign: 'center' }}>Vui lòng đăng nhập để sử dụng Chat hỗ trợ</div>;
+  }
+
   return (
     <div style={pageContainer}>
-      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
+      {/* HEADER */}
       <div style={header}>
         <div style={{ fontSize: '42px' }}>💬</div>
         <div>
@@ -92,14 +103,9 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
         ))}
       </div>
 
-      {/* INPUT AREA */}
+      {/* INPUT AREA - ĐÃ ĐIỀU CHỈNH KHÔNG BỊ CHE */}
       <div style={inputArea}>
-        <div 
-          onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
-          style={plusButton}
-        >
-          +
-        </div>
+        <div onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} style={plusButton}>+</div>
 
         <input
           type="file"
@@ -137,7 +143,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
 const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
-  padding: '16px 14px 90px',
+  padding: '16px 14px 160px',   // ← Tăng padding dưới để tránh che
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column' as const
@@ -199,13 +205,14 @@ const timeStyle: React.CSSProperties = {
 
 const inputArea: React.CSSProperties = {
   position: 'fixed',
-  bottom: '70px',
+  bottom: '110px',           // ← Tăng khoảng cách để không bị BottomNav che
   left: '14px',
   right: '14px',
   display: 'flex',
   gap: '8px',
   background: '#f3e8ff',
-  padding: '8px 0'
+  padding: '8px 0',
+  zIndex: 10
 };
 
 const plusButton: React.CSSProperties = {
@@ -242,7 +249,7 @@ const sendButton: React.CSSProperties = {
 
 const attachmentMenu: React.CSSProperties = {
   position: 'fixed',
-  bottom: '130px',
+  bottom: '150px',
   left: '20px',
   background: 'white',
   borderRadius: '16px',
