@@ -17,6 +17,7 @@ import ChatPage from './pages/ChatPage'
 import BottomNav from './components/BottomNav'
 import Modal from './components/Modal'
 import Toast from './components/Toast'
+import PullToRefresh from './components/PullToRefresh'   // ← Import PullToRefresh
 
 type Page = 
   | 'home' 
@@ -92,43 +93,45 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
-      {/* Các trang chính */}
-      {currentPage === 'home' && <HomePage onNavigate={goTo} />}
-      {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
-      {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}
-      {currentPage === 'tracking' && <TrackingPage onNavigate={goTo} />}
-      {currentPage === 'nhan-hang' && <NhanHangPage onNavigate={goTo} />}
-      {currentPage === 'tra-cuu-cuoc' && <TraCuuCuocPage onNavigate={goTo} />}
-      {currentPage === 'tai-xe' && <TaiXePage onNavigate={goTo} />}
-      {currentPage === 'ca-nhan' && <CaNhanPage onNavigate={goTo} />}
-      {currentPage === 'don-hang' && <DonHangPage onNavigate={goTo} />}
-      {currentPage === 'doi-soat' && <DoiSoatPage onNavigate={goTo} />}
-      {currentPage === 'khieu-nai' && <KhieuNaiPage onNavigate={goTo} />}
-      {currentPage === 'chat' && <ChatPage onNavigate={goTo} />}
+    <PullToRefresh onRefresh={() => window.location.reload()}>
+      <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
+        {/* Các trang chính */}
+        {currentPage === 'home' && <HomePage onNavigate={goTo} />}
+        {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
+        {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}
+        {currentPage === 'tracking' && <TrackingPage onNavigate={goTo} />}
+        {currentPage === 'nhan-hang' && <NhanHangPage onNavigate={goTo} />}
+        {currentPage === 'tra-cuu-cuoc' && <TraCuuCuocPage onNavigate={goTo} />}
+        {currentPage === 'tai-xe' && <TaiXePage onNavigate={goTo} />}
+        {currentPage === 'ca-nhan' && <CaNhanPage onNavigate={goTo} />}
+        {currentPage === 'don-hang' && <DonHangPage onNavigate={goTo} />}
+        {currentPage === 'doi-soat' && <DoiSoatPage onNavigate={goTo} />}
+        {currentPage === 'khieu-nai' && <KhieuNaiPage onNavigate={goTo} />}
+        {currentPage === 'chat' && <ChatPage onNavigate={goTo} />}
 
-      {/* BottomNav */}
-      <BottomNav onNavigate={goTo} currentPage={currentPage} />
+        {/* BottomNav */}
+        <BottomNav onNavigate={goTo} currentPage={currentPage} />
 
-      {/* Modal dùng chung */}
-      <Modal
-        isOpen={modal.isOpen}
-        onClose={closeModal}
-        title={modal.title}
-        onConfirm={modal.onConfirm}
-      >
-        {modal.children}
-      </Modal>
+        {/* Modal dùng chung */}
+        <Modal
+          isOpen={modal.isOpen}
+          onClose={closeModal}
+          title={modal.title}
+          onConfirm={modal.onConfirm}
+        >
+          {modal.children}
+        </Modal>
 
-      {/* Toast Notification */}
-      {toast && (
-        <Toast 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={hideToast} 
-        />
-      )}
-    </div>
+        {/* Toast Notification */}
+        {toast && (
+          <Toast 
+            message={toast.message} 
+            type={toast.type} 
+            onClose={hideToast} 
+          />
+        )}
+      </div>
+    </PullToRefresh>
   )
 }
 
