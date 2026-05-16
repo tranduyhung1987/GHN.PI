@@ -39,6 +39,8 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
     ghiChu: ''
   });
 
+  const [paymentMethod, setPaymentMethod] = useState<'prepaid' | 'cod'>('prepaid');
+
   const calculateFee = (): number => {
     const weight = form.trongLuong;
     const volWeight = (form.dai * form.rong * form.cao) / 5000;
@@ -59,23 +61,31 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
     }
 
     setIsProcessing(true);
+
     setTimeout(() => {
       const newMaDon = `GHN${Date.now().toString().slice(-8)}`;
       setMaDon(newMaDon);
       setIsProcessing(false);
       setShowSuccess(true);
-    }, 1200);
+
+      console.log('✅ Đơn hàng đã tạo:', { 
+        maDon: newMaDon, 
+        ...form, 
+        tongPi: piAmount,
+        thanhToan: paymentMethod === 'prepaid' ? 'Thanh toán trước' : 'Thu hộ (COD Pi)'
+      });
+    }, 1500);
   };
 
   return (
     <div style={pageContainer}>
-      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
+      {/* HEADER - GIỮ NGUYÊN */}
       <div style={headerStyle}>
         <h1 style={titleStyle}>GỬI HÀNG</h1>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-        {/* Loại đơn */}
+        {/* Loại đơn - GIỮ NGUYÊN */}
         <div>
           <label style={labelStyle}>Loại đơn hàng</label>
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -90,7 +100,22 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
           </div>
         </div>
 
-        {/* Người gửi & Người nhận */}
+        {/* Phương thức thanh toán - BỔ SUNG THEO QUY TRÌNH v1.1 */}
+        <div>
+          <label style={labelStyle}>Phương thức thanh toán</label>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button type="button" onClick={() => setPaymentMethod('prepaid')} 
+              style={paymentMethod === 'prepaid' ? activeToggle : inactiveToggle}>
+              💰 Thanh toán trước
+            </button>
+            <button type="button" onClick={() => setPaymentMethod('cod')} 
+              style={paymentMethod === 'cod' ? activeToggle : inactiveToggle}>
+              📦 Thu hộ (COD Pi)
+            </button>
+          </div>
+        </div>
+
+        {/* Người gửi & Người nhận - GIỮ NGUYÊN */}
         <div>
           <label style={labelStyle}>Người gửi</label>
           <input type="text" placeholder="Họ tên người gửi" value={form.nguoiGui} onChange={(e) => setForm({ ...form, nguoiGui: e.target.value })} style={inputStyle} />
@@ -105,7 +130,7 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
           <input type="text" placeholder="Địa chỉ nhận hàng" value={form.diaChiNhan} onChange={(e) => setForm({ ...form, diaChiNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
         </div>
 
-        {/* Thông tin kiện hàng */}
+        {/* Thông tin kiện hàng - GIỮ NGUYÊN */}
         <div>
           <label style={labelStyle}>Thông tin kiện hàng</label>
           <div style={{ marginBottom: '12px' }}>
@@ -127,26 +152,58 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
           <input type="text" placeholder="Ghi chú cho tài xế..." value={form.ghiChu} onChange={(e) => setForm({ ...form, ghiChu: e.target.value })} style={inputStyle} />
         </div>
 
-        {/* Ước tính cước */}
+        {/* Ước tính cước - GIỮ NGUYÊN */}
         <div style={feeBoxStyle}>
           <p style={{ color: '#6b21a8', marginBottom: '6px' }}>Ước tính cước vận chuyển</p>
           <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#22d3ee' }}>
             {piAmount.toLocaleString()} <span style={{ fontSize: '18px' }}>Pi</span>
           </p>
+          {paymentMethod === 'cod' && (
+            <p style={{ color: '#10b981', fontSize: '15px', marginTop: '8px' }}>
+              💰 Người nhận sẽ thanh toán khi nhận hàng
+            </p>
+          )}
         </div>
 
         <button type="submit" disabled={isProcessing} style={submitButton}>
-          {isProcessing ? 'Đang xử lý...' : `TẠO ĐƠN & THANH TOÁN ${piAmount.toLocaleString()} Pi`}
+          {isProcessing 
+            ? 'Đang xử lý...' 
+            : paymentMethod === 'prepaid' 
+              ? `TẠO ĐƠN & THANH TOÁN ${piAmount.toLocaleString()} Pi` 
+              : `TẠO ĐƠN THU HỘ ${piAmount.toLocaleString()} Pi`}
         </button>
       </form>
 
-      {/* Success Modal */}
+      {/* Success Modal - ĐÃ CẬP NHẬT THEO THU HỘ */}
       {showSuccess && (
         <div style={modalOverlay}>
           <div style={modalContent}>
             <h2 style={{ color: '#22d3ee', marginBottom: '16px' }}>✅ Tạo đơn thành công!</h2>
-            <p><strong>Mã đơn:</strong> {maDon}</p>
-            <button onClick={() => { setShowSuccess(false); onNavigate('tracking'); }} style={modalButton}>
+            <p><strong>Mã đơn hàng:</strong> <span style={{ color: '#22d3ee', fontSize: '18px' }}>{maDon}</span></p>
+            <p style={{ marginTop: '8px' }}>
+              {paymentMethod === 'prepaid' 
+                ? 'Đã thanh toán trước bằng Pi.' 
+                : 'Thu hộ (COD Pi) - Người nhận thanh toán khi nhận hàng.'}
+            </p>
+            <p style={{ marginTop: '12px', color: '#94a3b8' }}>Đơn hàng đã được ghi nhận và chờ tài xế nhận.</p>
+            
+            <button 
+              onClick={() => { 
+                setShowSuccess(false); 
+                onNavigate('don-hang'); 
+              }} 
+              style={modalButton}
+            >
+              Xem danh sách đơn hàng
+            </button>
+            
+            <button 
+              onClick={() => { 
+                setShowSuccess(false); 
+                onNavigate('tracking'); 
+              }} 
+              style={{ ...modalButton, background: '#64748b', marginTop: '10px' }}
+            >
               Theo dõi đơn hàng ngay
             </button>
           </div>
@@ -156,7 +213,7 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
   );
 }
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN HOÀN TOÀN) ===================== */
 const pageContainer = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' as const };
 
 const headerStyle = { display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' };

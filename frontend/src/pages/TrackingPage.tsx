@@ -18,6 +18,7 @@ interface TrackingOrder {
   viTriHienTai: string;
   thoiGianCapNhat: string;
   repScore: number;
+  paymentType?: 'prepaid' | 'cod';   // Thu hộ Pi
   timeline: Array<{ time: string; status: string; done: boolean }>;
 }
 
@@ -36,8 +37,9 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
       trangThai: 'DangGiao',
       soPi: 45000,
       viTriHienTai: "Cách điểm giao 0.8km",
-      thoiGianCapNhat: "15/05/2026 14:30",
+      thoiGianCapNhat: "16/05/2026 14:30",
       repScore: 92,
+      paymentType: "prepaid",
       timeline: [
         { time: "08:15", status: "Đơn đã tạo", done: true },
         { time: "09:40", status: "Tài xế nhận đơn", done: true },
@@ -55,8 +57,9 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
       trangThai: 'DaGiao',
       soPi: 28500,
       viTriHienTai: "Đã giao thành công",
-      thoiGianCapNhat: "14/05/2026 14:35",
+      thoiGianCapNhat: "15/05/2026 14:35",
       repScore: 81,
+      paymentType: "cod",
       timeline: [
         { time: "07:00", status: "Đơn đã tạo", done: true },
         { time: "09:30", status: "Tài xế nhận đơn", done: true },
@@ -78,18 +81,21 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
     return colors[status];
   };
 
+  const getPaymentText = (type?: string) => 
+    type === 'cod' ? '📦 Thu hộ Pi' : '💰 Thanh toán trước';
+
   // Loading skeleton khi vào trang
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1400);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <div style={pageContainer}>
-      {/* HEADER */}
+      {/* HEADER - GIỮ NGUYÊN */}
       <div style={header}>
         <h1 style={title}>📍 TRACKING</h1>
         <button style={refreshBtn}>🔄 Cập nhật</button>
@@ -97,7 +103,7 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
 
       <p style={subtitle}>Theo dõi đơn hàng thời gian thực • Minh bạch trên blockchain</p>
 
-      {/* FILTER TABS */}
+      {/* FILTER TABS - GIỮ NGUYÊN */}
       <div style={filterContainer}>
         {(['All', 'DangGiao', 'DaGiao', 'DangXuLy'] as const).map(f => (
           <button
@@ -110,7 +116,7 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
         ))}
       </div>
 
-      {/* DANH SÁCH + SKELETON */}
+      {/* DANH SÁCH + SKELETON - GIỮ NGUYÊN CẤU TRÚC */}
       {loading ? (
         <Skeleton count={2} />
       ) : (
@@ -142,6 +148,10 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
               <div style={{ color: '#eab308' }}>{order.repScore} ★</div>
             </div>
 
+            <div style={{ marginTop: '8px', color: '#10b981', fontSize: '14.5px' }}>
+              {getPaymentText(order.paymentType)}
+            </div>
+
             <div style={{ marginTop: '12px', color: '#64748b', fontSize: '14.5px' }}>
               {order.viTriHienTai}
             </div>
@@ -152,7 +162,7 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
   );
 }
 
-/* ===================== STYLES (GIỮ NGUYÊN BẢN GỐC) ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN HOÀN TOÀN) ===================== */
 const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',

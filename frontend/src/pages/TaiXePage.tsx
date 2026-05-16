@@ -1,21 +1,45 @@
-import { useState } from 'react';   // ← Đã bỏ React thừa
+import { useState } from 'react';
 
 interface TaiXePageProps {
   onNavigate: (page: string) => void;
 }
 
 function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
+  const [activeTab, setActiveTab] = useState<'near' | 'current' | 'history'>('near');
   const [reputation, setReputation] = useState(87);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [currentOrderToReceive, setCurrentOrderToReceive] = useState<any>(null);
+  const [currentOrderToScan, setCurrentOrderToScan] = useState<any>(null);
 
   const [availableOrders, setAvailableOrders] = useState([
-    { maDon: "GHN17489231", loaiDon: "Hỏa Tốc", nguoiGui: "Nguyễn Thị Lan", diaChi: "123 Đường ABC, Quận 1, TP.HCM", khoangCach: "1.2km", phi: 45000 },
-    { maDon: "GHN17488902", loaiDon: "Hỏa Tốc", nguoiGui: "Trần Văn Hải", diaChi: "456 Nguyễn Huệ, Quận 3, TP.HCM", khoangCach: "2.8km", phi: 38000 },
+    { 
+      maDon: "GHN17489231", 
+      loaiDon: "Hỏa Tốc", 
+      nguoiGui: "Nguyễn Thị Lan", 
+      sdtGui: "0912345678",
+      diaChiGui: "123 Đường ABC, Quận 1, TP.HCM",
+      nguoiNhan: "Trần Thị Hoa",
+      sdtNhan: "0987654321",
+      diaChiNhan: "456 Nguyễn Văn Linh, Quận 7, TP.HCM",
+      khoangCach: "1.2km", 
+      phi: 45000 
+    },
+    { 
+      maDon: "GHN17488902", 
+      loaiDon: "Đường Dài", 
+      nguoiGui: "Phạm Minh Quân", 
+      sdtGui: "0978123456",
+      diaChiGui: "89 Lê Lợi, Quận 1, TP.HCM",
+      nguoiNhan: "Lê Văn Nam",
+      sdtNhan: "0933456789",
+      diaChiNhan: "112 Pasteur, Quận 3, TP.HCM",
+      khoTrungChuyen: "Kho Hub Quận 7 - 789 Nguyễn Văn Linh",
+      khoangCach: "2.8km", 
+      phi: 38000 
+    },
   ]);
 
   const [myCurrentOrders, setMyCurrentOrders] = useState<any[]>([]);
-  const [_completedOrders, setCompletedOrders] = useState<any[]>([]);   // ← Fix lỗi completedOrders unused
+  const [completedOrders, setCompletedOrders] = useState<any[]>([]);   // ← Tab Lịch sử
 
   const showToast = (message: string) => {
     alert(message);
@@ -36,23 +60,32 @@ function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
   };
 
   const handleNhanDon = (order: any) => {
-    setCurrentOrderToReceive(order);
+    setAvailableOrders(prev => prev.filter(o => o.maDon !== order.maDon));
+    setMyCurrentOrders(prev => [...prev, {
+      ...order,
+      trangThai: "Đang di chuyển đến người gửi",
+    }]);
+    showToast(`✅ ĐÃ NHẬN ĐƠN ${order.maDon}`);
+    setActiveTab('current');
+  };
+
+  const handleOpenQR = (order: any) => {
+    setCurrentOrderToScan(order);
     setShowQRModal(true);
   };
 
   const handleQRScanSuccess = () => {
-    if (!currentOrderToReceive) return;
+    if (!currentOrderToScan) return;
 
-    setAvailableOrders(prev => prev.filter(o => o.maDon !== currentOrderToReceive.maDon));
-    setMyCurrentOrders(prev => [...prev, {
-      ...currentOrderToReceive,
-      trangThai: "Đang lấy hàng",
-      thoiGianNhan: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-    }]);
+    setMyCurrentOrders(prev => prev.map(o => 
+      o.maDon === currentOrderToScan.maDon 
+        ? { ...o, trangThai: "Đang lấy hàng / Đang giao" } 
+        : o
+    ));
 
-    showToast(`✅ ĐÃ NHẬN ĐƠN ${currentOrderToReceive.maDon}`);
+    showToast(`✅ ĐÃ NHẬN HÀNG THÀNH CÔNG - Đơn ${currentOrderToScan.maDon}`);
     setShowQRModal(false);
-    setCurrentOrderToReceive(null);
+    setCurrentOrderToScan(null);
   };
 
   const tuChoiDon = (maDon: string) => {
@@ -67,16 +100,23 @@ function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
     
     const order = myCurrentOrders.find(o => o.maDon === maDon);
     if (order) {
-      setCompletedOrders(prev => [...prev, { ...order, ngayHoanThanh: new Date().toLocaleDateString('vi-VN') }]);
+      const completedOrder = { 
+        ...order, 
+        trangThai: "Hoàn thành", 
+        ngayHoanThanh: new Date().toLocaleDateString('vi-VN') 
+      };
+      
+      setCompletedOrders(prev => [...prev, completedOrder]);
       setMyCurrentOrders(prev => prev.filter(o => o.maDon !== maDon));
       setReputation(prev => Math.min(100, prev + 3));
-      showToast(`🎉 HOÀN THÀNH ĐƠN ${maDon}`);
+      
+      showToast(`🎉 HOÀN THÀNH ĐƠN ${maDon} - Đã chuyển vào Lịch sử`);
     }
   };
 
   return (
     <div style={{ padding: '20px 14px 100px', background: '#f3e8ff', minHeight: '100vh' }}>
-      {/* HEADER - Không có mũi tên */}
+      {/* HEADER */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#4c1d95', margin: 0 }}>🏍️ TÀI XẾ</h1>
       </div>
@@ -91,15 +131,22 @@ function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
         </div>
       </div>
 
-      {/* Available Orders */}
-      {availableOrders.length > 0 && (
+      {/* TABS */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+        <button onClick={() => setActiveTab('near')} style={activeTab === 'near' ? activeTabStyle : inactiveTabStyle}>Đơn gần tôi</button>
+        <button onClick={() => setActiveTab('current')} style={activeTab === 'current' ? activeTabStyle : inactiveTabStyle}>Đơn đang làm</button>
+        <button onClick={() => setActiveTab('history')} style={activeTab === 'history' ? activeTabStyle : inactiveTabStyle}>Lịch sử</button>
+      </div>
+
+      {/* ĐƠN GẦN TÔI */}
+      {activeTab === 'near' && availableOrders.length > 0 && (
         <div style={{ marginBottom: '40px' }}>
           <h3 style={{ marginBottom: '16px', color: '#4c1d95' }}>Đơn hàng gần bạn</h3>
           {availableOrders.map((order) => (
             <div key={order.maDon} style={orderCardStyle}>
               <div style={{ fontWeight: 'bold' }}>{order.maDon}</div>
               <div>{order.nguoiGui}</div>
-              <div style={{ color: '#64748b' }}>{order.diaChi}</div>
+              <div style={{ color: '#64748b' }}>{order.diaChiGui}</div>
               <div style={{ marginTop: '12px', color: '#22d3ee', fontWeight: 'bold' }}>
                 {order.khoangCach} • {order.phi.toLocaleString()} Pi
               </div>
@@ -112,33 +159,73 @@ function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
         </div>
       )}
 
-      {/* My Current Orders */}
-      {myCurrentOrders.length > 0 && (
+      {/* ĐƠN ĐANG LÀM */}
+      {activeTab === 'current' && myCurrentOrders.length > 0 && (
         <div style={{ marginBottom: '40px' }}>
           <h3 style={{ marginBottom: '16px', color: '#4c1d95' }}>Đơn đang thực hiện</h3>
           {myCurrentOrders.map((order) => (
             <div key={order.maDon} style={myOrderCardStyle}>
+              <div style={{ fontWeight: 'bold' }}>{order.maDon} • {order.loaiDon}</div>
+              
+              <div style={{ margin: '12px 0', fontSize: '15px', lineHeight: '1.6' }}>
+                <strong>Người gửi:</strong> {order.nguoiGui} - {order.sdtGui}<br/>
+                <strong>Địa chỉ gửi:</strong> {order.diaChiGui}<br/><br/>
+                
+                <strong>Người nhận:</strong> {order.nguoiNhan} - {order.sdtNhan}<br/>
+                <strong>Địa chỉ nhận:</strong> {order.diaChiNhan}
+                {order.khoTrungChuyen && (
+                  <>
+                    <br/><br/>
+                    <strong>Kho trung chuyển:</strong> {order.khoTrungChuyen}
+                  </>
+                )}
+              </div>
+
+              <div style={{ color: '#22d3ee', marginBottom: '12px' }}>{order.trangThai}</div>
+
+              {order.trangThai.includes("di chuyển") && (
+                <button onClick={() => handleOpenQR(order)} style={qrButtonStyle}>
+                  📱 Đã đến - Quét QR nhận hàng
+                </button>
+              )}
+
+              {order.trangThai.includes("lấy hàng") && (
+                <button onClick={() => hoanThanhDon(order.maDon)} style={completeButtonStyle}>
+                  ✅ Hoàn thành giao hàng
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* LỊCH SỬ ĐƠN HÀNG - MỚI THÊM */}
+      {activeTab === 'history' && completedOrders.length > 0 && (
+        <div style={{ marginBottom: '40px' }}>
+          <h3 style={{ marginBottom: '16px', color: '#4c1d95' }}>Lịch sử hoàn thành</h3>
+          {completedOrders.map((order) => (
+            <div key={order.maDon} style={myOrderCardStyle}>
               <div style={{ fontWeight: 'bold' }}>{order.maDon}</div>
-              <div style={{ color: '#22d3ee' }}>{order.trangThai}</div>
-              <button onClick={() => hoanThanhDon(order.maDon)} style={completeButtonStyle}>
-                ✅ Hoàn thành
-              </button>
+              <div style={{ color: '#22c55e' }}>Hoàn thành • {order.ngayHoanThanh}</div>
+              <div style={{ marginTop: '8px', color: '#94a3b8', fontSize: '14px' }}>
+                {order.nguoiNhan} - {order.diaChiNhan}
+              </div>
             </div>
           ))}
         </div>
       )}
 
       {/* QR Modal */}
-      {showQRModal && currentOrderToReceive && (
+      {showQRModal && currentOrderToScan && (
         <div style={modalOverlay}>
           <div style={modalContent}>
-            <h2>Quét mã QR đơn hàng</h2>
+            <h2>Quét mã QR nhận hàng</h2>
             <p style={{ textAlign: 'center', margin: '20px 0' }}>
-              Đơn: <strong>{currentOrderToReceive.maDon}</strong>
+              Đơn: <strong>{currentOrderToScan.maDon}</strong>
             </p>
             <div style={qrMock}>
               <div style={{ fontSize: '80px' }}>📱</div>
-              <p>Hướng camera vào mã QR trên đơn hàng</p>
+              <p>Hướng camera vào mã QR trên kiện hàng</p>
             </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
               <button onClick={() => setShowQRModal(false)} style={cancelBtn}>Hủy</button>
@@ -153,7 +240,7 @@ function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
   );
 }
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN) ===================== */
 const reputationHeaderStyle = {
   backgroundColor: '#1e2937',
   padding: '24px',
@@ -202,6 +289,18 @@ const rejectButtonStyle = {
   cursor: 'pointer'
 };
 
+const qrButtonStyle = {
+  width: '100%',
+  padding: '16px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  marginBottom: '12px'
+};
+
 const completeButtonStyle = {
   width: '100%',
   padding: '16px',
@@ -210,8 +309,7 @@ const completeButtonStyle = {
   border: 'none',
   borderRadius: '9999px',
   fontWeight: 'bold',
-  cursor: 'pointer',
-  marginTop: '12px'
+  cursor: 'pointer'
 };
 
 const modalOverlay = {
@@ -260,6 +358,24 @@ const confirmBtn = {
   borderRadius: '9999px',
   fontWeight: 'bold',
   cursor: 'pointer'
+};
+
+const activeTabStyle = {
+  padding: '12px 20px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  borderRadius: '9999px',
+  fontWeight: 'bold',
+  whiteSpace: 'nowrap' as const
+};
+
+const inactiveTabStyle = {
+  padding: '12px 20px',
+  background: '#ede9fe',
+  color: '#4c1d95',
+  borderRadius: '9999px',
+  border: '1px solid #c4b5fd',
+  whiteSpace: 'nowrap' as const
 };
 
 export default TaiXePage;
