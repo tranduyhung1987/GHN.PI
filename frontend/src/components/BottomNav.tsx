@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface BottomNavProps {
-  onNavigate?: (page: string) => void;     // ← Optional
-  currentPage?: string;                    // ← Optional
+  onNavigate?: (page: string) => void;
+  currentPage?: string;
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ 
@@ -39,7 +39,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
   );
 };
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES TỐI ƯU ===================== */
 const bottomNavStyle: React.CSSProperties = {
   position: 'fixed',
   bottom: 0,
@@ -47,9 +47,9 @@ const bottomNavStyle: React.CSSProperties = {
   right: 0,
   background: 'white',
   borderTop: '1px solid #e0d4ff',
-  boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0 -4px 25px rgba(0, 0, 0, 0.12)',
   zIndex: 1000,
-  padding: '6px 0 2px',
+  padding: '8px 0 4px',
 };
 
 const navContainer: React.CSSProperties = {
@@ -63,28 +63,32 @@ const navContainer: React.CSSProperties = {
 const navItem: React.CSSProperties = {
   textAlign: 'center',
   cursor: 'pointer',
-  padding: '6px 4px',
+  padding: '8px 4px',
   flex: 1,
-  transition: 'all 0.25s ease',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  borderRadius: '12px',
 };
 
 const activeNavItem: React.CSSProperties = {
   ...navItem,
-  transform: 'scale(1.08)',
+  background: '#f3e8ff',
+  transform: 'scale(1.12)',
+  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.15)',
 };
 
 const iconStyle = (active: boolean): React.CSSProperties => ({
-  fontSize: '27px',
-  marginBottom: '3px',
-  filter: active ? 'drop-shadow(0 0 6px #22d3ee)' : 'none',
-  transition: 'all 0.25s ease',
+  fontSize: active ? '30px' : '26px',
+  marginBottom: '4px',
+  transition: 'all 0.3s ease',
+  filter: active ? 'drop-shadow(0 3px 8px #7c3aed)' : 'none',
 });
 
 const labelStyle = (active: boolean): React.CSSProperties => ({
-  fontSize: '12px',
+  fontSize: '12.5px',
   fontWeight: active ? '700' : '500',
   color: active ? '#4c1d95' : '#64748b',
-  transition: 'all 0.25s ease',
+  transition: 'all 0.3s ease',
+  letterSpacing: active ? '-0.3px' : 'normal',
 });
 
 export default BottomNav;
