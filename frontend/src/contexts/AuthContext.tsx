@@ -15,6 +15,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loginWithPi: () => Promise<void>;
   logout: () => void;
+  role?: Role;
+  setRole?: (role: Role) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,11 +54,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       user, 
       isAuthenticated: !!user, 
       loginWithPi, 
-      logout 
+      logout,
+      role: user?.role,
+      setRole: (newRole: Role) => {
+        if (user) {
+          const updatedUser = { ...user, role: newRole };
+          setUser(updatedUser);
+          localStorage.setItem('ghnpi_user', JSON.stringify(updatedUser));
+         }
+       }      
     }}>
       {children}
     </AuthContext.Provider>
-  );
+   );
 };
 
 export const useAuth = () => {
