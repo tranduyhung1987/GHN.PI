@@ -1,381 +1,197 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TaiXePageProps {
   onNavigate: (page: string) => void;
 }
 
-function TaiXePage({ onNavigate: _onNavigate }: TaiXePageProps) {
-  const [activeTab, setActiveTab] = useState<'near' | 'current' | 'history'>('near');
-  const [reputation, setReputation] = useState(87);
-  const [showQRModal, setShowQRModal] = useState(false);
-  const [currentOrderToScan, setCurrentOrderToScan] = useState<any>(null);
+interface Order {
+  maDon: string;
+  status: string;
+  customer: string;
+  address: string;
+  fee: string;
+  time: string;
+  loai: string;
+  paymentType?: string;
+  ghiChu?: string;
+}
 
-  const [availableOrders, setAvailableOrders] = useState([
-    { 
-      maDon: "GHN17489231", 
-      loaiDon: "Hỏa Tốc", 
-      nguoiGui: "Nguyễn Thị Lan", 
-      sdtGui: "0912345678",
-      diaChiGui: "123 Đường ABC, Quận 1, TP.HCM",
-      nguoiNhan: "Trần Thị Hoa",
-      sdtNhan: "0987654321",
-      diaChiNhan: "456 Nguyễn Văn Linh, Quận 7, TP.HCM",
-      khoangCach: "1.2km", 
-      phi: 45000 
-    },
-    { 
-      maDon: "GHN17488902", 
-      loaiDon: "Đường Dài", 
-      nguoiGui: "Phạm Minh Quân", 
-      sdtGui: "0978123456",
-      diaChiGui: "89 Lê Lợi, Quận 1, TP.HCM",
-      nguoiNhan: "Lê Văn Nam",
-      sdtNhan: "0933456789",
-      diaChiNhan: "112 Pasteur, Quận 3, TP.HCM",
-      khoTrungChuyen: "Kho Hub Quận 7 - 789 Nguyễn Văn Linh",
-      khoangCach: "2.8km", 
-      phi: 38000 
-    },
-  ]);
+const TaiXePage: React.FC<TaiXePageProps> = ({ onNavigate }) => {
+  const [filter, setFilter] = useState<'all' | 'pending' | 'shipping' | 'completed'>('pending'); // mặc định Chờ nhận
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const [myCurrentOrders, setMyCurrentOrders] = useState<any[]>([]);
-  const [completedOrders, setCompletedOrders] = useState<any[]>([]);   // ← Tab Lịch sử
+  const mapOrder = (o: any): Order => ({
+    maDon: o.maDon || o.id,
+    status: o.status === 'cho-lay-hang' ? 'pending' : 
+            o.status === 'dang-giao' ? 'shipping' : 
+            o.status === 'hoan-thanh' ? 'completed' : 'pending',
+    customer: o.nguoiNhan || 'Khách hàng',
+    address: o.diaChiNhan || o.diaChiGui || '',
+    fee: `${o.totalAmount?.toLocaleString() || '43.000'} Pi`,
+    time: o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : 'Vừa xong',
+    loai: o.loaiDon === 'hoatoc' ? '⚡ Hỏa Tốc' : '🛣️ Đường Dài',
+    paymentType: o.paymentMethod,
+    ghiChu: o.ghiChu,
+  });
 
-  const showToast = (message: string) => {
-    alert(message);
-  };
+  useEffect(() => {
+    const loadOrders = () => {
+      const saved = localStorage.getItem('orders');
+      if (saved) setOrders(JSON.parse(saved).map(mapOrder));
+    };
+    loadOrders();
+    window.addEventListener('storage', loadOrders);
+    return () => window.removeEventListener('storage', loadOrders);
+  }, []);
 
-  const getRepColor = (score: number): string => {
-    if (score >= 90) return '#22c55e';
-    if (score >= 75) return '#eab308';
-    if (score >= 60) return '#f59e0b';
-    return '#ef4444';
-  };
+  const filteredOrders = filter === 'all' 
+    ? orders 
+    : orders.filter(o => o.status === filter);
 
-  const getRepBadge = (score: number): string => {
-    if (score >= 90) return "🏆 Xuất Sắc";
-    if (score >= 75) return "⭐ Tốt";
-    if (score >= 60) return "⚠️ Trung Bình";
-    return "🔴 Cảnh Báo";
-  };
-
-  const handleNhanDon = (order: any) => {
-    setAvailableOrders(prev => prev.filter(o => o.maDon !== order.maDon));
-    setMyCurrentOrders(prev => [...prev, {
-      ...order,
-      trangThai: "Đang di chuyển đến người gửi",
-    }]);
-    showToast(`✅ ĐÃ NHẬN ĐƠN ${order.maDon}`);
-    setActiveTab('current');
-  };
-
-  const handleOpenQR = (order: any) => {
-    setCurrentOrderToScan(order);
-    setShowQRModal(true);
-  };
-
-  const handleQRScanSuccess = () => {
-    if (!currentOrderToScan) return;
-
-    setMyCurrentOrders(prev => prev.map(o => 
-      o.maDon === currentOrderToScan.maDon 
-        ? { ...o, trangThai: "Đang lấy hàng / Đang giao" } 
+  const updateOrderStatus = (maDon: string, newStatus: string) => {
+    const saved = localStorage.getItem('orders');
+    if (!saved) return;
+    const allOrders = JSON.parse(saved);
+    const updated = allOrders.map((o: any) => 
+      (o.maDon === maDon || o.id === maDon) 
+        ? { ...o, status: newStatus, updatedAt: new Date().toISOString() }
         : o
-    ));
-
-    showToast(`✅ ĐÃ NHẬN HÀNG THÀNH CÔNG - Đơn ${currentOrderToScan.maDon}`);
-    setShowQRModal(false);
-    setCurrentOrderToScan(null);
+    );
+    localStorage.setItem('orders', JSON.stringify(updated));
+    setOrders(updated.map(mapOrder));
   };
 
-  const tuChoiDon = (maDon: string) => {
-    if (window.confirm(`Từ chối đơn ${maDon}?`)) {
-      setAvailableOrders(prev => prev.filter(o => o.maDon !== maDon));
-      showToast(`Đã từ chối đơn ${maDon}`);
-    }
+  const nhanDon = (maDon: string) => {
+    updateOrderStatus(maDon, 'dang-giao');
+    alert(`✅ Đã nhận đơn ${maDon}!`);
   };
 
-  const hoanThanhDon = (maDon: string) => {
-    if (!window.confirm(`Xác nhận đã giao xong đơn ${maDon}?`)) return;
-    
-    const order = myCurrentOrders.find(o => o.maDon === maDon);
-    if (order) {
-      const completedOrder = { 
-        ...order, 
-        trangThai: "Hoàn thành", 
-        ngayHoanThanh: new Date().toLocaleDateString('vi-VN') 
-      };
-      
-      setCompletedOrders(prev => [...prev, completedOrder]);
-      setMyCurrentOrders(prev => prev.filter(o => o.maDon !== maDon));
-      setReputation(prev => Math.min(100, prev + 3));
-      
-      showToast(`🎉 HOÀN THÀNH ĐƠN ${maDon} - Đã chuyển vào Lịch sử`);
-    }
+  const huyDon = (maDon: string) => {
+    const reason = prompt("Nhập lý do hủy đơn:", "Không liên lạc được khách");
+    if (!reason?.trim()) return alert("Vui lòng nhập lý do!");
+    updateOrderStatus(maDon, 'cho-lay-hang');
+    alert(`❌ Đã hủy đơn ${maDon}`);
+  };
+
+  const quetQR = (order: Order) => {
+    const isHoatoc = order.loai.includes('Hỏa Tốc');
+    const newStatus = isHoatoc ? 'dang-giao-den-nguoi-nhan' : 'dang-den-kho-trung-chuyen';
+    const statusText = isHoatoc ? 'Đang giao đến người nhận' : 'Đang đến kho trung chuyển';
+
+    updateOrderStatus(order.maDon, newStatus);
+
+    const fakeCode = 'GHN' + Math.floor(10000000 + Math.random() * 90000000);
+    alert(`✅ QUÉT QR THÀNH CÔNG!\nMã: ${fakeCode}\nĐơn: ${order.maDon}\nTrạng thái mới: ${statusText}`);
   };
 
   return (
-    <div style={{ padding: '20px 14px 100px', background: '#f3e8ff', minHeight: '100vh' }}>
-      {/* HEADER */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#4c1d95', margin: 0 }}>🏍️ TÀI XẾ</h1>
-      </div>
-
-      {/* Reputation */}
-      <div style={reputationHeaderStyle}>
-        <div style={{ fontSize: '52px', fontWeight: 'bold', color: getRepColor(reputation), textAlign: 'center' }}>
-          {reputation} pts
-        </div>
-        <div style={{ textAlign: 'center', color: getRepColor(reputation), fontWeight: 'bold', marginTop: '8px' }}>
-          {getRepBadge(reputation)}
+    <div style={pageContainer}>
+      {/* Header */}
+      <div style={header}>
+        <div style={{ fontSize: '46px' }}>🏍️</div>
+        <div>
+          <h1 style={title}>ĐƠN HÀNG TÀI XẾ</h1>
+          <p style={subtitle}>Tổng {orders.length} đơn</p>
         </div>
       </div>
 
-      {/* TABS */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
-        <button onClick={() => setActiveTab('near')} style={activeTab === 'near' ? activeTabStyle : inactiveTabStyle}>Đơn gần tôi</button>
-        <button onClick={() => setActiveTab('current')} style={activeTab === 'current' ? activeTabStyle : inactiveTabStyle}>Đơn đang làm</button>
-        <button onClick={() => setActiveTab('history')} style={activeTab === 'history' ? activeTabStyle : inactiveTabStyle}>Lịch sử</button>
+      {/* Tabs - Tất cả ở cuối */}
+      <div style={tabContainer}>
+        <button onClick={() => setFilter('pending')} style={filter === 'pending' ? activeTab : inactiveTab}>Chờ nhận</button>
+        <button onClick={() => setFilter('shipping')} style={filter === 'shipping' ? activeTab : inactiveTab}>Đang giao</button>
+        <button onClick={() => setFilter('completed')} style={filter === 'completed' ? activeTab : inactiveTab}>Hoàn thành</button>
+        <button onClick={() => setFilter('all')} style={filter === 'all' ? activeTab : inactiveTab}>Tất cả</button>
       </div>
 
-      {/* ĐƠN GẦN TÔI */}
-      {activeTab === 'near' && availableOrders.length > 0 && (
-        <div style={{ marginBottom: '40px' }}>
-          <h3 style={{ marginBottom: '16px', color: '#4c1d95' }}>Đơn hàng gần bạn</h3>
-          {availableOrders.map((order) => (
-            <div key={order.maDon} style={orderCardStyle}>
-              <div style={{ fontWeight: 'bold' }}>{order.maDon}</div>
-              <div>{order.nguoiGui}</div>
-              <div style={{ color: '#64748b' }}>{order.diaChiGui}</div>
-              <div style={{ marginTop: '12px', color: '#22d3ee', fontWeight: 'bold' }}>
-                {order.khoangCach} • {order.phi.toLocaleString()} Pi
+      {/* Danh sách đơn */}
+      <div style={listContainer}>
+        {filteredOrders.length === 0 ? (
+          <p style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>Không có đơn hàng nào</p>
+        ) : (
+          filteredOrders.map(order => (
+            <div key={order.maDon} style={orderCard}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <strong style={{ color: '#4c1d95', fontSize: '18px' }}>{order.maDon}</strong>
+                  <p style={{ margin: '6px 0 4px', color: '#6b21a8' }}>{order.customer}</p>
+                  <p style={{ fontSize: '14px', color: '#64748b' }}>{order.address}</p>
+                  <p style={{ fontSize: '15px', fontWeight: '600' }}>{order.loai}</p>
+                </div>
+                <p style={{ color: '#22d3ee', fontWeight: '700', fontSize: '19px' }}>{order.fee}</p>
               </div>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-                <button onClick={() => handleNhanDon(order)} style={nhanDonButtonStyle}>Nhận đơn</button>
-                <button onClick={() => tuChoiDon(order.maDon)} style={rejectButtonStyle}>Từ chối</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
-      {/* ĐƠN ĐANG LÀM */}
-      {activeTab === 'current' && myCurrentOrders.length > 0 && (
-        <div style={{ marginBottom: '40px' }}>
-          <h3 style={{ marginBottom: '16px', color: '#4c1d95' }}>Đơn đang thực hiện</h3>
-          {myCurrentOrders.map((order) => (
-            <div key={order.maDon} style={myOrderCardStyle}>
-              <div style={{ fontWeight: 'bold' }}>{order.maDon} • {order.loaiDon}</div>
-              
-              <div style={{ margin: '12px 0', fontSize: '15px', lineHeight: '1.6' }}>
-                <strong>Người gửi:</strong> {order.nguoiGui} - {order.sdtGui}<br/>
-                <strong>Địa chỉ gửi:</strong> {order.diaChiGui}<br/><br/>
-                
-                <strong>Người nhận:</strong> {order.nguoiNhan} - {order.sdtNhan}<br/>
-                <strong>Địa chỉ nhận:</strong> {order.diaChiNhan}
-                {order.khoTrungChuyen && (
+              <div style={statusBadge(order.status)}>
+                {order.status === 'pending' && '⏳ Chờ nhận'}
+                {order.status === 'shipping' && '🚛 Đang giao'}
+                {order.status === 'dang-giao-den-nguoi-nhan' && '🏠 Đang giao đến người nhận'}
+                {order.status === 'dang-den-kho-trung-chuyen' && '🏬 Đang đến kho trung chuyển'}
+                {order.status === 'completed' && '✅ Hoàn thành'}
+              </div>
+
+              <div style={buttonGroup}>
+                {order.status === 'pending' && (
+                  <button onClick={() => nhanDon(order.maDon)} style={acceptButton}>✅ NHẬN ĐƠN</button>
+                )}
+
+                {order.status === 'shipping' && (
                   <>
-                    <br/><br/>
-                    <strong>Kho trung chuyển:</strong> {order.khoTrungChuyen}
+                    <button onClick={() => huyDon(order.maDon)} style={cancelButton}>❌ HỦY</button>
+                    <button onClick={() => quetQR(order)} style={qrButton}>📷 QUÉT QR HOÀN THÀNH</button>
                   </>
                 )}
-              </div>
 
-              <div style={{ color: '#22d3ee', marginBottom: '12px' }}>{order.trangThai}</div>
-
-              {order.trangThai.includes("di chuyển") && (
-                <button onClick={() => handleOpenQR(order)} style={qrButtonStyle}>
-                  📱 Đã đến - Quét QR nhận hàng
-                </button>
-              )}
-
-              {order.trangThai.includes("lấy hàng") && (
-                <button onClick={() => hoanThanhDon(order.maDon)} style={completeButtonStyle}>
-                  ✅ Hoàn thành giao hàng
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* LỊCH SỬ ĐƠN HÀNG - MỚI THÊM */}
-      {activeTab === 'history' && completedOrders.length > 0 && (
-        <div style={{ marginBottom: '40px' }}>
-          <h3 style={{ marginBottom: '16px', color: '#4c1d95' }}>Lịch sử hoàn thành</h3>
-          {completedOrders.map((order) => (
-            <div key={order.maDon} style={myOrderCardStyle}>
-              <div style={{ fontWeight: 'bold' }}>{order.maDon}</div>
-              <div style={{ color: '#22c55e' }}>Hoàn thành • {order.ngayHoanThanh}</div>
-              <div style={{ marginTop: '8px', color: '#94a3b8', fontSize: '14px' }}>
-                {order.nguoiNhan} - {order.diaChiNhan}
+                <button onClick={() => setSelectedOrder(order)} style={detailButton}>Chi tiết</button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
 
-      {/* QR Modal */}
-      {showQRModal && currentOrderToScan && (
-        <div style={modalOverlay}>
-          <div style={modalContent}>
-            <h2>Quét mã QR nhận hàng</h2>
-            <p style={{ textAlign: 'center', margin: '20px 0' }}>
-              Đơn: <strong>{currentOrderToScan.maDon}</strong>
-            </p>
-            <div style={qrMock}>
-              <div style={{ fontSize: '80px' }}>📱</div>
-              <p>Hướng camera vào mã QR trên kiện hàng</p>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
-              <button onClick={() => setShowQRModal(false)} style={cancelBtn}>Hủy</button>
-              <button onClick={handleQRScanSuccess} style={confirmBtn}>
-                ✅ Xác nhận quét thành công
-              </button>
-            </div>
+      {/* Modal Chi tiết */}
+      {selectedOrder && (
+        <div style={modalOverlay} onClick={() => setSelectedOrder(null)}>
+          <div style={modalContent} onClick={e => e.stopPropagation()}>
+            <h2>Chi tiết đơn {selectedOrder.maDon}</h2>
+            <p><strong>Khách:</strong> {selectedOrder.customer}</p>
+            <p><strong>Địa chỉ:</strong> {selectedOrder.address}</p>
+            <p><strong>Loại:</strong> {selectedOrder.loai}</p>
+            <p><strong>Phí:</strong> {selectedOrder.fee}</p>
+            <button onClick={() => setSelectedOrder(null)} style={closeButton}>Đóng</button>
           </div>
         </div>
       )}
     </div>
   );
-}
-
-/* ===================== STYLES (GIỮ NGUYÊN) ===================== */
-const reputationHeaderStyle = {
-  backgroundColor: '#1e2937',
-  padding: '24px',
-  borderRadius: '20px',
-  border: '2px solid #eab308',
-  marginBottom: '24px',
-  textAlign: 'center' as const
 };
 
-const orderCardStyle = {
-  backgroundColor: '#fff',
-  padding: '20px',
-  borderRadius: '20px',
-  border: '1px solid #c4b5fd',
-  marginBottom: '16px'
-};
+/* ===================== STYLES ===================== */
+const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 0 100px' };
+const header: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '14px', padding: '0 16px', marginBottom: '16px' };
+const title: React.CSSProperties = { fontSize: '22px', fontWeight: '700', color: '#4c1d95', margin: 0 };
+const subtitle: React.CSSProperties = { color: '#6b21a8', margin: 0, fontSize: '15px' };
 
-const myOrderCardStyle = {
-  backgroundColor: '#1e2937',
-  padding: '20px',
-  borderRadius: '20px',
-  border: '2px solid #22d3ee',
-  marginBottom: '16px',
-  color: 'white'
-};
+const tabContainer: React.CSSProperties = { display: 'flex', gap: '8px', padding: '0 16px', marginBottom: '20px', overflowX: 'auto' };
+const activeTab: React.CSSProperties = { padding: '10px 20px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '600', whiteSpace: 'nowrap' };
+const inactiveTab: React.CSSProperties = { padding: '10px 20px', background: '#fff', color: '#6b21a8', border: '1px solid #c4b5fd', borderRadius: '9999px', whiteSpace: 'nowrap' };
 
-const nhanDonButtonStyle = {
-  flex: 1,
-  padding: '14px',
-  background: '#22d3ee',
-  color: '#0f172a',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
-};
+const listContainer: React.CSSProperties = { padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '16px' };
+const orderCard: React.CSSProperties = { background: '#fff', padding: '20px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', border: '1px solid #e0d4ff' };
 
-const rejectButtonStyle = {
-  flex: 1,
-  padding: '14px',
-  background: '#ef4444',
-  color: 'white',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
-};
+const statusBadge = (status: string): React.CSSProperties => ({
+  display: 'inline-block', padding: '6px 16px', borderRadius: '9999px', fontSize: '14px', fontWeight: '600', marginTop: '12px',
+  background: status.includes('dang-giao') ? '#dbeafe' : status === 'completed' ? '#d1fae5' : '#fef3c7',
+  color: status.includes('dang-giao') ? '#3b82f6' : status === 'completed' ? '#10b981' : '#d97706'
+});
 
-const qrButtonStyle = {
-  width: '100%',
-  padding: '16px',
-  background: '#22d3ee',
-  color: '#0f172a',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  marginBottom: '12px'
-};
+const buttonGroup: React.CSSProperties = { marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' };
+const acceptButton: React.CSSProperties = { flex: 1, padding: '14px', background: '#22c55e', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '700' };
+const cancelButton: React.CSSProperties = { flex: 1, padding: '14px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '700' };
+const qrButton: React.CSSProperties = { flex: 1, padding: '14px', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '700' };
+const detailButton: React.CSSProperties = { flex: 1, padding: '14px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '600' };
 
-const completeButtonStyle = {
-  width: '100%',
-  padding: '16px',
-  background: '#22c55e',
-  color: '#0f172a',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
-};
-
-const modalOverlay = {
-  position: 'fixed' as const,
-  top: 0, left: 0, right: 0, bottom: 0,
-  background: 'rgba(0,0,0,0.9)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000
-};
-
-const modalContent = {
-  background: 'white',
-  padding: '30px',
-  borderRadius: '24px',
-  width: '90%',
-  maxWidth: '400px',
-  textAlign: 'center' as const
-};
-
-const qrMock = {
-  border: '3px dashed #22d3ee',
-  borderRadius: '16px',
-  padding: '40px 20px',
-  margin: '20px 0'
-};
-
-const cancelBtn = {
-  flex: 1,
-  padding: '14px',
-  background: '#ef4444',
-  color: 'white',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
-};
-
-const confirmBtn = {
-  flex: 1,
-  padding: '14px',
-  background: '#22d3ee',
-  color: '#0f172a',
-  border: 'none',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
-};
-
-const activeTabStyle = {
-  padding: '12px 20px',
-  background: '#22d3ee',
-  color: '#0f172a',
-  borderRadius: '9999px',
-  fontWeight: 'bold',
-  whiteSpace: 'nowrap' as const
-};
-
-const inactiveTabStyle = {
-  padding: '12px 20px',
-  background: '#ede9fe',
-  color: '#4c1d95',
-  borderRadius: '9999px',
-  border: '1px solid #c4b5fd',
-  whiteSpace: 'nowrap' as const
-};
+const modalOverlay: React.CSSProperties = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
+const modalContent: React.CSSProperties = { background: '#fff', padding: '24px', borderRadius: '20px', width: '90%', maxWidth: '400px' };
+const closeButton: React.CSSProperties = { marginTop: '20px', padding: '12px 24px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '9999px', width: '100%' };
 
 export default TaiXePage;

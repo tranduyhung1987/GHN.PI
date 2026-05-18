@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+
+declare global {
+  interface Window {
+    Pi: any;
+  }
+}
 
 interface ChatPageProps {
   onNavigate: (page: string) => void;
@@ -14,13 +19,19 @@ type Message = {
 };
 
 const ChatPage: React.FC<ChatPageProps> = () => {
-  const { isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Chào bạn! Bạn cần hỗ trợ gì hôm nay?", isUser: false, time: "10:32" },
+    { 
+      id: 1, 
+      text: "Chào bạn! GHN.PI hỗ trợ 24/7. Bạn cần hỗ trợ về thanh toán Pi hay theo dõi đơn hàng?", 
+      isUser: false, 
+      time: "10:32" 
+    },
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isPiConnected, setIsPiConnected] = useState(false);
+  const [piUsername, setPiUsername] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -33,8 +44,20 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Kiểm tra Pi Connection
+  useEffect(() => {
+    if (window.Pi) {
+      window.Pi.authenticate(['payments'], { 
+        onIncompletePaymentFound: () => {} 
+      }).then((user: any) => {
+        setIsPiConnected(true);
+        setPiUsername(user?.username || 'Pi User');
+      }).catch(() => setIsPiConnected(false));
+    }
+  }, []);
+
   const sendMessage = () => {
-    if (!newMessage.trim() || !isAuthenticated || isSending) return;
+    if (!newMessage.trim() || isSending) return;
 
     const newMsg: Message = {
       id: Date.now(),
@@ -50,7 +73,9 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     setTimeout(() => {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        text: "Cảm ơn bạn! Đơn hàng của bạn đang được xử lý. Bạn cần hỗ trợ thêm gì không ạ?",
+        text: isPiConnected 
+          ? `Cảm ơn @${piUsername}! Đơn hàng của bạn đang được xử lý. Thanh toán Pi đã xác nhận.` 
+          : "Cảm ơn bạn! Đơn hàng của bạn đang được xử lý. Bạn cần hỗ trợ thêm gì không ạ?",
         isUser: false,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
@@ -79,10 +104,6 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     if (e.key === 'Enter') sendMessage();
   };
 
-  if (!isAuthenticated) {
-    return <div style={{ padding: '40px 20px', textAlign: 'center' }}>Vui lòng đăng nhập để sử dụng Chat hỗ trợ</div>;
-  }
-
   return (
     <div style={pageContainer}>
       {/* HEADER */}
@@ -90,7 +111,9 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         <div style={{ fontSize: '42px' }}>💬</div>
         <div>
           <h1 style={title}>HỖ TRỢ CHAT</h1>
-          <p style={subtitle}>CSKH GHN.PI • Trả lời nhanh 24/7</p>
+          <p style={subtitle}>
+            CSKH GHN.PI • {isPiConnected ? `✅ @${piUsername}` : 'Pi Network'}
+          </p>
         </div>
       </div>
 
@@ -117,7 +140,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         <div ref={chatEndRef} />
       </div>
 
-      {/* INPUT AREA - GIỮ NGUYÊN GIAO DIỆN BẠN MUỐN */}
+      {/* INPUT AREA */}
       <div style={inputArea}>
         <div style={inputWrapper}>
           <div onClick={() => setShowAttachmentMenu(!showAttachmentMenu)} style={plusButtonInside}>+</div>
@@ -257,7 +280,6 @@ const attachmentMenu: React.CSSProperties = {
 
 const menuItem: React.CSSProperties = { padding: '12px 24px', fontSize: '16px', cursor: 'pointer' };
 
-/* === FIX LỖI ĐỎ === */
 const previewImage: React.CSSProperties = {
   maxWidth: '220px',
   borderRadius: '12px',

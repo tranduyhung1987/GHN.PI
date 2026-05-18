@@ -5,127 +5,120 @@ interface TrackingPageProps {
   onNavigate: (page: string) => void;
 }
 
-type OrderStatus = 'DangXuLy' | 'DangLayHang' | 'DangGiao' | 'DaGiao' | 'Huy';
-
 interface TrackingOrder {
   maDon: string;
-  loai: string;
+  loaiDon: string;
   nguoiNhan: string;
-  diaChi: string;
-  taiXe: string;
-  trangThai: OrderStatus;
-  soPi: number;
-  viTriHienTai: string;
-  thoiGianCapNhat: string;
-  repScore: number;
-  paymentType?: 'prepaid' | 'cod';   // Thu hộ Pi
-  timeline: Array<{ time: string; status: string; done: boolean }>;
+  diaChiNhan: string;
+  diaChiGui?: string;
+  taiXe?: string;
+  trangThai: string;
+  totalAmount: number;
+  paymentMethod?: 'prepaid' | 'cod';
+  piPaymentId?: string;
+  piTx?: string;
+  viTriHienTai?: string;
+  thoiGianCapNhat?: string;
+  timeline?: Array<{ time: string; status: string; done: boolean }>;
 }
 
 function TrackingPage({ onNavigate }: TrackingPageProps) {
-  const [activeFilter, setActiveFilter] = useState<'All' | OrderStatus>('All');
+  const [activeFilter, setActiveFilter] = useState<'All' | string>('All');
   const [selectedOrder, setSelectedOrder] = useState<TrackingOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<TrackingOrder[]>([]);
 
-  const [orders] = useState<TrackingOrder[]>([
-    {
-      maDon: "GHN17489231",
-      loai: "Hỏa Tốc",
-      nguoiNhan: "Nguyễn Thị Lan",
-      diaChi: "123 Đường ABC, Quận 1, TP.HCM",
-      taiXe: "Anh Minh • BKS 51H-12345",
-      trangThai: 'DangGiao',
-      soPi: 45000,
-      viTriHienTai: "Cách điểm giao 0.8km",
-      thoiGianCapNhat: "16/05/2026 14:30",
-      repScore: 92,
-      paymentType: "prepaid",
-      timeline: [
-        { time: "08:15", status: "Đơn đã tạo", done: true },
-        { time: "09:40", status: "Tài xế nhận đơn", done: true },
-        { time: "11:20", status: "Đang lấy hàng", done: true },
-        { time: "13:45", status: "Đang giao hàng", done: true },
-        { time: "14:30", status: "Gần đến nơi", done: false },
-      ]
-    },
-    {
-      maDon: "GHN17488902",
-      loai: "Đường Dài",
-      nguoiNhan: "Trần Văn Hải",
-      diaChi: "456 Nguyễn Văn Linh, Quận 7",
-      taiXe: "Chị Ngọc • BKS 79A-56789",
-      trangThai: 'DaGiao',
-      soPi: 28500,
-      viTriHienTai: "Đã giao thành công",
-      thoiGianCapNhat: "15/05/2026 14:35",
-      repScore: 81,
-      paymentType: "cod",
-      timeline: [
-        { time: "07:00", status: "Đơn đã tạo", done: true },
-        { time: "09:30", status: "Tài xế nhận đơn", done: true },
-        { time: "12:15", status: "Đang giao hàng", done: true },
-        { time: "14:35", status: "Đã giao thành công", done: true },
-      ]
+  const loadOrders = () => {
+    const saved = localStorage.getItem('orders');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const mapped = parsed.map((o: any) => ({
+        maDon: o.maDon || o.id,
+        loaiDon: o.loaiDon,
+        nguoiNhan: o.nguoiNhan,
+        diaChiNhan: o.diaChiNhan,
+        diaChiGui: o.diaChiGui,
+        totalAmount: o.totalAmount || o.shippingFee || 0,
+        paymentMethod: o.paymentMethod,
+        piPaymentId: o.piPaymentId,
+        piTx: o.piTx,
+        trangThai: o.status || 'DangXuLy',
+        viTriHienTai: o.status === 'cho-lay-hang' ? 'Đang chờ tài xế nhận' : 
+                     o.status === 'dang-giao' ? 'Đang giao hàng' : 'Đã cập nhật',
+        thoiGianCapNhat: o.updatedAt || o.createdAt,
+        timeline: [
+          { time: "08:15", status: "Đơn đã tạo & thanh toán Pi", done: true },
+          { time: "09:40", status: "Tài xế nhận đơn", done: o.status !== 'cho-lay-hang' },
+          { time: "11:20", status: "Đang lấy hàng", done: false },
+          { time: "13:45", status: "Đang giao hàng", done: false },
+        ]
+      }));
+      setOrders(mapped);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    loadOrders();
+    window.addEventListener('storage', loadOrders);
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => {
+      window.removeEventListener('storage', loadOrders);
+      clearTimeout(timer);
+    };
+  }, []);
 
   const filteredOrders = activeFilter === 'All' 
     ? orders 
-    : orders.filter(o => o.trangThai === activeFilter);
+    : orders.filter(o => o.trangThai.includes(activeFilter.toLowerCase()));
 
-  const getStatusColor = (status: OrderStatus) => {
-    const colors: Record<OrderStatus, string> = { 
-      DangXuLy: '#eab308', DangLayHang: '#3b82f6', 
-      DangGiao: '#22d3ee', DaGiao: '#22c55e', Huy: '#ef4444' 
-    };
-    return colors[status];
+  const getStatusColor = (status: string) => {
+    if (status.includes('hoan-thanh') || status.includes('completed')) return '#22c55e';
+    if (status.includes('dang-giao') || status.includes('shipping')) return '#22d3ee';
+    if (status.includes('cho-lay') || status.includes('pending')) return '#eab308';
+    return '#ef4444';
   };
 
-  const getPaymentText = (type?: string) => 
-    type === 'cod' ? '📦 Thu hộ Pi' : '💰 Thanh toán trước';
-
-  // Loading skeleton khi vào trang
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
+  const getPaymentText = (type?: string, piTx?: string) => {
+    if (type === 'cod') return '📦 Thu hộ Pi';
+    return piTx && piTx !== 'pending' ? '✅ Đã thanh toán Pi' : '💰 Thanh toán trước (Pi)';
+  };
 
   return (
     <div style={pageContainer}>
-      {/* HEADER - GIỮ NGUYÊN */}
       <div style={header}>
         <h1 style={title}>📍 TRACKING</h1>
-        <button style={refreshBtn}>🔄 Cập nhật</button>
+        <button style={refreshBtn} onClick={loadOrders}>🔄 Cập nhật</button>
       </div>
 
-      <p style={subtitle}>Theo dõi đơn hàng thời gian thực • Minh bạch trên blockchain</p>
+      <p style={subtitle}>Theo dõi đơn hàng thời gian thực • Thanh toán Pi minh bạch</p>
 
-      {/* FILTER TABS - GIỮ NGUYÊN */}
       <div style={filterContainer}>
-        {(['All', 'DangGiao', 'DaGiao', 'DangXuLy'] as const).map(f => (
+        {(['All', 'DangGiao', 'DaGiao'] as const).map(f => (
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
             style={activeFilter === f ? activeFilterStyle : filterStyle}
           >
-            {f === 'All' ? 'Tất cả' : f === 'DangGiao' ? 'Đang giao' : f === 'DaGiao' ? 'Đã giao' : 'Đang xử lý'}
+            {f === 'All' ? 'Tất cả' : f === 'DangGiao' ? 'Đang giao' : 'Đã giao'}
           </button>
         ))}
       </div>
 
-      {/* DANH SÁCH + SKELETON - GIỮ NGUYÊN CẤU TRÚC */}
       {loading ? (
         <Skeleton count={2} />
+      ) : filteredOrders.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#64748b', padding: '60px 20px' }}>
+          Chưa có đơn hàng nào để theo dõi
+        </p>
       ) : (
         filteredOrders.map((order) => (
           <div key={order.maDon} style={orderCard} onClick={() => setSelectedOrder(order)}>
             <div style={orderHeader}>
               <div>
                 <span style={{ fontWeight: '700', fontSize: '17px' }}>{order.maDon}</span>
-                <span style={{ marginLeft: '10px', color: '#6b21a8' }}>{order.loai}</span>
+                <span style={{ marginLeft: '10px', color: '#6b21a8' }}>
+                  {order.loaiDon === 'hoatoc' ? '⚡ Hỏa Tốc' : '🛣️ Đường Dài'}
+                </span>
               </div>
               <span style={{ 
                 padding: '4px 12px', 
@@ -135,22 +128,22 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
                 fontWeight: '600',
                 fontSize: '14px'
               }}>
-                {order.trangThai === 'DangGiao' ? 'Đang giao' : 
-                 order.trangThai === 'DaGiao' ? 'Đã giao' : 'Đang xử lý'}
+                {order.trangThai}
               </span>
             </div>
 
             <div style={infoLine}><strong>Người nhận:</strong> {order.nguoiNhan}</div>
-            <div style={infoLine}><strong>Địa chỉ:</strong> {order.diaChi}</div>
-
-            <div style={driverLine}>
-              <div>🏍️ {order.taiXe}</div>
-              <div style={{ color: '#eab308' }}>{order.repScore} ★</div>
-            </div>
+            <div style={infoLine}><strong>Địa chỉ:</strong> {order.diaChiNhan}</div>
 
             <div style={{ marginTop: '8px', color: '#10b981', fontSize: '14.5px' }}>
-              {getPaymentText(order.paymentType)}
+              {getPaymentText(order.paymentMethod, order.piTx)}
             </div>
+
+            {order.piPaymentId && (
+              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
+                Pi ID: {order.piPaymentId.slice(0, 16)}...
+              </div>
+            )}
 
             <div style={{ marginTop: '12px', color: '#64748b', fontSize: '14.5px' }}>
               {order.viTriHienTai}
@@ -158,61 +151,40 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
           </div>
         ))
       )}
+
+      {selectedOrder && (
+        <div style={modalOverlay}>
+          <div style={modalContent}>
+            <h2>Chi tiết Tracking</h2>
+            <p><strong>Mã đơn:</strong> {selectedOrder.maDon}</p>
+            <p><strong>Thanh toán:</strong> {getPaymentText(selectedOrder.paymentMethod, selectedOrder.piTx)}</p>
+            {selectedOrder.piPaymentId && <p><strong>Pi Payment ID:</strong> {selectedOrder.piPaymentId}</p>}
+            <button onClick={() => setSelectedOrder(null)} style={closeButton}>Đóng</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ===================== STYLES (GIỮ NGUYÊN HOÀN TOÀN) ===================== */
-const pageContainer: React.CSSProperties = {
-  minHeight: '100vh',
-  background: '#f3e8ff',
-  padding: '16px 14px 100px',
-  boxSizing: 'border-box'
-};
-
-const header: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: '12px'
-};
-
+/* ===================== STYLES GIỮ NGUYÊN ===================== */
+const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' };
+const header: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' };
 const title: React.CSSProperties = { fontSize: '28px', fontWeight: '700', color: '#4c1d95' };
 const subtitle: React.CSSProperties = { color: '#6b21a8', marginBottom: '20px', fontSize: '15px' };
 
-const filterContainer: React.CSSProperties = { 
-  display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' 
-};
+const filterContainer: React.CSSProperties = { display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' };
+const filterStyle: React.CSSProperties = { padding: '10px 20px', borderRadius: '9999px', background: '#ede9fe', color: '#4c1d95', border: '1px solid #c4b5fd', whiteSpace: 'nowrap' as const };
+const activeFilterStyle: React.CSSProperties = { ...filterStyle, background: '#22d3ee', color: '#0f172a', fontWeight: '700' };
 
-const filterStyle: React.CSSProperties = { 
-  padding: '10px 20px', borderRadius: '9999px', background: '#ede9fe', color: '#4c1d95', 
-  border: '1px solid #c4b5fd', whiteSpace: 'nowrap' as const 
-};
-
-const activeFilterStyle: React.CSSProperties = { 
-  ...filterStyle, background: '#22d3ee', color: '#0f172a', fontWeight: '700' 
-};
-
-const orderCard: React.CSSProperties = { 
-  background: 'white', padding: '20px', borderRadius: '20px', marginBottom: '16px', 
-  boxShadow: '0 4px 15px rgba(0,0,0,0.06)', cursor: 'pointer' 
-};
-
+const orderCard: React.CSSProperties = { background: 'white', padding: '20px', borderRadius: '20px', marginBottom: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', cursor: 'pointer' };
 const orderHeader: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', marginBottom: '12px' };
 const infoLine: React.CSSProperties = { marginBottom: '8px', color: '#334155' };
-const driverLine: React.CSSProperties = { 
-  display: 'flex', justifyContent: 'space-between', background: '#1e2937', color: 'white', 
-  padding: '12px', borderRadius: '12px', margin: '12px 0' 
-};
 
-const refreshBtn: React.CSSProperties = {
-  padding: '8px 16px',
-  background: '#ede9fe',
-  color: '#4c1d95',
-  border: '1px solid #c4b5fd',
-  borderRadius: '9999px',
-  fontWeight: '600',
-  cursor: 'pointer'
-};
+const modalOverlay: React.CSSProperties = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
+const modalContent: React.CSSProperties = { background: '#fff', padding: '30px', borderRadius: '20px', maxWidth: '380px', width: '90%', textAlign: 'center' as const };
+const closeButton: React.CSSProperties = { padding: '14px 24px', background: '#64748b', color: 'white', border: 'none', borderRadius: '9999px', marginTop: '20px', width: '100%' };
+
+const refreshBtn: React.CSSProperties = { padding: '8px 16px', background: '#ede9fe', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px', fontWeight: '600', cursor: 'pointer' };
 
 export default TrackingPage;

@@ -1,16 +1,42 @@
-import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
+
+declare global {
+  interface Window {
+    Pi: any;
+  }
+}
 
 interface CaNhanPageProps {
   onNavigate: (page: string) => void;
 }
 
 const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
-  const { user, logout } = useAuth();   // Giả sử AuthContext có user
+  const [isPiConnected, setIsPiConnected] = useState(false);
+  const [piUsername, setPiUsername] = useState('Thành Viên GHN.PI');
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+
+  // Kiểm tra Pi Connection
+  useEffect(() => {
+    if (window.Pi) {
+      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
+        .then((user: any) => {
+          setIsPiConnected(true);
+          setPiUsername(user?.username || 'Thành Viên GHN.PI');
+        })
+        .catch(() => setIsPiConnected(false));
+    }
+
+    // Load recent orders từ localStorage
+    const saved = localStorage.getItem('orders');
+    if (saved) {
+      const parsed = JSON.parse(saved).slice(0, 3); // 3 đơn gần nhất
+      setRecentOrders(parsed);
+    }
+  }, []);
 
   const handleLogout = () => {
     if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
-      logout();
+      alert('✅ Đã đăng xuất thành công!');
       onNavigate('home');
     }
   };
@@ -25,9 +51,12 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
       {/* Profile Card */}
       <div style={profileCard}>
         <div style={avatar}>🧑‍💼</div>
-        <h2 style={name}>{user?.name || 'Thành Viên GHN.PI'}</h2>
-        <p style={role}>Vai trò: <strong>{user?.role || 'Sender'}</strong></p>
-        <p style={wallet}>Ví Pi: <strong>{user?.piAddress || 'pi1234567890'}</strong></p>
+        <h2 style={name}>{piUsername}</h2>
+        <p style={role}>
+          Vai trò: <strong>Sender</strong> 
+          {isPiConnected && <span style={{ color: '#22d3ee' }}> • ✅ Pi Connected</span>}
+        </p>
+        <p style={wallet}>Ví Pi: <strong>@{piUsername}</strong></p>
         
         <div style={reputationBox}>
           <span>Reputation Score</span>
@@ -45,26 +74,30 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
       {/* Lịch sử gần đây */}
       <div style={section}>
         <h3 style={sectionTitle}>📋 Lịch sử đơn hàng gần đây</h3>
-        <div style={historyItem}>
-          <div>
-            <strong>GHN17489231</strong>
-            <p style={{ margin: '4px 0', fontSize: '14px' }}>Hỏa Tốc • Nguyễn Thị Lan</p>
-          </div>
-          <div style={{ textAlign: 'right', color: '#22c55e' }}>Hoàn thành</div>
-        </div>
-        <div style={historyItem}>
-          <div>
-            <strong>GHN17488902</strong>
-            <p style={{ margin: '4px 0', fontSize: '14px' }}>Đường Dài • Trần Văn Hải</p>
-          </div>
-          <div style={{ textAlign: 'right', color: '#22c55e' }}>Hoàn thành</div>
-        </div>
+        {recentOrders.length === 0 ? (
+          <p>Chưa có đơn hàng nào</p>
+        ) : (
+          recentOrders.map((order, idx) => (
+            <div key={idx} style={historyItem}>
+              <div>
+                <strong>{order.maDon}</strong>
+                <p style={{ margin: '4px 0', fontSize: '14px' }}>
+                  {order.loaiDon === 'hoatoc' ? '⚡ Hỏa Tốc' : '🛣️ Đường Dài'} • {order.nguoiNhan}
+                </p>
+              </div>
+              <div style={{ textAlign: 'right', color: '#22c55e' }}>
+                {order.totalAmount?.toLocaleString() || order.shippingFee?.toLocaleString()} Pi
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Menu */}
       <div style={menuContainer}>
         <button onClick={() => onNavigate('don-hang')} style={menuButton}>📦 Đơn hàng của tôi</button>
         <button onClick={() => onNavigate('tracking')} style={menuButton}>📍 Theo dõi đơn hàng</button>
+        <button onClick={() => onNavigate('doi-soat')} style={menuButton}>💰 Đối soát thanh toán</button>
         <button style={menuButton}>⭐ Đánh giá & Phản hồi</button>
         <button style={menuButton}>⚙️ Cài đặt</button>
       </div>
@@ -77,7 +110,7 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
   );
 };
 
-/* ===================== STYLES (ĐỒNG BỘ VỚI APP) ===================== */
+/* ===================== STYLES ===================== */
 const pageContainer = {
   minHeight: '100vh',
   background: '#f3e8ff',

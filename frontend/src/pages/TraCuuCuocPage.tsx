@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface TraCuuCuocPageProps {
   onNavigate: (page: string) => void;
@@ -20,6 +20,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
   const [activeTab, setActiveTab] = useState<'tim' | 'cuoc'>('cuoc');
   const [ketQua, setKetQua] = useState<any>(null);
   const [calculating, setCalculating] = useState(false);
+  const [isPiConnected, setIsPiConnected] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     tinhGui: '', 
@@ -32,6 +33,15 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
     cao: 10,
     loaiHang: 'hangthuong',
   });
+
+  // Kiểm tra Pi
+  useEffect(() => {
+    if (window.Pi) {
+      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
+        .then(() => setIsPiConnected(true))
+        .catch(() => setIsPiConnected(false));
+    }
+  }, []);
 
   const tinhCuoc = () => {
     if (!form.tinhGui || !form.tinhNhan) {
@@ -64,12 +74,11 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 
   return (
     <div style={pageContainer}>
-      {/* HEADER */}
       <div style={headerStyle}>
         <h1 style={titleStyle}>🔎 TRA CỨU CƯỚC</h1>
+        {isPiConnected && <p style={{ color: '#22d3ee', fontSize: '14px' }}>✅ Pi Connected</p>}
       </div>
 
-      {/* TABS */}
       <div style={tabContainer}>
         <button 
           onClick={() => setActiveTab('cuoc')} 
@@ -88,7 +97,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
       {activeTab === 'cuoc' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* === PHẦN FORM GIỮ NGUYÊN HOÀN TOÀN === */}
           <div style={cardStyle}>
             <h3 style={{ color: '#4c1d95', marginBottom: '16px' }}>📍 Thông tin địa chỉ</h3>
             <div style={{ marginBottom: '20px' }}>
@@ -147,7 +155,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
             </div>
           </div>
 
-          {/* NÚT TÍNH CƯỚC */}
           <button 
             onClick={tinhCuoc} 
             disabled={calculating}
@@ -156,7 +163,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
             {calculating ? 'ĐANG TÍNH TOÁN...' : 'ƯỚC TÍNH CƯỚC PHÍ'}
           </button>
 
-          {/* === PHẦN KẾT QUẢ CHI TIẾT + NÚT TẠO ĐƠN (TÍCH HỢP MỚI) === */}
           {ketQua && (
             <div style={resultStyle}>
               <h3 style={{ color: '#4c1d95', textAlign: 'center', marginBottom: '16px' }}>📋 Kết quả ước tính</h3>
@@ -171,7 +177,6 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
                 ⏱ Thời gian giao dự kiến: {ketQua.thoiGianGiao}
               </p>
 
-              {/* Nút Tạo đơn ngay */}
               <button 
                 onClick={() => onNavigate('gui-hang')}
                 style={createOrderBtn}
@@ -186,7 +191,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
   );
 }
 
-/* ===================== STYLES (GIỮ NGUYÊN + BỔ SUNG) ===================== */
+/* ===================== STYLES ===================== */
 const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 120px', boxSizing: 'border-box' as const };
 const headerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'center', marginBottom: '20px' };
 const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: '700', color: '#4c1d95' };

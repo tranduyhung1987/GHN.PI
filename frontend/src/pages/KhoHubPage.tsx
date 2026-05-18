@@ -1,14 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+declare global {
+  interface Window {
+    Pi: any;
+  }
+}
 
 type Mode = 'welcome' | 'register' | 'myHub' | 'partnerHub';
 
 interface KhoHubPageProps {
-  onNavigate?: (page: string) => void;   // Để quay về trang chủ nếu cần
+  onNavigate?: (page: string) => void;
 }
 
 export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
   const [mode, setMode] = useState<Mode>('welcome');
+  const [isPiConnected, setIsPiConnected] = useState(false);
+  const [piUsername, setPiUsername] = useState('');
   const [hubReputation] = useState(92);
+
+  // Kiểm tra Pi Connection
+  useEffect(() => {
+    const checkPi = async () => {
+      if (window.Pi) {
+        try {
+          const user = await window.Pi.authenticate(['payments'], {
+            onIncompletePaymentFound: () => {}
+          });
+          setIsPiConnected(true);
+          setPiUsername(user?.username || 'Kho Partner');
+        } catch (e) {
+          setIsPiConnected(false);
+        }
+      }
+    };
+    checkPi();
+  }, []);
 
   const getRepColor = (score: number): string => {
     if (score >= 90) return '#22c55e';
@@ -20,17 +46,43 @@ export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
     return score >= 90 ? "🏆 Đối tác Xuất Sắc" : score >= 75 ? "⭐ Đối tác Uy Tín" : "📉 Cần cải thiện";
   };
 
+  const handlePiLogin = async () => {
+    if (!window.Pi) {
+      alert("⚠️ Vui lòng mở trong Pi Browser!");
+      return;
+    }
+    try {
+      const user = await window.Pi.authenticate(['payments'], { 
+        onIncompletePaymentFound: () => {} 
+      });
+      setIsPiConnected(true);
+      setPiUsername(user?.username || 'Kho Partner');
+      alert(`✅ Kho đã kết nối Pi Network!\nChào ${user?.username}`);
+    } catch (e) {
+      alert("❌ Kết nối Pi thất bại. Vui lòng thử lại.");
+    }
+  };
+
   return (
     <div style={pageContainer}>
-      {/* HEADER */}
       <div style={headerStyle}>
         <div style={{ fontSize: '48px', cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('home')}>
           ←
         </div>
         <div>
           <h1 style={titleStyle}>KHO TRUNG CHUYỂN</h1>
-          <p style={subtitleStyle}>Mạng lưới Hub • Minh bạch On-chain</p>
+          <p style={subtitleStyle}>Mạng lưới Hub • Thanh toán Pi • On-chain</p>
         </div>
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        {isPiConnected ? (
+          <p style={{ color: '#22d3ee', fontWeight: '600' }}>✅ Đã kết nối Pi @{piUsername}</p>
+        ) : (
+          <button onClick={handlePiLogin} style={piConnectButton}>
+            🔗 Kết nối Pi Network
+          </button>
+        )}
       </div>
 
       {mode === 'welcome' && (
@@ -38,8 +90,8 @@ export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
           <div style={{ fontSize: '110px', marginBottom: '20px' }}>🏪</div>
           <h2 style={welcomeTitle}>Mạng lưới Kho Trung Chuyển GHN.PI</h2>
           <p style={welcomeText}>
-            Kết nối kho hàng & bến bãi của bạn với hệ sinh thái GHN.PI<br />
-            Gửi đơn đường dài nhanh • Thanh toán Pi • Minh bạch on-chain
+            Kết nối kho hàng của bạn với hệ sinh thái GHN.PI<br />
+            Nhận đơn đường dài • Thanh toán Pi tự động • Minh bạch on-chain
           </p>
 
           <button onClick={() => setMode('partnerHub')} style={mainButton}>
@@ -50,7 +102,6 @@ export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
 
       {mode === 'partnerHub' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Reputation */}
           <div style={repCard}>
             <div style={{ fontSize: '52px', fontWeight: 'bold', color: getRepColor(hubReputation) }}>
               {hubReputation} <span style={{ fontSize: '24px' }}>pts</span>
@@ -63,7 +114,6 @@ export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
             </p>
           </div>
 
-          {/* Kho của bạn */}
           <div style={infoCard}>
             <h3 style={{ color: '#4c1d95', marginBottom: '12px' }}>Kho của bạn</h3>
             <div style={{ background: '#ede9fe', padding: '18px', borderRadius: '14px' }}>
@@ -74,7 +124,7 @@ export default function KhoHubPage({ onNavigate }: KhoHubPageProps) {
           </div>
 
           <button 
-            onClick={() => alert('Chức năng quản trị kho đang phát triển...')} 
+            onClick={() => alert('Chức năng quản trị kho & theo dõi đơn Pi đang phát triển...')} 
             style={mainButton}
           >
             Quản trị kho & đơn hàng
@@ -126,6 +176,12 @@ const mainButton = {
   borderRadius: '9999px',
   cursor: 'pointer',
   boxShadow: '0 8px 25px rgba(34,211,238,0.4)'
+};
+
+const piConnectButton = {
+  ...mainButton,
+  background: 'linear-gradient(135deg, #4c1d95, #7c3aed)',
+  color: 'white'
 };
 
 const repCard = {

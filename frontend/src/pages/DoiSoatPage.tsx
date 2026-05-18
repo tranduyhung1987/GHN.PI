@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface DoiSoatPageProps {
   onNavigate: (page: string) => void;
 }
 
+interface Order {
+  maDon: string;
+  nguoiGui: string;
+  nguoiNhan: string;
+  totalAmount?: number;
+  paymentMethod?: 'prepaid' | 'cod';
+  piPaymentId?: string;
+  piTx?: string;
+  status?: string;
+  createdAt?: string;
+}
+
 const DoiSoatPage: React.FC<DoiSoatPageProps> = ({ onNavigate }) => {
   const [maDonHang, setMaDonHang] = useState('');
-  const [ketQua, setKetQua] = useState<any>(null);
+  const [ketQua, setKetQua] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  // Load từ localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('orders');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const mapped = parsed.map((o: any) => ({
+        maDon: o.maDon || o.id,
+        nguoiGui: o.nguoiGui,
+        nguoiNhan: o.nguoiNhan,
+        totalAmount: o.totalAmount,
+        paymentMethod: o.paymentMethod,
+        piPaymentId: o.piPaymentId,
+        piTx: o.piTx,
+        status: o.status,
+        createdAt: o.createdAt
+      }));
+      setOrders(mapped);
+    }
+  }, []);
 
   const handleDoiSoat = () => {
     if (!maDonHang.trim()) {
@@ -14,28 +47,28 @@ const DoiSoatPage: React.FC<DoiSoatPageProps> = ({ onNavigate }) => {
       return;
     }
 
-    // Mock kết quả
-    setKetQua({
-      maDon: maDonHang.toUpperCase(),
-      trangThai: 'Đã thanh toán',
-      soTien: '245.000 đ',
-      thoiGian: '14/05/2026 09:45',
-      piNhan: '89.3 Pi'
-    });
+    const found = orders.find(o => 
+      o.maDon.toUpperCase() === maDonHang.toUpperCase()
+    );
+
+    if (found) {
+      setKetQua(found);
+    } else {
+      alert('❌ Không tìm thấy đơn hàng!');
+      setKetQua(null);
+    }
   };
 
   return (
     <div style={pageContainer}>
-      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
       <div style={header}>
         <div style={iconTitle}>💰</div>
         <div>
           <h1 style={title}>ĐỐI SOÁT</h1>
-          <p style={subtitle}>Kiểm tra và đối chiếu thanh toán</p>
+          <p style={subtitle}>Kiểm tra thanh toán Pi • Minh bạch on-chain</p>
         </div>
       </div>
 
-      {/* FORM ĐỐI SOÁT */}
       <div style={card}>
         <p style={label}>Mã đơn hàng cần đối soát</p>
         
@@ -52,15 +85,34 @@ const DoiSoatPage: React.FC<DoiSoatPageProps> = ({ onNavigate }) => {
         </button>
       </div>
 
-      {/* KẾT QUẢ */}
       {ketQua && (
         <div style={resultCard}>
-          <h3 style={{ margin: '0 0 12px 0', color: '#4c1d95' }}>Kết quả đối soát</h3>
+          <h3 style={{ margin: '0 0 16px 0', color: '#4c1d95' }}>Kết quả đối soát</h3>
+          
           <p><strong>Mã đơn:</strong> {ketQua.maDon}</p>
-          <p><strong>Trạng thái:</strong> <span style={{ color: '#22c55e' }}>{ketQua.trangThai}</span></p>
-          <p><strong>Số tiền:</strong> {ketQua.soTien}</p>
-          <p><strong>Thời gian:</strong> {ketQua.thoiGian}</p>
-          <p><strong>Pi nhận:</strong> <span style={{ color: '#4c1d95', fontWeight: '700' }}>{ketQua.piNhan}</span></p>
+          <p><strong>Người gửi:</strong> {ketQua.nguoiGui}</p>
+          <p><strong>Người nhận:</strong> {ketQua.nguoiNhan}</p>
+          
+          <p>
+            <strong>Thanh toán:</strong>{' '}
+            <span style={{ color: '#22c55e', fontWeight: '600' }}>
+              {ketQua.paymentMethod === 'cod' ? '📦 Thu hộ Pi' : '💰 Thanh toán trước'}
+            </span>
+          </p>
+          
+          {ketQua.totalAmount && (
+            <p><strong>Số tiền:</strong> {ketQua.totalAmount.toLocaleString()} Pi</p>
+          )}
+          
+          {ketQua.piPaymentId && (
+            <p><strong>Pi Payment ID:</strong> {ketQua.piPaymentId.slice(0, 16)}...</p>
+          )}
+          
+          {ketQua.piTx && (
+            <p><strong>Trạng thái Pi:</strong> <span style={{ color: '#22c55e' }}>{ketQua.piTx === 'pending' ? 'Đang xử lý' : 'Hoàn tất'}</span></p>
+          )}
+          
+          <p><strong>Thời gian:</strong> {ketQua.createdAt}</p>
         </div>
       )}
     </div>
@@ -138,7 +190,7 @@ const button: React.CSSProperties = {
 const resultCard: React.CSSProperties = {
   background: 'white',
   borderRadius: '20px',
-  padding: '20px',
+  padding: '24px',
   border: '1px solid #c4b5fd',
   lineHeight: '1.8'
 };

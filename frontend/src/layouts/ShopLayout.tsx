@@ -1,24 +1,54 @@
-// src/layouts/MemberLayout.tsx
-import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
 
-interface MemberLayoutProps {
+declare global {
+  interface Window {
+    Pi: any;
+  }
+}
+
+interface ShopLayoutProps {
   children: React.ReactNode;
 }
 
-const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
-  const { role } = useAuth();
+const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
+  const [isPiConnected, setIsPiConnected] = useState(false);
+  const [piUsername, setPiUsername] = useState('');
+  const [role, setRole] = useState<string>('shop'); // Có thể lấy từ context sau
+
+  // Kiểm tra Pi Connection
+  useEffect(() => {
+    if (window.Pi) {
+      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
+        .then((user: any) => {
+          setIsPiConnected(true);
+          setPiUsername(user?.username || 'Member');
+        })
+        .catch(() => setIsPiConnected(false));
+    }
+  }, []);
 
   return (
     <div style={container}>
-      {/* Header chung cho Member */}
+      {/* Header chung cho Member / Shop */}
       <div style={header}>
-        <h2 style={title}>GHN.PI</h2>
-        <div style={roleBadge}>
-          {role === 'shop' && '🛒 Shop'}
-          {role === 'driver' && '🏍️ Tài Xế'}
-          {role === 'warehouse' && '🏬 Kho Hub'}
-          {role === 'admin' && '👑 Admin'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '28px' }}>🛒</span>
+          <h2 style={title}>GHN.PI</h2>
+        </div>
+
+        <div style={rightSection}>
+          {isPiConnected ? (
+            <div style={piBadge}>✅ @{piUsername}</div>
+          ) : (
+            <div style={piBadge}>🔗 Pi Network</div>
+          )}
+          <div style={roleBadge}>
+            {role === 'shop' && '🛒 Shop'}
+            {role === 'driver' && '🏍️ Tài Xế'}
+            {role === 'warehouse' && '🏬 Kho Hub'}
+            {role === 'admin' && '👑 Admin'}
+            {role === 'sender' && '📦 Sender'}
+          </div>
         </div>
       </div>
 
@@ -29,6 +59,7 @@ const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
   );
 };
 
+/* ===================== STYLES ===================== */
 const container = {
   minHeight: '100vh',
   background: '#f3e8ff',
@@ -46,11 +77,37 @@ const header = {
   boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
 };
 
-const title = { margin: 0, fontSize: '20px', fontWeight: '700' };
-const roleBadge = { fontSize: '14px', padding: '4px 12px', background: 'rgba(255,255,255,0.2)', borderRadius: '9999px' };
+const title = { 
+  margin: 0, 
+  fontSize: '22px', 
+  fontWeight: '700' 
+};
+
+const rightSection = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px'
+};
+
+const roleBadge = { 
+  fontSize: '14px', 
+  padding: '6px 14px', 
+  background: 'rgba(255,255,255,0.25)', 
+  borderRadius: '9999px',
+  fontWeight: '600'
+};
+
+const piBadge = {
+  background: '#22d3ee',
+  color: '#0f172a',
+  padding: '6px 12px',
+  borderRadius: '9999px',
+  fontSize: '13px',
+  fontWeight: '600'
+};
 
 const mainContent = {
   padding: '16px'
 };
 
-export default MemberLayout;
+export default ShopLayout;

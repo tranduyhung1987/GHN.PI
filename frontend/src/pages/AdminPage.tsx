@@ -1,13 +1,41 @@
-// src/pages/AdminPage.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+declare global {
+  interface Window {
+    Pi: any;
+  }
+}
 
 const AdminPage: React.FC = () => {
+  const [isPiConnected, setIsPiConnected] = useState(false);
+  const [piUsername, setPiUsername] = useState('');
+
+  // Kiểm tra Pi Connection cho Admin
+  useEffect(() => {
+    if (window.Pi) {
+      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
+        .then((user: any) => {
+          setIsPiConnected(true);
+          setPiUsername(user?.username || 'Admin');
+        })
+        .catch(() => setIsPiConnected(false));
+    }
+  }, []);
+
   return (
     <div style={pageContainer}>
+      {/* HEADER */}
       <div style={header}>
         <div style={{ fontSize: '48px' }}>👑</div>
-        <h1 style={title}>BẢNG ĐIỀU KHIỂN ADMIN</h1>
-        <p style={subtitle}>Quản trị hệ thống GHN.PI</p>
+        <div>
+          <h1 style={title}>BẢNG ĐIỀU KHIỂN ADMIN</h1>
+          <p style={subtitle}>Quản trị hệ thống GHN.PI • Pi Network</p>
+          {isPiConnected && (
+            <p style={{ color: '#22d3ee', fontWeight: '600', marginTop: '8px' }}>
+              ✅ Admin @{piUsername} • Connected
+            </p>
+          )}
+        </div>
       </div>
 
       <div style={grid}>
@@ -30,10 +58,11 @@ const AdminPage: React.FC = () => {
       </div>
 
       <div style={actionArea}>
-        <button style={adminButton}>Quản lý người dùng</button>
-        <button style={adminButton}>Quản lý đơn hàng</button>
-        <button style={adminButton}>Báo cáo tài chính</button>
-        <button style={adminButton}>Cài đặt hệ thống</button>
+        <button style={adminButton}>👤 Quản lý người dùng</button>
+        <button style={adminButton}>📦 Quản lý đơn hàng</button>
+        <button style={adminButton}>💰 Báo cáo tài chính Pi</button>
+        <button style={adminButton}>⚙️ Cài đặt hệ thống</button>
+        <button style={adminButton}>📊 Thống kê thanh toán Pi</button>
       </div>
     </div>
   );
@@ -47,7 +76,14 @@ const pageContainer = {
   boxSizing: 'border-box' as const
 };
 
-const header = { textAlign: 'center' as const, marginBottom: '30px' };
+const header = { 
+  textAlign: 'center' as const, 
+  marginBottom: '30px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  alignItems: 'center'
+};
+
 const title = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
 const subtitle = { color: '#6b21a8', marginTop: '8px' };
 

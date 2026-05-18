@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface KhieuNaiPageProps {
   onNavigate: (page: string) => void;
+}
+
+interface Order {
+  maDon: string;
+  nguoiGui: string;
+  nguoiNhan: string;
+  diaChiNhan: string;
+  paymentMethod?: 'prepaid' | 'cod';
+  piPaymentId?: string;
+  totalAmount?: number;
 }
 
 const KhieuNaiPage: React.FC<KhieuNaiPageProps> = ({ onNavigate }) => {
@@ -9,32 +19,68 @@ const KhieuNaiPage: React.FC<KhieuNaiPageProps> = ({ onNavigate }) => {
   const [loaiKhieuNai, setLoaiKhieuNai] = useState('');
   const [moTa, setMoTa] = useState('');
   const [fileName, setFileName] = useState('Không có tệp nào được chọn');
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Load đơn hàng từ localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('orders');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const mapped = parsed.map((o: any) => ({
+        maDon: o.maDon || o.id,
+        nguoiGui: o.nguoiGui,
+        nguoiNhan: o.nguoiNhan,
+        diaChiNhan: o.diaChiNhan,
+        paymentMethod: o.paymentMethod,
+        piPaymentId: o.piPaymentId,
+        totalAmount: o.totalAmount
+      }));
+      setOrders(mapped);
+    }
+  }, []);
+
+  const timDonHang = () => {
+    if (!maDonHang.trim()) return alert("Vui lòng nhập mã đơn hàng!");
+    const found = orders.find(o => o.maDon.toUpperCase() === maDonHang.toUpperCase());
+    if (found) {
+      setSelectedOrder(found);
+    } else {
+      alert("❌ Không tìm thấy đơn hàng!");
+    }
+  };
 
   const handleSubmit = () => {
     if (!maDonHang || !loaiKhieuNai || !moTa) {
       alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
-    alert('✅ Khiếu nại đã được gửi thành công! Chúng tôi sẽ phản hồi sớm nhất.');
+    alert(`✅ Khiếu nại cho đơn ${maDonHang} đã được gửi thành công!\nChúng tôi sẽ phản hồi trong 24h qua Pi Network.`);
+    
     // Reset form
     setMaDonHang('');
     setLoaiKhieuNai('');
     setMoTa('');
     setFileName('Không có tệp nào được chọn');
+    setSelectedOrder(null);
   };
+
+  const lyDoOptions = [
+    "Đơn hàng bị chậm trễ", "Hàng hóa bị hỏng", "Mất hàng",
+    "Sai mô tả sản phẩm", "Tài xế không liên lạc", "Thu hộ sai số tiền",
+    "Khác"
+  ];
 
   return (
     <div style={pageContainer}>
-      {/* HEADER - ĐÃ BỎ MŨI TÊN ← */}
       <div style={header}>
         <div style={warningIcon}>⚠️</div>
         <div>
           <h1 style={title}>KHIẾU NẠI</h1>
-          <p style={subtitle}>Hỗ trợ giải quyết tranh chấp</p>
+          <p style={subtitle}>Hỗ trợ giải quyết tranh chấp • Minh bạch Pi</p>
         </div>
       </div>
 
-      {/* FORM */}
       <div style={formContainer}>
         <div style={formGroup}>
           <label style={label}>Mã đơn hàng</label>
@@ -45,7 +91,17 @@ const KhieuNaiPage: React.FC<KhieuNaiPageProps> = ({ onNavigate }) => {
             placeholder="GHNxxxxxxxx"
             style={input}
           />
+          <button onClick={timDonHang} style={searchButton}>🔍 Tìm đơn</button>
         </div>
+
+        {selectedOrder && (
+          <div style={orderInfoBox}>
+            <strong>Mã đơn:</strong> {selectedOrder.maDon}<br />
+            <strong>Người nhận:</strong> {selectedOrder.nguoiNhan}<br />
+            <strong>Thanh toán:</strong> {selectedOrder.paymentMethod === 'cod' ? '📦 Thu hộ Pi' : '💰 Thanh toán trước'}
+            {selectedOrder.piPaymentId && <><br /><strong>Pi ID:</strong> {selectedOrder.piPaymentId.slice(0,16)}...</>}
+          </div>
+        )}
 
         <div style={formGroup}>
           <label style={label}>Loại khiếu nại</label>
@@ -55,10 +111,9 @@ const KhieuNaiPage: React.FC<KhieuNaiPageProps> = ({ onNavigate }) => {
             style={input}
           >
             <option value="">Chọn loại khiếu nại</option>
-            <option value="don-hang">Đơn hàng bị chậm trễ</option>
-            <option value="hang-hong">Hàng hóa bị hỏng</option>
-            <option value="mat-hang">Mất hàng</option>
-            <option value="khac">Khác</option>
+            {lyDoOptions.map((item, i) => (
+              <option key={i} value={item}>{item}</option>
+            ))}
           </select>
         </div>
 
@@ -173,6 +228,26 @@ const submitButton: React.CSSProperties = {
   fontSize: '17px',
   fontWeight: '700',
   cursor: 'pointer'
+};
+
+const searchButton: React.CSSProperties = {
+  padding: '12px 20px',
+  background: '#22d3ee',
+  color: '#0f172a',
+  border: 'none',
+  borderRadius: '9999px',
+  fontWeight: '600',
+  cursor: 'pointer',
+  marginTop: '8px'
+};
+
+const orderInfoBox: React.CSSProperties = {
+  background: '#f0fdf4',
+  padding: '16px',
+  borderRadius: '12px',
+  borderLeft: '4px solid #22c55e',
+  fontSize: '14.5px',
+  lineHeight: '1.7'
 };
 
 export default KhieuNaiPage;

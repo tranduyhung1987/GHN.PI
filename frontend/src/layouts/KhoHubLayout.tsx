@@ -1,12 +1,38 @@
-// src/layouts/KhoHubLayout.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import BottomNav from '../components/BottomNav';
+
+declare global {
+  interface Window {
+    Pi: any;
+  }
+}
 
 interface KhoHubLayoutProps {
   children: React.ReactNode;
 }
 
 const KhoHubLayout: React.FC<KhoHubLayoutProps> = ({ children }) => {
+  const [isPiConnected, setIsPiConnected] = useState(false);
+  const [piUsername, setPiUsername] = useState('');
+
+  // Kiểm tra Pi Connection
+  useEffect(() => {
+    if (window.Pi) {
+      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
+        .then((user: any) => {
+          setIsPiConnected(true);
+          setPiUsername(user?.username || 'Kho Partner');
+        })
+        .catch(() => setIsPiConnected(false));
+    }
+  }, []);
+
+  // Dummy navigate cho Layout (có thể mở rộng sau)
+  const handleNavigate = (page: string) => {
+    console.log('KhoHub navigate to:', page);
+    // Nếu cần chuyển trang thật thì dùng context hoặc window.location
+  };
+
   return (
     <div style={container}>
       {/* Header riêng cho Kho Trung Chuyển */}
@@ -15,18 +41,27 @@ const KhoHubLayout: React.FC<KhoHubLayoutProps> = ({ children }) => {
           <span style={{ fontSize: '32px' }}>🏬</span>
           <h2 style={title}>GHN.PI - KHO TRUNG CHUYỂN</h2>
         </div>
-        <div style={roleBadge}>📦 Kho Hub • Minh bạch On-chain</div>
+        
+        <div style={rightSection}>
+          {isPiConnected ? (
+            <div style={piBadge}>✅ @{piUsername}</div>
+          ) : (
+            <div style={piBadge}>🔗 Pi Network</div>
+          )}
+          <div style={roleBadge}>📦 Kho Hub Partner</div>
+        </div>
       </div>
 
       <main style={mainContent}>
         {children}
       </main>
 
-      <BottomNav />
+      <BottomNav onNavigate={handleNavigate} />
     </div>
   );
 };
 
+/* ===================== STYLES ===================== */
 const container = {
   minHeight: '100vh',
   background: '#f3e8ff',
@@ -35,7 +70,7 @@ const container = {
 };
 
 const khoHeader = {
-  background: '#1e3a8a',           // Màu xanh đậm phù hợp với kho
+  background: '#1e3a8a',
   color: '#fff',
   padding: '16px 20px',
   display: 'flex',
@@ -50,6 +85,12 @@ const title = {
   fontWeight: '800' 
 };
 
+const rightSection = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px'
+};
+
 const roleBadge = { 
   background: '#67e8f9', 
   color: '#0f172a', 
@@ -57,6 +98,15 @@ const roleBadge = {
   borderRadius: '9999px', 
   fontWeight: '700',
   fontSize: '14px'
+};
+
+const piBadge = {
+  background: '#22d3ee',
+  color: '#0f172a',
+  padding: '6px 12px',
+  borderRadius: '9999px',
+  fontSize: '13px',
+  fontWeight: '600'
 };
 
 const mainContent = {
