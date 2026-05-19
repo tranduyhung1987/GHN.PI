@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import BottomNav from '../components/BottomNav';
 
-const DangKyVaiTroPage: React.FC = () => {
+interface DangKyVaiTroPageProps {
+  onNavigate: (page: string) => void;
+}
+
+const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +33,7 @@ const DangKyVaiTroPage: React.FC = () => {
   const handleSelectRole = (role: string, label: string) => {
     console.log('🔥 Chọn vai trò:', role); // debug
     localStorage.setItem('userRole', role);
-    localStorage.setItem('currentPage', 'home'); // ← Quan trọng: chuyển về trang chủ
+    localStorage.setItem('currentPage', 'home'); // Chuyển về trang chủ trong bộ nhớ
     alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nTrang sẽ tải lại để áp dụng giao diện!`);
     window.location.reload();
   };
@@ -78,9 +82,8 @@ const DangKyVaiTroPage: React.FC = () => {
       )}
 
       <BottomNav
-        onNavigate={(page) => {
-          if (page !== 'dang-ky-vai-tro') window.location.href = `/${page}`;
-        }}
+        onNavigate={onNavigate}
+        currentPage="dang-ky-vai-tro"
       />
     </div>
   );

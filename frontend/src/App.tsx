@@ -13,7 +13,7 @@ import DonHangPage from './pages/DonHangPage';
 import DoiSoatPage from './pages/DoiSoatPage';
 import KhieuNaiPage from './pages/KhieuNaiPage';
 import ChatPage from './pages/ChatPage';
-import DangKyVaiTroPage from './pages/DangKyVaiTroPage';   // ← THÊM DÒNG NÀY
+import DangKyVaiTroPage from './pages/DangKyVaiTroPage';
 
 import BottomNav from './components/BottomNav';
 import Modal from './components/Modal';
@@ -36,31 +36,19 @@ type Page =
   | 'doi-soat'
   | 'khieu-nai'
   | 'chat'
-  | 'dang-ky-vai-tro';   // ← THÊM DÒNG NÀY
+  | 'dang-ky-vai-tro';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>(() => {
-    const savedPage = localStorage.getItem('currentPage') as Page;
-    return savedPage && savedPage !== 'home' ? savedPage : 'home';
-  });
-
-  const [userRole, setUserRole] = useState<string>(() => 
-    localStorage.getItem('userRole') || ''
-  );
+  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [userRole, setUserRole] = useState<string>('');
 
   useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'userRole') {
-        const newRole = localStorage.getItem('userRole') || '';
-        setUserRole(newRole);
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+    const savedPage = localStorage.getItem('currentPage') as Page;
+    if (savedPage) setCurrentPage(savedPage);
 
-  const [modal, setModal] = useState({ isOpen: false, title: '', children: null as React.ReactNode, onConfirm: undefined as (() => void) | undefined });
-  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' | 'info' } | null>(null);
+    const savedRole = localStorage.getItem('userRole') || '';
+    if (savedRole) setUserRole(savedRole);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('currentPage', currentPage);
@@ -71,31 +59,19 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: '',
+    children: null as React.ReactNode,
+    onConfirm: undefined as (() => void) | undefined,
+  });
+
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' | 'info' } | null>(null);
+
   const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => setToast({ message, type });
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => 
+    setToast({ message, type });
   const hideToast = () => setToast(null);
-
-  useEffect(() => {
-    const handleOpenModal = (e: any) => {
-      const { title, children, onConfirm } = e.detail || {};
-      setModal({ isOpen: true, title: title || "Thông báo", children: children || null, onConfirm });
-    };
-    const handleShowToast = (e: any) => {
-      const { message, type } = e.detail || {};
-      if (message) showToast(message, type);
-    };
-    const handleCloseModal = () => closeModal();
-
-    window.addEventListener('openModal', handleOpenModal);
-    window.addEventListener('showToast', handleShowToast);
-    window.addEventListener('closeModal', handleCloseModal);
-
-    return () => {
-      window.removeEventListener('openModal', handleOpenModal);
-      window.removeEventListener('showToast', handleShowToast);
-      window.removeEventListener('closeModal', handleCloseModal);
-    };
-  }, []);
 
   return (
     <AuthProvider>
@@ -104,26 +80,39 @@ function App() {
           <div className="min-h-screen" style={{ paddingBottom: '80px' }}>
             {/* Routing */}
             {currentPage === 'home' && <HomePage onNavigate={goTo} userRole={userRole} />}
-            {currentPage === 'kho-hub' && <KhoHubPage onNavigate={goTo} />}
-            {currentPage === 'gui-hang' && <GuiHangPage onNavigate={goTo} />}
-            {currentPage === 'tracking' && <TrackingPage onNavigate={goTo} />}
-            {currentPage === 'nhan-hang' && <NhanHangPage onNavigate={goTo} />}
-            {currentPage === 'tra-cuu-cuoc' && <TraCuuCuocPage onNavigate={goTo} />}
-            {currentPage === 'tai-xe' && <TaiXePage onNavigate={goTo} />}
-            {currentPage === 'ca-nhan' && <CaNhanPage onNavigate={goTo} />}
-            {currentPage === 'don-hang' && <DonHangPage onNavigate={goTo} />}
-            {currentPage === 'doi-soat' && <DoiSoatPage onNavigate={goTo} />}
-            {currentPage === 'khieu-nai' && <KhieuNaiPage onNavigate={goTo} />}
-            {currentPage === 'chat' && <ChatPage onNavigate={goTo} />}
-            {currentPage === 'dang-ky-vai-tro' && <DangKyVaiTroPage onNavigate={goTo} />}   {/* ← THÊM DÒNG NÀY */}
+            {currentPage === 'dang-ky-vai-tro' && <DangKyVaiTroPage onNavigate={goTo} />}
+
+            {/* Khối định tuyến an toàn cho các subpages tránh lỗi strict type checking */}
+            {(() => {
+              const Pages: Record<string, React.ComponentType<any>> = {
+                'kho-hub': KhoHubPage,
+                'gui-hang': GuiHangPage,
+                'tracking': TrackingPage,
+                'nhan-hang': NhanHangPage,
+                'tra-cuu-cuoc': TraCuuCuocPage,
+                'tai-xe': TaiXePage,
+                'ca-nhan': CaNhanPage,
+                'don-hang': DonHangPage,
+                'doi-soat': DoiSoatPage,
+                'khieu-nai': KhieuNaiPage,
+                'chat': ChatPage,
+              };
+
+              const Component = Pages[currentPage];
+              return Component ? <Component onNavigate={goTo} /> : null;
+            })()}
 
             <BottomNav 
               onNavigate={goTo} 
               currentPage={currentPage} 
-              userRole={userRole} 
             />
 
-            <Modal isOpen={modal.isOpen} onClose={closeModal} title={modal.title} onConfirm={modal.onConfirm}>
+            <Modal 
+              isOpen={modal.isOpen} 
+              onClose={closeModal} 
+              title={modal.title}
+              onConfirm={modal.onConfirm}
+            >
               {modal.children}
             </Modal>
 
