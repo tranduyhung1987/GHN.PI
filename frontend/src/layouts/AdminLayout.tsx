@@ -9,9 +9,15 @@ declare global {
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  onNavigate: (page: string) => void;
+  currentPage: string;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ 
+  children, 
+  onNavigate, 
+  currentPage 
+}) => {
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState('');
 
@@ -26,15 +32,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     }
   }, []);
 
-  // Dummy navigate cho Admin (có thể mở rộng sau)
-  const handleNavigate = (page: string) => {
-    console.log('Admin navigate to:', page);
-    // Nếu cần chuyển trang thật thì dùng window.location hoặc context
-  };
-
   return (
     <div style={container}>
-      {/* Admin Header */}
       <div style={adminHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ fontSize: '32px' }}>👑</div>
@@ -55,7 +54,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <BottomNav onNavigate={handleNavigate} />
+      <BottomNav onNavigate={onNavigate} currentPage={currentPage} />
     </div>
   );
 };

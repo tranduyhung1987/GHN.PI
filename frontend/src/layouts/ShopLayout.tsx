@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BottomNav from '../components/BottomNav';
 
 declare global {
   interface Window {
@@ -8,14 +9,19 @@ declare global {
 
 interface ShopLayoutProps {
   children: React.ReactNode;
+  onNavigate: (page: string) => void;
+  currentPage: string;
 }
 
-const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
+const ShopLayout: React.FC<ShopLayoutProps> = ({ 
+  children, 
+  onNavigate, 
+  currentPage 
+}) => {
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState('');
-  const [role, setRole] = useState<string>('shop'); // Có thể lấy từ context sau
+  const [role, setRole] = useState<string>('shop');
 
-  // Kiểm tra Pi Connection
   useEffect(() => {
     if (window.Pi) {
       window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
@@ -29,7 +35,6 @@ const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   return (
     <div style={container}>
-      {/* Header chung cho Member / Shop */}
       <div style={header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '28px' }}>🛒</span>
@@ -55,6 +60,8 @@ const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       <main style={mainContent}>
         {children}
       </main>
+
+      <BottomNav onNavigate={onNavigate} currentPage={currentPage} />
     </div>
   );
 };
@@ -77,11 +84,7 @@ const header = {
   boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
 };
 
-const title = { 
-  margin: 0, 
-  fontSize: '22px', 
-  fontWeight: '700' 
-};
+const title = { margin: 0, fontSize: '22px', fontWeight: '700' };
 
 const rightSection = {
   display: 'flex',

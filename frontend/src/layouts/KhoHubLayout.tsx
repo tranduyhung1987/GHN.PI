@@ -9,13 +9,18 @@ declare global {
 
 interface KhoHubLayoutProps {
   children: React.ReactNode;
+  onNavigate: (page: string) => void;
+  currentPage: string;
 }
 
-const KhoHubLayout: React.FC<KhoHubLayoutProps> = ({ children }) => {
+const KhoHubLayout: React.FC<KhoHubLayoutProps> = ({ 
+  children, 
+  onNavigate, 
+  currentPage 
+}) => {
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState('');
 
-  // Kiểm tra Pi Connection
   useEffect(() => {
     if (window.Pi) {
       window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
@@ -27,15 +32,8 @@ const KhoHubLayout: React.FC<KhoHubLayoutProps> = ({ children }) => {
     }
   }, []);
 
-  // Dummy navigate cho Layout (có thể mở rộng sau)
-  const handleNavigate = (page: string) => {
-    console.log('KhoHub navigate to:', page);
-    // Nếu cần chuyển trang thật thì dùng context hoặc window.location
-  };
-
   return (
     <div style={container}>
-      {/* Header riêng cho Kho Trung Chuyển */}
       <div style={khoHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '32px' }}>🏬</span>
@@ -56,7 +54,7 @@ const KhoHubLayout: React.FC<KhoHubLayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <BottomNav onNavigate={handleNavigate} />
+      <BottomNav onNavigate={onNavigate} currentPage={currentPage} />
     </div>
   );
 };
@@ -79,11 +77,7 @@ const khoHeader = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
 };
 
-const title = { 
-  margin: 0, 
-  fontSize: '22px', 
-  fontWeight: '800' 
-};
+const title = { margin: 0, fontSize: '22px', fontWeight: '800' };
 
 const rightSection = {
   display: 'flex',

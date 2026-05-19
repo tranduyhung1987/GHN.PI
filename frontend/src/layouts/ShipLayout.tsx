@@ -9,13 +9,18 @@ declare global {
 
 interface ShipLayoutProps {
   children: React.ReactNode;
+  onNavigate: (page: string) => void;
+  currentPage: string;
 }
 
-const ShipLayout: React.FC<ShipLayoutProps> = ({ children }) => {
+const ShipLayout: React.FC<ShipLayoutProps> = ({ 
+  children, 
+  onNavigate, 
+  currentPage 
+}) => {
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState('');
 
-  // Kiểm tra Pi Connection cho Tài Xế
   useEffect(() => {
     if (window.Pi) {
       window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
@@ -27,15 +32,8 @@ const ShipLayout: React.FC<ShipLayoutProps> = ({ children }) => {
     }
   }, []);
 
-  // Dummy navigate cho Layout
-  const handleNavigate = (page: string) => {
-    console.log('ShipLayout navigate to:', page);
-    // Có thể mở rộng sau khi có routing context
-  };
-
   return (
     <div style={container}>
-      {/* Header cho Tài Xế */}
       <div style={shipHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '28px' }}>🏍️</span>
@@ -56,7 +54,7 @@ const ShipLayout: React.FC<ShipLayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <BottomNav onNavigate={handleNavigate} />
+      <BottomNav onNavigate={onNavigate} currentPage={currentPage} />
     </div>
   );
 };
@@ -79,11 +77,7 @@ const shipHeader = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
 };
 
-const title = { 
-  margin: 0, 
-  fontSize: '22px', 
-  fontWeight: '800' 
-};
+const title = { margin: 0, fontSize: '22px', fontWeight: '800' };
 
 const rightSection = {
   display: 'flex',
