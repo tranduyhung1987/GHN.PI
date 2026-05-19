@@ -192,7 +192,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
 }
 
 /* ===================== STYLES ===================== */
-const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 120px', boxSizing: 'border-box' as const };
+const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 90px', boxSizing: 'border-box' as const };
 const headerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'center', marginBottom: '20px' };
 const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: '700', color: '#4c1d95' };
 

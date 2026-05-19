@@ -313,7 +313,7 @@ function GuiHangPage({ onNavigate }: GuiHangPageProps) {
 }
 
 /* ===================== STYLES (GIỮ NGUYÊN) ===================== */
-const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' };
+const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 90px', boxSizing: 'border-box' };
 
 const roleBar: React.CSSProperties = {
   background: '#4c1d95',

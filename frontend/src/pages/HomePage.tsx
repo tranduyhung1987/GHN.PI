@@ -140,7 +140,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
 const pageContainer: React.CSSProperties = { 
   minHeight: '100vh', 
   background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', 
-  padding: '20px 14px 100px', 
+  padding: '16px 14px 90px', 
   boxSizing: 'border-box' 
 };
 
@@ -172,13 +172,19 @@ const cardsGrid: React.CSSProperties = {
 
 const cardStyle: React.CSSProperties = { 
   background: 'white', 
-  padding: '24px 16px', 
-  borderRadius: '20px', 
-  textAlign: 'center' as const, 
-  border: '1px solid #e0d4ff', 
-  boxShadow: '0 4px 15px rgba(0,0,0,0.06)', 
-  cursor: 'pointer' 
-};
+  padding: '20px 14px', 
+  borderRadius: '24px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  boxShadow: '0 4px 20px rgba(124, 58, 237, 0.06)',
+  border: '1px solid #f3e8ff',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  minHeight: '145px',
+  boxSizing: 'border-box'  
+ };
 
 const iconStyle: React.CSSProperties = { fontSize: '48px', marginBottom: '12px' };
 const cardTitle: React.CSSProperties = { fontSize: '17px', fontWeight: '700', color: '#4c1d95', margin: '0 0 6px 0' };

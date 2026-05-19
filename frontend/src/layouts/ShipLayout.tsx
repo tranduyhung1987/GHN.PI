@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import BottomNav from '../components/BottomNav';
+import BottomNav from '../components/BottomNav'; // vẫn giữ import (nếu cần sau này)
 
 declare global {
   interface Window {
@@ -34,6 +34,7 @@ const ShipLayout: React.FC<ShipLayoutProps> = ({
 
   return (
     <div style={container}>
+      {/* HEADER - TÀI XẾ */}
       <div style={shipHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '28px' }}>🏍️</span>
@@ -54,7 +55,32 @@ const ShipLayout: React.FC<ShipLayoutProps> = ({
         {children}
       </main>
 
-      <BottomNav onNavigate={onNavigate} currentPage={currentPage} />
+      {/* BOTTOM NAV ĐÃ BỔ SUNG "CÁ NHÂN" */}
+      <div style={bottomNavContainer}>
+        {/* Tab Trang chủ */}
+        <div 
+          onClick={() => onNavigate('home')}
+          style={{
+            ...navItemStyle,
+            ...(currentPage === 'home' || currentPage === '' ? activeNavStyle : {})
+          }}
+        >
+          <div style={navIcon}>🏠</div>
+          <div style={navText}>Trang chủ</div>
+        </div>
+
+        {/* Tab Cá nhân */}
+        <div 
+          onClick={() => onNavigate('ca-nhan')}
+          style={{
+            ...navItemStyle,
+            ...(currentPage === 'ca-nhan' ? activeNavStyle : {})
+          }}
+        >
+          <div style={navIcon}>👤</div>
+          <div style={navText}>Cá nhân</div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -105,6 +131,46 @@ const piBadge = {
 
 const mainContent = {
   padding: '20px 16px'
+};
+
+/* ==================== BOTTOM NAV STYLES ==================== */
+const bottomNavContainer: React.CSSProperties = {
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  height: '80px',
+  background: 'white',
+  borderTop: '1px solid #e0d4ff',
+  display: 'flex',
+  boxShadow: '0 -4px 12px rgba(0,0,0,0.1)',
+  zIndex: 1000
+};
+
+const navItemStyle: React.CSSProperties = {
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#64748b',
+  fontSize: '12px',
+  cursor: 'pointer',
+  paddingTop: '8px'
+};
+
+const activeNavStyle: React.CSSProperties = {
+  color: '#4c1d95',
+  fontWeight: '700'
+};
+
+const navIcon: React.CSSProperties = {
+  fontSize: '26px',
+  marginBottom: '4px'
+};
+
+const navText: React.CSSProperties = {
+  fontSize: '12px'
 };
 
 export default ShipLayout;
