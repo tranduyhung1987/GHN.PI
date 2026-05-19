@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BottomNav from '../components/BottomNav';
+import DangNhapModal from '../components/Modal/DangNhapModal';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -9,13 +10,20 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState<string>('');
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [currentRole, setCurrentRole] = useState<string>('');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
-    // Lấy role từ localStorage
+    // Load từ localStorage
     const savedRole = localStorage.getItem('userRole') || userRole || '';
+    const savedPi = localStorage.getItem('piUsername');
+    
     setCurrentRole(savedRole);
+    
+    if (savedPi) {
+      setIsPiConnected(true);
+      setPiUsername(savedPi);
+    }
 
     if (window.Pi) {
       window.Pi.init({ version: "2.0" })
@@ -24,15 +32,20 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
     }
   }, [userRole]);
 
-  const handlePiLogin = async () => {
-    setIsAuthenticating(true);
+  // ===================== LOGIN SUCCESS =====================
+  const handleLoginSuccess = (username: string) => {
+    setIsPiConnected(true);
+    setPiUsername(username);
+    setShowLoginModal(false);
+
+    // Lưu thông tin
+    localStorage.setItem('piUsername', username);
+    localStorage.setItem('currentPage', 'dang-ky-vai-tro');
+
+    // Force chuyển trang ngay lập tức
     setTimeout(() => {
-      const mockUser = "ThanhPiUser";
-      setIsPiConnected(true);
-      setPiUsername(mockUser);
-      alert(`🎉 ĐĂNG NHẬP THÀNH CÔNG!\n\nUsername: @${mockUser}`);
-      setIsAuthenticating(false);
-    }, 800);
+      window.location.reload();   // ← Đây là chìa khóa
+    }, 200);
   };
 
   const handleCardClick = (page: string) => {
@@ -43,7 +56,16 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
     onNavigate(page);
   };
 
-  // ================== DANH SÁCH CARD THEO ROLE ==================
+  const handleRegisterRoleClick = () => {
+    if (isPiConnected) {
+      localStorage.setItem('currentPage', 'dang-ky-vai-tro');
+      window.location.reload();
+    } else {
+      setShowLoginModal(true);
+    }
+  };
+
+  // Card theo role
   const getCardsByRole = () => {
     const allCards = [
       { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn & thanh toán Pi", page: "gui-hang" },
@@ -55,20 +77,11 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
     ];
 
     switch (currentRole) {
-      case 'sender':
-        return allCards.filter(c => ['gui-hang', 'tra-cuu-cuoc', 'tracking', 'nhan-hang'].includes(c.page));
-      
-      case 'driver':
-        return allCards.filter(c => ['tai-xe', 'tracking', 'nhan-hang'].includes(c.page));
-      
-      case 'warehouse':
-        return allCards.filter(c => ['kho-hub', 'tracking'].includes(c.page));
-      
-      case 'receiver':
-        return allCards.filter(c => ['nhan-hang', 'tracking', 'khieu-nai'].includes(c.page)); // khieu-nai nếu có
-      
-      default: // Guest hoặc chưa chọn role
-        return allCards;
+      case 'sender': return allCards.filter(c => ['gui-hang', 'tra-cuu-cuoc', 'tracking'].includes(c.page));
+      case 'driver': return allCards.filter(c => ['tai-xe', 'tracking'].includes(c.page));
+      case 'warehouse': return allCards.filter(c => ['kho-hub', 'tracking'].includes(c.page));
+      case 'receiver': return allCards.filter(c => ['nhan-hang', 'tracking'].includes(c.page));
+      default: return allCards;
     }
   };
 
@@ -85,36 +98,40 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
             ✅ Đã kết nối @{piUsername}
           </p>
         )}
-        
-        {currentRole && (
-          <p style={{ color: '#4c1d95', fontWeight: '600', marginTop: '4px' }}>
-            Vai trò: <strong>{currentRole === 'sender' ? 'Người Gửi Hàng' : 
-                              currentRole === 'driver' ? 'Tài Xế' : 
-                              currentRole === 'warehouse' ? 'Kho Trung Chuyển' : 
-                              currentRole === 'receiver' ? 'Người Nhận Hàng' : currentRole}</strong>
-          </p>
-        )}
       </div>
 
       <div style={piButtonContainer}>
-        <button style={piButton} onClick={handlePiLogin} disabled={isAuthenticating}>
-          {isAuthenticating ? 'Đang kết nối...' : isPiConnected ? '🔄 Kết nối lại' : '⭐ Đăng nhập với Pi Network'}
+        <button style={piButton} onClick={() => setShowLoginModal(true)}>
+          {isPiConnected ? '🔄 Kết nối lại' : '⭐ Đăng nhập với Pi Network'}
         </button>
       </div>
 
       <div style={cardsGrid}>
         {cards.map((card, index) => (
-          <div 
-            key={index} 
-            onClick={() => handleCardClick(card.page)} 
-            style={cardStyle}
-          >
+          <div key={index} onClick={() => handleCardClick(card.page)} style={cardStyle}>
             <div style={iconStyle}>{card.icon}</div>
             <h3 style={cardTitle}>{card.title}</h3>
             <p style={cardDesc}>{card.desc}</p>
           </div>
         ))}
       </div>
+
+      {/* MODAL */}
+      <DangNhapModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+
+      <BottomNav 
+        onNavigate={(page) => {
+          if (page === 'dang-ky-vai-tro') {
+            handleRegisterRoleClick();
+          } else {
+            onNavigate(page);
+          }
+        }} 
+      />
     </div>
   );
 };

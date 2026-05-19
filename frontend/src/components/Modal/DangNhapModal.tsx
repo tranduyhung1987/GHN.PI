@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface DangNhapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess?: (role: string) => void;
+  onLoginSuccess?: (username: string) => void;   // ← Đã sửa đúng
 }
 
 const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
@@ -16,13 +16,14 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
 
   const handlePiLogin = () => {
     setIsLoading(true);
-    // Simulate Pi Network login
+
     setTimeout(() => {
       setIsLoading(false);
-      onLoginSuccess?.('member'); // hoặc 'driver', 'warehouse' tùy theo
+      const username = "ThanhPiUser"; // Mock username
+      onLoginSuccess?.(username);     // ← Gọi callback quan trọng
       onClose();
-      alert('✅ Đăng nhập Pi Network thành công!');
-    }, 1500);
+      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${username}`);
+    }, 1200);
   };
 
   const handleEmailLogin = (e: React.FormEvent) => {
@@ -30,10 +31,11 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      onLoginSuccess?.('member');
+      const username = "ThanhPiUser";
+      onLoginSuccess?.(username);
       onClose();
       alert('✅ Đăng nhập bằng email thành công!');
-    }, 1200);
+    }, 1000);
   };
 
   return (
@@ -57,7 +59,6 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
         overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }}>
-        {/* Header */}
         <div style={{
           background: 'linear-gradient(135deg, #4c1d95, #7c3aed)',
           color: 'white',
@@ -86,9 +87,7 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
           </button>
         </div>
 
-        {/* Body */}
         <div style={{ padding: '24px' }}>
-          {/* Login Method Tabs */}
           <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '9999px', padding: '4px', marginBottom: '24px' }}>
             <button
               onClick={() => setLoginMethod('pi')}
@@ -133,54 +132,20 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
                 borderRadius: '9999px',
                 fontSize: '17px',
                 fontWeight: '700',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.8 : 1
+                cursor: isLoading ? 'not-allowed' : 'pointer'
               }}
             >
               {isLoading ? 'Đang kết nối Pi Network...' : '🚀 Đăng nhập bằng Pi Network'}
             </button>
           ) : (
             <form onSubmit={handleEmailLogin}>
-              <input
-                type="email"
-                placeholder="Email của bạn"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={inputStyle}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Mật khẩu"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={inputStyle}
-                required
-              />
-              <button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  background: '#4c1d95',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  fontSize: '17px',
-                  fontWeight: '700',
-                  marginTop: '12px',
-                  cursor: isLoading ? 'not-allowed' : 'pointer'
-                }}
-              >
+              <input type="email" placeholder="Email của bạn" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} required />
+              <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} required />
+              <button type="submit" disabled={isLoading} style={emailButtonStyle}>
                 {isLoading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
               </button>
             </form>
           )}
-        </div>
-
-        <div style={{ textAlign: 'center', padding: '16px', color: '#64748b', fontSize: '14px' }}>
-          Chưa có tài khoản? <span style={{ color: '#22d3ee', cursor: 'pointer' }}>Đăng ký ngay</span>
         </div>
       </div>
     </div>
@@ -195,6 +160,19 @@ const inputStyle = {
   borderRadius: '12px',
   fontSize: '15px',
   background: '#f8fafc'
+};
+
+const emailButtonStyle = {
+  width: '100%',
+  padding: '16px',
+  background: '#4c1d95',
+  color: 'white',
+  border: 'none',
+  borderRadius: '9999px',
+  fontSize: '17px',
+  fontWeight: '700',
+  marginTop: '12px',
+  cursor: 'pointer'
 };
 
 export default DangNhapModal;

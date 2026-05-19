@@ -15,7 +15,6 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
   const [piUsername, setPiUsername] = useState('Thành Viên GHN.PI');
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
 
-  // Kiểm tra Pi Connection
   useEffect(() => {
     if (window.Pi) {
       window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
@@ -26,18 +25,24 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
         .catch(() => setIsPiConnected(false));
     }
 
-    // Load recent orders từ localStorage
     const saved = localStorage.getItem('orders');
     if (saved) {
-      const parsed = JSON.parse(saved).slice(0, 3); // 3 đơn gần nhất
+      const parsed = JSON.parse(saved).slice(0, 3);
       setRecentOrders(parsed);
     }
   }, []);
 
   const handleLogout = () => {
-    if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
-      alert('✅ Đã đăng xuất thành công!');
-      onNavigate('home');
+    if (window.confirm('Bạn có chắc muốn đăng xuất và quay về giao diện người mới?')) {
+      // XÓA ROLE + PI USER → quay lại KhachMoiLayout
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('piUsername');
+      localStorage.removeItem('currentPage');
+
+      alert('✅ Đã đăng xuất thành công!\n\nĐang quay về giao diện người mới...');
+
+      // Reload để BottomNav + Layout chuyển sang KhachMoiLayout
+      window.location.reload();
     }
   };
 
@@ -53,7 +58,7 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
         <div style={avatar}>🧑‍💼</div>
         <h2 style={name}>{piUsername}</h2>
         <p style={role}>
-          Vai trò: <strong>Sender</strong> 
+          Vai trò: <strong>Người Gửi Hàng</strong> 
           {isPiConnected && <span style={{ color: '#22d3ee' }}> • ✅ Pi Connected</span>}
         </p>
         <p style={wallet}>Ví Pi: <strong>@{piUsername}</strong></p>
@@ -68,32 +73,9 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
       <div style={balanceCard}>
         <p style={{ color: '#6b21a8', marginBottom: '8px' }}>Số dư ví Pi</p>
         <p style={balanceAmount}>1.245.680 <span style={{ fontSize: '20px' }}>Pi</span></p>
-        <p style={{ fontSize: '14px', color: '#10b981' }}>✅ Có thể dùng để thanh toán & thu hộ</p>
       </div>
 
-      {/* Lịch sử gần đây */}
-      <div style={section}>
-        <h3 style={sectionTitle}>📋 Lịch sử đơn hàng gần đây</h3>
-        {recentOrders.length === 0 ? (
-          <p>Chưa có đơn hàng nào</p>
-        ) : (
-          recentOrders.map((order, idx) => (
-            <div key={idx} style={historyItem}>
-              <div>
-                <strong>{order.maDon}</strong>
-                <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                  {order.loaiDon === 'hoatoc' ? '⚡ Hỏa Tốc' : '🛣️ Đường Dài'} • {order.nguoiNhan}
-                </p>
-              </div>
-              <div style={{ textAlign: 'right', color: '#22c55e' }}>
-                {order.totalAmount?.toLocaleString() || order.shippingFee?.toLocaleString()} Pi
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Menu */}
+      {/* Menu Cá nhân */}
       <div style={menuContainer}>
         <button onClick={() => onNavigate('don-hang')} style={menuButton}>📦 Đơn hàng của tôi</button>
         <button onClick={() => onNavigate('tracking')} style={menuButton}>📍 Theo dõi đơn hàng</button>
@@ -102,7 +84,7 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
         <button style={menuButton}>⚙️ Cài đặt</button>
       </div>
 
-      {/* Logout */}
+      {/* NÚT ĐĂNG XUẤT */}
       <button onClick={handleLogout} style={logoutButton}>
         Đăng xuất
       </button>
@@ -110,7 +92,7 @@ const CaNhanPage: React.FC<CaNhanPageProps> = ({ onNavigate }) => {
   );
 };
 
-/* ===================== STYLES ===================== */
+/* ===================== STYLES (GIỮ NGUYÊN) ===================== */
 const pageContainer = {
   minHeight: '100vh',
   background: '#f3e8ff',
@@ -158,16 +140,6 @@ const balanceCard = {
 };
 
 const balanceAmount = { fontSize: '32px', fontWeight: '700', color: '#22d3ee', margin: '8px 0' };
-
-const section = { background: 'white', padding: '20px', borderRadius: '20px', marginBottom: '20px' };
-const sectionTitle = { color: '#4c1d95', marginBottom: '16px', fontSize: '18px' };
-
-const historyItem = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '12px 0',
-  borderBottom: '1px solid #e0d4ff'
-};
 
 const menuContainer = { display: 'flex', flexDirection: 'column' as const, gap: '12px', marginBottom: '30px' };
 
