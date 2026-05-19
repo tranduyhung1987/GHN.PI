@@ -76,7 +76,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
     <div style={pageContainer}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>🔎 TRA CỨU CƯỚC</h1>
-        {isPiConnected && <p style={{ color: '#22d3ee', fontSize: '14px' }}>✅ Pi Connected</p>}
+        {isPiConnected && <p style={{ color: '#7c3aed', fontSize: '14px', fontWeight: '600' }}>✅ Pi Connected</p>}
       </div>
 
       <div style={tabContainer}>
@@ -171,7 +171,7 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
               <div style={resultRow}><span>Hình thức</span><strong>{ketQua.hinhThuc}</strong></div>
               <div style={totalRow}>
                 <span>TỔNG CỘNG</span>
-                <strong style={{ fontSize: '28px', color: '#22d3ee' }}>{ketQua.tongCong.toLocaleString()} Pi</strong>
+                <strong style={{ fontSize: '28px', color: '#7c3aed' }}>{ketQua.tongCong.toLocaleString()} Pi</strong>
               </div>
               <p style={{ textAlign: 'center', marginTop: '12px', color: '#10b981', fontWeight: '600' }}>
                 ⏱ Thời gian giao dự kiến: {ketQua.thoiGianGiao}
@@ -191,48 +191,48 @@ export default function TraCuuCuocPage({ onNavigate }: TraCuuCuocPageProps) {
   );
 }
 
-/* ===================== STYLES ===================== */
-const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 90px', boxSizing: 'border-box' as const };
-const headerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'center', marginBottom: '20px' };
-const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: '700', color: '#4c1d95' };
+/* ===================== STYLES ĐỒNG BỘ ===================== */
+const pageContainer: React.CSSProperties = { minHeight: '100vh', background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', padding: '16px 14px 100px', boxSizing: 'border-box' };
+const headerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' };
+const titleStyle: React.CSSProperties = { fontSize: '24px', fontWeight: '800', color: '#4c1d95', margin: '0 0 8px 0' };
 
-const cardStyle: React.CSSProperties = { background: '#ede9fe', padding: '20px', borderRadius: '16px', border: '1px solid #c4b5fd' };
+const cardStyle: React.CSSProperties = { background: 'white', padding: '20px', borderRadius: '24px', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.05)', border: '1px solid #f3e8ff' };
 const subLabel: React.CSSProperties = { color: '#6b21a8', marginBottom: '8px', fontSize: '14.5px', fontWeight: '600' };
-const selectStyle: React.CSSProperties = { width: '100%', padding: '13px 12px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95' };
-const inputStyle: React.CSSProperties = { width: '100%', padding: '13px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95' };
+const selectStyle: React.CSSProperties = { width: '100%', padding: '13px 12px', background: '#fdfbff', border: '1px solid #e9d5ff', borderRadius: '14px', color: '#4c1d95' };
+const inputStyle: React.CSSProperties = { width: '100%', padding: '13px', background: '#fdfbff', border: '1px solid #e9d5ff', borderRadius: '14px', color: '#4c1d95' };
 
 const sizeContainer: React.CSSProperties = { display: 'flex', gap: '10px' };
 const sizeField: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column' as const };
 const sizeLabel: React.CSSProperties = { fontSize: '12px', color: '#6b21a8', marginBottom: '4px' };
-const sizeInput: React.CSSProperties = { width: '100%', padding: '10px 8px', background: '#f3e8ff', border: '1px solid #c4b5fd', borderRadius: '10px', textAlign: 'center' as const, fontSize: '15px' };
+const sizeInput: React.CSSProperties = { width: '100%', padding: '10px 8px', background: '#fdfbff', border: '1px solid #e9d5ff', borderRadius: '10px', textAlign: 'center' as const, fontSize: '15px', color: '#4c1d95' };
 
-const activeTypeBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#22d3ee', color: '#0f172a', borderRadius: '9999px', fontWeight: '600' };
-const inactiveTypeBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#e0e7ff', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px' };
+const activeTypeBtn: React.CSSProperties = { flex: 1, padding: '12px', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', borderRadius: '9999px', fontWeight: '600', border: 'none' };
+const inactiveTypeBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#f3e8ff', color: '#4c1d95', border: '1px solid #e9d5ff', borderRadius: '9999px', fontWeight: '600' };
 
 const calcButtonStyle: React.CSSProperties = { 
   width: '100%', padding: '18px', fontSize: '17px', fontWeight: '700', 
-  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)', color: '#0f172a', 
-  border: 'none', borderRadius: '9999px', marginTop: '10px' 
+  background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', 
+  border: 'none', borderRadius: '9999px', marginTop: '10px', cursor: 'pointer'
 };
 
 const resultStyle: React.CSSProperties = { 
-  background: 'white', padding: '24px', borderRadius: '20px', 
-  boxShadow: '0 4px 20px rgba(0,0,0,0.08)', border: '2px solid #22d3ee' 
+  background: 'white', padding: '24px', borderRadius: '28px', 
+  boxShadow: '0 4px 20px rgba(124, 58, 237, 0.05)', border: '1px solid #f3e8ff' 
 };
 const resultRow: React.CSSProperties = { 
-  display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px dashed #e0d4ff' 
+  display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f3e8ff' 
 };
 const totalRow: React.CSSProperties = { 
   display: 'flex', justifyContent: 'space-between', padding: '16px 0', marginTop: '8px', 
-  borderTop: '2px solid #22d3ee', fontSize: '18px', fontWeight: '700' 
+  borderTop: '2px solid #f3e8ff', fontSize: '18px', fontWeight: '700' 
 };
 
 const createOrderBtn: React.CSSProperties = {
   width: '100%',
   padding: '16px',
   marginTop: '16px',
-  background: '#22d3ee',
-  color: '#0f172a',
+  background: '#f3e8ff',
+  color: '#4c1d95',
   border: 'none',
   borderRadius: '9999px',
   fontSize: '17px',
@@ -240,6 +240,6 @@ const createOrderBtn: React.CSSProperties = {
   cursor: 'pointer'
 };
 
-const tabContainer: React.CSSProperties = { display: 'flex', background: '#e0e7ff', borderRadius: '9999px', padding: '6px', marginBottom: '24px' };
-const activeTabStyle: React.CSSProperties = { flex: 1, padding: '14px', borderRadius: '9999px', background: '#22d3ee', color: '#0f172a', fontWeight: '700' };
-const inactiveTabStyle: React.CSSProperties = { flex: 1, padding: '14px', borderRadius: '9999px', background: '#e0e7ff', color: '#4c1d95' };
+const tabContainer: React.CSSProperties = { display: 'flex', background: 'white', borderRadius: '9999px', padding: '6px', marginBottom: '24px', border: '1px solid #f3e8ff' };
+const activeTabStyle: React.CSSProperties = { flex: 1, padding: '14px', borderRadius: '9999px', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', fontWeight: '700' };
+const inactiveTabStyle: React.CSSProperties = { flex: 1, padding: '14px', borderRadius: '9999px', background: 'transparent', color: '#4c1d95', border: 'none' };

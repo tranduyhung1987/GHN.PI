@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Skeleton from '../components/Skeleton';
 
 interface TrackingPageProps {
   onNavigate: (page: string) => void;
@@ -31,135 +30,96 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
   const loadOrders = () => {
     const saved = localStorage.getItem('orders');
     if (saved) {
-      const parsed = JSON.parse(saved);
-      const mapped = parsed.map((o: any) => ({
-        maDon: o.maDon || o.id,
-        loaiDon: o.loaiDon,
-        nguoiNhan: o.nguoiNhan,
-        diaChiNhan: o.diaChiNhan,
-        diaChiGui: o.diaChiGui,
-        totalAmount: o.totalAmount || o.shippingFee || 0,
-        paymentMethod: o.paymentMethod,
-        piPaymentId: o.piPaymentId,
-        piTx: o.piTx,
-        trangThai: o.status || 'DangXuLy',
-        viTriHienTai: o.status === 'cho-lay-hang' ? 'Đang chờ tài xế nhận' : 
-                     o.status === 'dang-giao' ? 'Đang giao hàng' : 'Đã cập nhật',
-        thoiGianCapNhat: o.updatedAt || o.createdAt,
-        timeline: [
-          { time: "08:15", status: "Đơn đã tạo & thanh toán Pi", done: true },
-          { time: "09:40", status: "Tài xế nhận đơn", done: o.status !== 'cho-lay-hang' },
-          { time: "11:20", status: "Đang lấy hàng", done: false },
-          { time: "13:45", status: "Đang giao hàng", done: false },
-        ]
-      }));
-      setOrders(mapped);
+      try {
+        const parsed = JSON.parse(saved);
+        const mapped = parsed.map((o: any) => ({
+          maDon: o.maDon || o.id,
+          loaiDon: o.loaiDon || 'hoatoc',
+          nguoiNhan: o.nguoiNhan,
+          diaChiNhan: o.diaChiNhan,
+          diaChiGui: o.diaChiGui,
+          taiXe: o.taiXe || 'Chưa phân công',
+          trangThai: o.status || 'cho-lay-hang',
+          totalAmount: o.totalAmount || 0,
+          paymentMethod: 'prepaid',
+          piPaymentId: o.piPaymentId,
+          piTx: o.piTx,
+          viTriHienTai: o.viTriHienTai || 'Kho trung chuyển',
+          thoiGianCapNhat: new Date().toLocaleTimeString(),
+          timeline: [
+            { time: '08:00', status: 'Đã tạo đơn', done: true },
+            { time: '09:30', status: 'Đang điều phối', done: o.status !== 'cho-lay-hang' }
+          ]
+        }));
+        setOrders(mapped);
+      } catch (e) {
+        console.error("Lỗi khi tải đơn hàng:", e);
+      }
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     loadOrders();
     window.addEventListener('storage', loadOrders);
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => {
-      window.removeEventListener('storage', loadOrders);
-      clearTimeout(timer);
-    };
+    return () => window.removeEventListener('storage', loadOrders);
   }, []);
 
   const filteredOrders = activeFilter === 'All' 
     ? orders 
-    : orders.filter(o => o.trangThai.includes(activeFilter.toLowerCase()));
-
-  const getStatusColor = (status: string) => {
-    if (status.includes('hoan-thanh') || status.includes('completed')) return '#22c55e';
-    if (status.includes('dang-giao') || status.includes('shipping')) return '#22d3ee';
-    if (status.includes('cho-lay') || status.includes('pending')) return '#eab308';
-    return '#ef4444';
-  };
-
-  const getPaymentText = (type?: string, piTx?: string) => {
-    if (type === 'cod') return '📦 Thu hộ Pi';
-    return piTx && piTx !== 'pending' ? '✅ Đã thanh toán Pi' : '💰 Thanh toán trước (Pi)';
-  };
+    : orders.filter(o => o.trangThai === activeFilter);
 
   return (
     <div style={pageContainer}>
-      <div style={header}>
-        <h1 style={title}>📍 TRACKING</h1>
-        <button style={refreshBtn} onClick={loadOrders}>🔄 Cập nhật</button>
+      <div style={headerStyle}>
+        <button type="button" style={backBtnStyle} onClick={() => onNavigate('home')}>⬅ Trở Lại</button>
+        <h2 style={headerTitleStyle}>Tracking Đơn Hàng</h2>
+        <div style={{ width: '40px' }}></div>
       </div>
 
-      <p style={subtitle}>Theo dõi đơn hàng thời gian thực • Thanh toán Pi minh bạch</p>
-
-      <div style={filterContainer}>
-        {(['All', 'DangGiao', 'DaGiao'] as const).map(f => (
-          <button
-            key={f}
+      <div style={filterContainerStyle}>
+        {['All', 'cho-lay-hang', 'dang-giao', 'hoan-thanh'].map(f => (
+          <button 
+            key={f} 
             onClick={() => setActiveFilter(f)}
             style={activeFilter === f ? activeFilterStyle : filterStyle}
           >
-            {f === 'All' ? 'Tất cả' : f === 'DangGiao' ? 'Đang giao' : 'Đã giao'}
+            {f === 'All' ? 'Tất cả' : f.replace('-', ' ')}
           </button>
         ))}
       </div>
 
-      {loading ? (
-        <Skeleton count={2} />
-      ) : filteredOrders.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#64748b', padding: '60px 20px' }}>
-          Chưa có đơn hàng nào để theo dõi
-        </p>
-      ) : (
-        filteredOrders.map((order) => (
-          <div key={order.maDon} style={orderCard} onClick={() => setSelectedOrder(order)}>
-            <div style={orderHeader}>
-              <div>
-                <span style={{ fontWeight: '700', fontSize: '17px' }}>{order.maDon}</span>
-                <span style={{ marginLeft: '10px', color: '#6b21a8' }}>
-                  {order.loaiDon === 'hoatoc' ? '⚡ Hỏa Tốc' : '🛣️ Đường Dài'}
-                </span>
+      <div style={{ marginTop: '16px' }}>
+        {loading ? (
+          <p style={{ textAlign: 'center', color: '#64748b' }}>Đang tải...</p>
+        ) : filteredOrders.length > 0 ? (
+          filteredOrders.map((order, index) => (
+            <div key={index} style={orderCardStyle} onClick={() => setSelectedOrder(order)}>
+              <div style={orderHeaderStyle}>
+                <span style={{ fontWeight: '800', color: '#4c1d95' }}>{order.maDon}</span>
+                <span style={statusBadge}>{order.trangThai.replace('-', ' ')}</span>
               </div>
-              <span style={{ 
-                padding: '4px 12px', 
-                borderRadius: '9999px', 
-                backgroundColor: getStatusColor(order.trangThai) + '20',
-                color: getStatusColor(order.trangThai),
-                fontWeight: '600',
-                fontSize: '14px'
-              }}>
-                {order.trangThai}
-              </span>
+              <div style={infoLineStyle}>🚚 {order.loaiDon === 'hoatoc' ? 'Hỏa tốc' : 'Đường dài'}</div>
+              <div style={infoLineStyle}>👤 {order.nguoiNhan}</div>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>📍 {order.diaChiNhan}</div>
             </div>
-
-            <div style={infoLine}><strong>Người nhận:</strong> {order.nguoiNhan}</div>
-            <div style={infoLine}><strong>Địa chỉ:</strong> {order.diaChiNhan}</div>
-
-            <div style={{ marginTop: '8px', color: '#10b981', fontSize: '14.5px' }}>
-              {getPaymentText(order.paymentMethod, order.piTx)}
-            </div>
-
-            {order.piPaymentId && (
-              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                Pi ID: {order.piPaymentId.slice(0, 16)}...
-              </div>
-            )}
-
-            <div style={{ marginTop: '12px', color: '#64748b', fontSize: '14.5px' }}>
-              {order.viTriHienTai}
-            </div>
-          </div>
-        ))
-      )}
+          ))
+        ) : (
+          <p style={{ textAlign: 'center', color: '#64748b', marginTop: '40px' }}>Chưa có đơn hàng nào ở trạng thái này.</p>
+        )}
+      </div>
 
       {selectedOrder && (
-        <div style={modalOverlay}>
-          <div style={modalContent}>
-            <h2>Chi tiết Tracking</h2>
-            <p><strong>Mã đơn:</strong> {selectedOrder.maDon}</p>
-            <p><strong>Thanh toán:</strong> {getPaymentText(selectedOrder.paymentMethod, selectedOrder.piTx)}</p>
-            {selectedOrder.piPaymentId && <p><strong>Pi Payment ID:</strong> {selectedOrder.piPaymentId}</p>}
-            <button onClick={() => setSelectedOrder(null)} style={closeButton}>Đóng</button>
+        <div style={modalOverlay} onClick={() => setSelectedOrder(null)}>
+          <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: '#4c1d95', margin: '0 0 15px 0' }}>Chi tiết: {selectedOrder.maDon}</h3>
+            <div style={{ textAlign: 'left', fontSize: '14px', lineHeight: '1.8' }}>
+              <p><strong>Người nhận:</strong> {selectedOrder.nguoiNhan}</p>
+              <p><strong>Địa chỉ:</strong> {selectedOrder.diaChiNhan}</p>
+              <p><strong>Trạng thái:</strong> {selectedOrder.trangThai}</p>
+              <p><strong>Tổng tiền:</strong> {selectedOrder.totalAmount} Pi</p>
+            </div>
+            <button style={closeButtonStyle} onClick={() => setSelectedOrder(null)}>Đóng</button>
           </div>
         </div>
       )}
@@ -167,24 +127,23 @@ function TrackingPage({ onNavigate }: TrackingPageProps) {
   );
 }
 
-/* ===================== STYLES GIỮ NGUYÊN ===================== */
-const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' };
-const header: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' };
-const title: React.CSSProperties = { fontSize: '28px', fontWeight: '700', color: '#4c1d95' };
-const subtitle: React.CSSProperties = { color: '#6b21a8', marginBottom: '20px', fontSize: '15px' };
+/* ==================== STYLES ĐỒNG BỘ TÍM ==================== */
+const pageContainer: React.CSSProperties = { minHeight: '100vh', background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', padding: '16px 14px 100px', boxSizing: 'border-box' };
+const headerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' };
+const backBtnStyle: React.CSSProperties = { padding: '10px 16px', background: 'white', border: '1px solid #f3e8ff', borderRadius: '9999px', color: '#4c1d95', fontWeight: '700', fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(124, 58, 237, 0.04)' };
+const headerTitleStyle: React.CSSProperties = { fontSize: '20px', fontWeight: '800', color: '#4c1d95', margin: 0 };
 
-const filterContainer: React.CSSProperties = { display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px' };
-const filterStyle: React.CSSProperties = { padding: '10px 20px', borderRadius: '9999px', background: '#ede9fe', color: '#4c1d95', border: '1px solid #c4b5fd', whiteSpace: 'nowrap' as const };
-const activeFilterStyle: React.CSSProperties = { ...filterStyle, background: '#22d3ee', color: '#0f172a', fontWeight: '700' };
+const filterContainerStyle: React.CSSProperties = { display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '20px', paddingBottom: '5px' };
+const filterStyle: React.CSSProperties = { padding: '8px 16px', borderRadius: '9999px', background: 'white', color: '#64748b', border: '1px solid #e9d5ff', fontWeight: '600', fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' };
+const activeFilterStyle: React.CSSProperties = { ...filterStyle, background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', border: 'none' };
 
-const orderCard: React.CSSProperties = { background: 'white', padding: '20px', borderRadius: '20px', marginBottom: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', cursor: 'pointer' };
-const orderHeader: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', marginBottom: '12px' };
-const infoLine: React.CSSProperties = { marginBottom: '8px', color: '#334155' };
+const orderCardStyle: React.CSSProperties = { background: 'white', padding: '18px', borderRadius: '24px', marginBottom: '16px', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.05)', border: '1px solid #f3e8ff', cursor: 'pointer' };
+const orderHeaderStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', marginBottom: '10px', alignItems: 'center' };
+const statusBadge: React.CSSProperties = { fontSize: '11px', background: '#f3e8ff', color: '#7c3aed', padding: '4px 10px', borderRadius: '9999px', fontWeight: '700', textTransform: 'uppercase' };
+const infoLineStyle: React.CSSProperties = { marginBottom: '6px', color: '#1e2937', fontSize: '14px' };
 
-const modalOverlay: React.CSSProperties = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
-const modalContent: React.CSSProperties = { background: '#fff', padding: '30px', borderRadius: '20px', maxWidth: '380px', width: '90%', textAlign: 'center' as const };
-const closeButton: React.CSSProperties = { padding: '14px 24px', background: '#64748b', color: 'white', border: 'none', borderRadius: '9999px', marginTop: '20px', width: '100%' };
-
-const refreshBtn: React.CSSProperties = { padding: '8px 16px', background: '#ede9fe', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: '9999px', fontWeight: '600', cursor: 'pointer' };
+const modalOverlay: React.CSSProperties = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(76, 29, 149, 0.3)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' };
+const modalContentStyle: React.CSSProperties = { background: 'white', padding: '32px 24px', borderRadius: '28px', textAlign: 'center', maxWidth: '360px', width: '100%', border: '1px solid #f3e8ff' };
+const closeButtonStyle: React.CSSProperties = { width: '100%', padding: '14px', background: '#f3e8ff', color: '#4c1d95', border: 'none', borderRadius: '9999px', fontWeight: '700', marginTop: '20px', cursor: 'pointer' };
 
 export default TrackingPage;

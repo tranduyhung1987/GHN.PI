@@ -40,103 +40,101 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
 
     // Lưu thông tin
     localStorage.setItem('piUsername', username);
-    localStorage.setItem('currentPage', 'dang-ky-vai-tro');
+    localStorage.setItem('isPiConnected', 'true');
 
-    // Force chuyển trang ngay lập tức
-    setTimeout(() => {
-      window.location.reload();   // ← Đây là chìa khóa
-    }, 200);
-  };
-
-  const handleCardClick = (page: string) => {
-    if (!isPiConnected) {
-      alert("⚠️ Vui lòng đăng nhập Pi Network trước khi sử dụng!");
-      return;
+    // Chuyển hướng theo vai trò (nếu có)
+    const savedRole = localStorage.getItem('userRole');
+    if (savedRole === 'tai-xe') {
+      onNavigate('tai-xe');
+    } else if (savedRole === 'kho-hub') {
+      onNavigate('kho-hub');
     }
-    onNavigate(page);
   };
 
-  const handleRegisterRoleClick = () => {
-    if (isPiConnected) {
-      localStorage.setItem('currentPage', 'dang-ky-vai-tro');
+  // ===================== DANG XUAT =====================
+  const handleLogout = () => {
+    if(window.confirm("Bạn có chắc muốn đăng xuất tài khoản Pi Network?")) {
+      localStorage.clear();
+      setIsPiConnected(false);
+      setPiUsername('');
+      setCurrentRole('');
       window.location.reload();
-    } else {
-      setShowLoginModal(true);
     }
   };
-
-  // Card theo role
-  const getCardsByRole = () => {
-    const allCards = [
-      { icon: "📦", title: "GỬI HÀNG", desc: "Tạo đơn & thanh toán Pi", page: "gui-hang" },
-      { icon: "📊", title: "TRA CỨU CƯỚC", desc: "Ước tính ngay", page: "tra-cuu-cuoc" },
-      { icon: "🏬", title: "KHO TRUNG CHUYỂN", desc: "Đối tác kho", page: "kho-hub" },
-      { icon: "🏍️", title: "TÀI XẾ", desc: "Nhận đơn giao hàng", page: "tai-xe" },
-      { icon: "📍", title: "TRACKING", desc: "Theo dõi realtime", page: "tracking" },
-      { icon: "🖐️", title: "NHẬN HÀNG", desc: "Xác nhận nhận hàng", page: "nhan-hang" },
-    ];
-
-    switch (currentRole) {
-      case 'sender': return allCards.filter(c => ['gui-hang', 'tra-cuu-cuoc', 'tracking'].includes(c.page));
-      case 'driver': return allCards.filter(c => ['tai-xe', 'tracking'].includes(c.page));
-      case 'warehouse': return allCards.filter(c => ['kho-hub', 'tracking'].includes(c.page));
-      case 'receiver': return allCards.filter(c => ['nhan-hang', 'tracking'].includes(c.page));
-      default: return allCards;
-    }
-  };
-
-  const cards = getCardsByRole();
 
   return (
     <div style={pageContainer}>
+      {/* LOGO SECTION */}
       <div style={logoContainer}>
-        <div style={logoStyle}>🚚 GHN.PI</div>
-        <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
-        
-        {isPiConnected && (
-          <p style={{ color: '#22d3ee', fontWeight: '600', marginTop: '8px' }}>
-            ✅ Đã kết nối @{piUsername}
-          </p>
+        <h1 style={logoStyle}>GHN.PI</h1>
+        <p style={subtitleStyle}>Hệ Thống Giao Nhận Phi Tập Trung Tiên Phong</p>
+      </div>
+
+      {/* PI NETWORK CONNECTION BUTTON */}
+      <div style={piButtonContainer}>
+        {isPiConnected ? (
+          <button style={{...piButton, background: 'linear-gradient(135deg, #059669, #10b981)'}} onClick={handleLogout}>
+            ⚡ @{piUsername} ({currentRole === 'tai-xe' ? 'Tài Xế' : currentRole === 'kho-hub' ? 'Chủ Kho' : 'Khách Hàng'})
+          </button>
+        ) : (
+          <button style={piButton} onClick={() => setShowLoginModal(true)}>
+            🔮 Kết Nối Pi Network
+          </button>
         )}
       </div>
 
-      <div style={piButtonContainer}>
-        <button style={piButton} onClick={() => setShowLoginModal(true)}>
-          {isPiConnected ? '🔄 Kết nối lại' : '⭐ Đăng nhập với Pi Network'}
-        </button>
-      </div>
-
+      {/* CORE FEATURES GRID */}
       <div style={cardsGrid}>
-        {cards.map((card, index) => (
-          <div key={index} onClick={() => handleCardClick(card.page)} style={cardStyle}>
-            <div style={iconStyle}>{card.icon}</div>
-            <h3 style={cardTitle}>{card.title}</h3>
-            <p style={cardDesc}>{card.desc}</p>
-          </div>
-        ))}
+        <div style={cardStyle} onClick={() => onNavigate('gui-hang')}>
+          <span style={iconStyle}>📦</span>
+          <h3 style={cardTitle}>Gửi Hàng Hỏa Tốc</h3>
+          <p style={cardDesc}>Tạo đơn giao nhận tức thì bằng Pi</p>
+        </div>
+
+        <div style={cardStyle} onClick={() => onNavigate('tra-cuu-cuoc')}>
+          <span style={iconStyle}>💰</span>
+          <h3 style={cardTitle}>Tra Cứu Giá Cước</h3>
+          <p style={cardDesc}>Tính toán chi phí vận chuyển ước tính</p>
+        </div>
+
+        <div style={cardStyle} onClick={() => onNavigate('kho-hub')}>
+          <span style={iconStyle}>🏬</span>
+          <h3 style={cardTitle}>Kho Trung Chuyển</h3>
+          <p style={cardDesc}>Quản lý trạm Hub phân phối</p>
+        </div>
+
+        <div style={cardStyle} onClick={() => onNavigate('tai-xe')}>
+          <span style={iconStyle}>🏍️</span>
+          <h3 style={cardTitle}>Đối Tác Tài Xế</h3>
+          <p style={cardDesc}>Giao hàng kiếm thu nhập Pi</p>
+        </div>        
+
+        <div style={cardStyle} onClick={() => onNavigate('nhan-hang')}>
+          <span style={iconStyle}>📥</span>
+          <h3 style={cardTitle}>Xác Nhận Nhận Hàng</h3>
+          <p style={cardDesc}>Dành cho người mua nhận bưu kiện</p>
+        </div>
+
+        <div style={cardStyle} onClick={() => onNavigate('tracking')}>
+          <span style={iconStyle}>🔍</span>
+          <h3 style={cardTitle}>Tracking Đơn Hàng</h3>
+          <p style={cardDesc}>Tra cứu lộ trình thời gian thực</p>
+        </div>
+
+
       </div>
 
-      {/* MODAL */}
-      <DangNhapModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
+      {/* LOGIN MODAL COMPONENT */}
+      <DangNhapModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
         onLoginSuccess={handleLoginSuccess}
-      />
-
-      <BottomNav 
-        onNavigate={(page) => {
-          if (page === 'dang-ky-vai-tro') {
-            handleRegisterRoleClick();
-          } else {
-            onNavigate(page);
-          }
-        }} 
       />
     </div>
   );
 };
 
-/* ===================== STYLES ===================== */
+/* ==================== SYSTEM STYLES (TRẢ VỀ BẢN CŨ NGUYÊN GỐC) ==================== */
 const pageContainer: React.CSSProperties = { 
   minHeight: '100vh', 
   background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', 
@@ -149,7 +147,7 @@ const logoStyle: React.CSSProperties = { fontSize: '52px', fontWeight: '700', co
 const subtitleStyle: React.CSSProperties = { color: '#6b21a8', marginTop: '4px' };
 
 const piButtonContainer: React.CSSProperties = { 
-  display: 'flex', justifyContent: 'center', marginBottom: '40px', padding: '0 14px' 
+  display: 'flex', justifyContent: 'center' as const, marginBottom: '40px', padding: '0 14px' 
 };
 const piButton: React.CSSProperties = { 
   padding: '18px 40px', 
@@ -175,19 +173,43 @@ const cardStyle: React.CSSProperties = {
   padding: '20px 14px', 
   borderRadius: '24px',
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'column' as const, // Thêm as const sửa lỗi TypeScript
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'center',        // Giữ căn dọc giữa block của bạn
   cursor: 'pointer',
   boxShadow: '0 4px 20px rgba(124, 58, 237, 0.06)',
   border: '1px solid #f3e8ff',
   transition: 'transform 0.2s, box-shadow 0.2s',
   minHeight: '145px',
   boxSizing: 'border-box'  
- };
+};
 
-const iconStyle: React.CSSProperties = { fontSize: '48px', marginBottom: '12px' };
-const cardTitle: React.CSSProperties = { fontSize: '17px', fontWeight: '700', color: '#4c1d95', margin: '0 0 6px 0' };
-const cardDesc: React.CSSProperties = { fontSize: '13.5px', color: '#64748b', margin: 0 };
+const iconStyle: React.CSSProperties = { 
+  fontSize: '48px', 
+  marginBottom: '12px',
+  display: 'block',                 // Đưa icon về dạng khối độc lập để cân bằng tâm
+  textAlign: 'center' as const
+};
+
+// Giữ nguyên size 17px gốc và màu tím nguyên bản của bạn
+const cardTitle: React.CSSProperties = { 
+  fontSize: '17px', 
+  fontWeight: '700', 
+  color: '#4c1d95', 
+  margin: '0 0 6px 0',
+  textAlign: 'center' as const,     // Căn giữa chữ tiêu đề
+  width: '100%',                     // Chiếm toàn bộ độ rộng ô để textAlign hoạt động
+  display: 'block'
+};
+
+// Giữ nguyên size 13.5px gốc và màu xám xanh nguyên bản của bạn
+const cardDesc: React.CSSProperties = { 
+  fontSize: '13.5px', 
+  color: '#64748b', 
+  margin: 0,
+  textAlign: 'center' as const,     // Căn giữa chữ mô tả
+  width: '100%',                     // Chiếm toàn bộ độ rộng ô để textAlign hoạt động
+  display: 'block'
+};
 
 export default HomePage;

@@ -13,6 +13,7 @@
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
     "axios": "^1.8.4",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.14.0",
     "pi-sdk-react": "^2.0.0",
     "react": "^19.2.0",
