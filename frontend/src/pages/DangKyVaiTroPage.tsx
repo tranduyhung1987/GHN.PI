@@ -47,16 +47,29 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handlePiLogin = () => {
+const handlePiLogin = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const username = "ThanhPiUser";
-      setIsPiConnected(true);
-      setPiUsername(username);
-      localStorage.setItem('piUsername', username);
+    try {
+      // Gọi SDK Pi để xác thực người dùng thật
+      await window.Pi.authenticate(['username'], 
+        (authResult: any) => {
+          const username = authResult.user.username; // Lấy username thật từ Pi
+          setIsPiConnected(true);
+          setPiUsername(username);
+          localStorage.setItem('piUsername', username);
+          setIsLoading(false);
+          alert(`✅ Đăng nhập Pi Network thành công!\nChào mừng @${username}`);
+        }, 
+        (error: any) => {
+          console.error("Lỗi xác thực Pi:", error);
+          setIsLoading(false);
+          alert("Kết nối Pi thất bại!");
+        }
+      );
+    } catch (err) {
+      console.error("Lỗi:", err);
       setIsLoading(false);
-      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${username}`);
-    }, 1200);
+    }
   };
 
   const handleSelectRole = (role: string, label: string) => {
