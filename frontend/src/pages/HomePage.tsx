@@ -64,7 +64,7 @@ const handleTestPayment = async () => {
     alert("Đang khởi tạo SDK...");
 
     // 3. Khởi tạo lại SDK ngay trước khi thanh toán để đảm bảo an toàn
-    await window.Pi.init({ version: "2.0" });
+    await (window as any).Pi.init({ version: "2.0", sandbox: true });
     
     alert("SDK sẵn sàng! Đang gọi lệnh thanh toán...");
 

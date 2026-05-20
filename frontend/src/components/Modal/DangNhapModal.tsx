@@ -14,16 +14,42 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
 
   if (!isOpen) return null;
 
-  const handlePiLogin = () => {
+  const handlePiLogin = async () => {
     setIsLoading(true);
 
-    setTimeout(() => {
+    // Đảm bảo Pi SDK đã load
+    if (typeof (window as any).Pi === 'undefined') {
+      alert("⚠️ Vui lòng mở ứng dụng trong Pi Browser để đăng nhập Pi Network!");
       setIsLoading(false);
-      const username = "ThanhPiUser"; // Mock username
-      onLoginSuccess?.(username);     // ← Gọi callback quan trọng
+      return;
+    }
+
+    try {
+      const scopes = ['payments'];
+
+      const onIncompletePaymentFound = (payment: any) => {
+        console.log("📌 Có payment dang dở:", payment);
+        return Promise.resolve();
+      };
+
+      // 🔥 CÚ PHÁP ĐÚNG CỦA PI SDK - LẤY TÊN THẬT
+      const authenticateResponse = await (window as any).Pi.authenticate(
+        scopes,
+        onIncompletePaymentFound
+      );
+
+      const realUsername = authenticateResponse.user.username; // ← TÊN THẬT CỦA PI
+
+      setIsLoading(false);
+      onLoginSuccess?.(realUsername);     // Truyền tên thật vào HomePage
       onClose();
-      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${username}`);
-    }, 1200);
+
+      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${realUsername}`);
+    } catch (error: any) {
+      setIsLoading(false);
+      console.error("Pi Auth error:", error);
+      alert("❌ Đăng nhập Pi thất bại: " + (error?.message || error));
+    }
   };
 
   const handleEmailLogin = (e: React.FormEvent) => {
