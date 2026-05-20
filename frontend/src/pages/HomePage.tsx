@@ -51,6 +51,34 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
     }
   };
 
+  // Thêm hàm này vào component HomePage - test thanh toán Pi
+  const handleTestPayment = () => {
+    if (!window.Pi) {
+      alert("⚠️ SDK chưa được tải! Vui lòng mở bằng Pi Browser.");
+      return;
+    }
+    const paymentData = {
+      amount: 0.1, // Số Pi thử nghiệm
+      memo: "Thử nghiệm thanh toán",
+      metadata: { orderId: "test_123" },
+    };
+    const callbacks = {
+      onReadyForServerApproval: (paymentId: string) => {
+        alert("✅ Đã sẵn sàng duyệt: " + paymentId);
+      },
+      onReadyForServerCompletion: (paymentId: string, txid: string) => {
+        alert("🎉 Giao dịch thành công! TXID: " + txid);
+      },
+      onCancel: (paymentId: string) => {
+        alert("❌ Người dùng đã hủy");
+      },
+      onError: (error: any, paymentId: string) => {
+        alert("❌ Lỗi: " + error.message);
+      },
+    };
+    window.Pi.requestPayment(paymentData, callbacks);
+  };
+
   // ===================== DANG XUAT =====================
   const handleLogout = () => {
     if(window.confirm("Bạn có chắc muốn đăng xuất tài khoản Pi Network?")) {
@@ -73,9 +101,15 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
       {/* PI NETWORK CONNECTION BUTTON */}
       <div style={piButtonContainer}>
         {isPiConnected ? (
-          <button style={{...piButton, background: 'linear-gradient(135deg, #059669, #10b981)'}} onClick={handleLogout}>
-            ⚡ @{piUsername} ({currentRole === 'tai-xe' ? 'Tài Xế' : currentRole === 'kho-hub' ? 'Chủ Kho' : 'Khách Hàng'})
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
+            <button style={{...piButton, marginBottom: '10px', background: 'linear-gradient(135deg, #059669, #10b981)'}} onClick={handleLogout}>
+              ⚡ @{piUsername} ({currentRole === 'tai-xe' ? 'Tài Xế' : currentRole === 'kho-hub' ? 'Chủ Kho' : 'Khách Hàng'})
+            </button>
+            {/* Nút Test Thanh Toán mới */}
+            <button style={{...piButton, background: '#f59e0b', maxWidth: '340px'}} onClick={handleTestPayment}>
+              💰 Test Thanh Toán (SDK)
+            </button>
+          </div>
         ) : (
           <button style={piButton} onClick={() => setShowLoginModal(true)}>
             🔮 Kết Nối Pi Network
