@@ -52,16 +52,30 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
   };
 
   // Thêm hàm này vào component HomePage - test thanh toán Pi
-  const handleTestPayment = () => {
-    if (!window.Pi) {
-      alert("⚠️ SDK chưa được tải! Vui lòng mở bằng Pi Browser.");
-      return;
-    }
+const handleTestPayment = async () => {
+  // 1. Kiểm tra sự tồn tại của Pi SDK
+  if (typeof window.Pi === 'undefined') {
+    alert("⚠️ Lỗi: Không tìm thấy window.Pi. Bạn có chắc đang mở trong Pi Browser không?");
+    return;
+  }
+
+  try {
+    // 2. Feedback cho người dùng biết là đã bấm được nút
+    alert("Đang khởi tạo SDK...");
+
+    // 3. Khởi tạo lại SDK ngay trước khi thanh toán để đảm bảo an toàn
+    await window.Pi.init({ version: "2.0" });
+    
+    alert("SDK sẵn sàng! Đang gọi lệnh thanh toán...");
+
+    // 4. Định nghĩa dữ liệu thanh toán
     const paymentData = {
-      amount: 0.1, // Số Pi thử nghiệm
+      amount: 0.1,
       memo: "Thử nghiệm thanh toán",
       metadata: { orderId: "test_123" },
     };
+
+    // 5. Định nghĩa callback
     const callbacks = {
       onReadyForServerApproval: (paymentId: string) => {
         alert("✅ Đã sẵn sàng duyệt: " + paymentId);
@@ -70,14 +84,22 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, userRole = '' }) => {
         alert("🎉 Giao dịch thành công! TXID: " + txid);
       },
       onCancel: (paymentId: string) => {
-        alert("❌ Người dùng đã hủy");
+        alert("❌ Người dùng đã hủy giao dịch");
       },
       onError: (error: any, paymentId: string) => {
-        alert("❌ Lỗi: " + error.message);
+        alert("❌ Lỗi SDK: " + JSON.stringify(error));
       },
     };
+
+    // 6. Thực hiện thanh toán
     window.Pi.requestPayment(paymentData, callbacks);
-  };
+
+  } catch (err) {
+    // Nếu có lỗi, nó sẽ hiển thị ở đây
+    alert("❌ Lỗi hệ thống khi gọi thanh toán: " + err);
+    console.error("Lỗi chi tiết:", err);
+  }
+};
 
   // ===================== DANG XUAT =====================
   const handleLogout = () => {
