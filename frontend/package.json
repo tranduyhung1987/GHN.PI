@@ -1,5 +1,5 @@
 {
-  "name": "ghn.pi-frontend",
+  "name": "ghn-pi-frontend",
   "private": true,
   "version": "0.3.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
     "axios": "^1.8.4",
+    "firebase": "^11.3.1",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.14.0",
     "pi-sdk-react": "^2.0.0",

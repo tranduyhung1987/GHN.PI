@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { db } from './firebase'; // Import db từ file firebase.js
+import { collection, getDocs } from "firebase/firestore"; // Import các hàm để truy vấn dữ liệu
 
 // Import tất cả trang
 import HomePage from './pages/HomePage';
@@ -41,6 +43,23 @@ type Page =
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [userRole, setUserRole] = useState<string>('');
+
+  // --- LOGIC FIREBASE ---
+  useEffect(() => {
+    // Kiểm tra kết nối Firestore khi app khởi động
+    const checkFirebase = async () => {
+      try {
+        console.log("Đang kiểm tra kết nối Firestore...");
+        // Đoạn này dùng để test: thử lấy dữ liệu từ một collection bất kỳ (nếu đã tạo)
+        // const querySnapshot = await getDocs(collection(db, "test_collection"));
+        // console.log("Kết nối Firestore thành công!");
+      } catch (error) {
+        console.error("Lỗi kết nối Firebase:", error);
+      }
+    };
+    checkFirebase();
+  }, []);
+  // ----------------------
 
   useEffect(() => {
     const savedPage = localStorage.getItem('currentPage') as Page;
