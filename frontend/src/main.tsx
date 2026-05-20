@@ -1,11 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
-
-// Import CSS
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './index.css';
 
-// Optional: Load Pi SDK script (nếu chưa có trong index.html)
+// Load Pi SDK
 const loadPiSDK = () => {
   if (!document.getElementById('pi-sdk')) {
     const script = document.createElement('script');
@@ -20,6 +20,10 @@ loadPiSDK();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </AuthProvider>
   </StrictMode>
 );

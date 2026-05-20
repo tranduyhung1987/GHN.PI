@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import BottomNav from '../components/BottomNav';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface DangKyVaiTroPageProps {
   onNavigate: (page: string) => void;
 }
 
 const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
+  const { setAuth } = useAuth();
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [piUsername, setPiUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const savedPi = localStorage.getItem('piUsername');
@@ -16,7 +23,29 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
       setIsPiConnected(true);
       setPiUsername(savedPi);
     }
+    
+    const savedAvatar = localStorage.getItem('userAvatar');
+    if (savedAvatar) {
+      setAvatarUrl(savedAvatar);
+    }
   }, []);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setAvatarUrl(base64String);
+        localStorage.setItem('userAvatar', base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handlePiLogin = () => {
     setIsLoading(true);
@@ -31,9 +60,8 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
   };
 
   const handleSelectRole = (role: string, label: string) => {
-    console.log('🔥 Chọn vai trò:', role); // debug
     localStorage.setItem('userRole', role);
-    localStorage.setItem('currentPage', 'home'); // Chuyển về trang chủ trong bộ nhớ
+    localStorage.setItem('currentPage', 'home');
     alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nTrang sẽ tải lại để áp dụng giao diện!`);
     window.location.reload();
   };
@@ -47,12 +75,30 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
 
   return (
     <div style={pageContainer}>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} 
+        accept="image/*" 
+      />
+
       <div style={headerStyle}>
-        <div style={headerIcon}>👤</div>
+        <div style={avatarContainerStyle} onClick={handleAvatarClick}>
+          <img 
+            src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} 
+            alt="Avatar" 
+            style={avatarImageStyle} 
+          />
+        </div>
+        
         <h1 style={titleStyle}>CHỌN VAI TRÒ CỦA BẠN</h1>
-        <p style={subtitleStyle}>
-          {isPiConnected ? `✅ Đã kết nối @${piUsername}` : 'Bạn phải đăng nhập Pi Network trước khi chọn vai trò'}
-        </p>
+        
+        {isPiConnected ? (
+          <div style={statusBoxStyle}>✅ Đã kết nối @{piUsername}</div>
+        ) : (
+          <p style={subtitleStyle}>Bạn phải đăng nhập Pi Network trước khi chọn vai trò</p>
+        )}
       </div>
 
       {!isPiConnected ? (
@@ -98,7 +144,36 @@ const pageContainer: React.CSSProperties = {
 };
 
 const headerStyle: React.CSSProperties = { textAlign: 'center' as const, marginBottom: '30px' };
-const headerIcon: React.CSSProperties = { fontSize: '62px', marginBottom: '12px' };
+
+const avatarContainerStyle: React.CSSProperties = {
+  width: '80px',
+  height: '80px',
+  borderRadius: '50%',
+  overflow: 'hidden', 
+  cursor: 'pointer',
+  margin: '0 auto 12px auto',
+  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+  border: '4px solid #ffffff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+};
+
+const avatarImageStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',        // Lệnh "tự zoom lấp đầy khung"
+  objectPosition: 'center',  // Luôn căn giữa ảnh
+  display: 'block',
+  
+  // MẸO: Nếu ảnh vẫn chưa full, bạn tăng giá trị scale lên (ví dụ 1.2, 1.3, 1.4)
+  // 1.0 là mặc định. Bạn tăng dần lên cho đến khi thấy vừa mắt nhất.
+  transform: 'scale(1.4)', 
+  
+  // Thêm cái này để tránh việc zoom bị lệch
+  transition: 'transform 0.2s ease-in-out'
+};
+
 const titleStyle: React.CSSProperties = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: '0 0 8px 0' };
 const subtitleStyle: React.CSSProperties = { color: '#6b21a8', fontSize: '15.5px' };
 
@@ -109,6 +184,17 @@ const warningBox: React.CSSProperties = {
   padding: '24px 20px',
   marginBottom: '30px',
   textAlign: 'center' as const,
+};
+
+const statusBoxStyle: React.CSSProperties = {
+  background: '#ffffff',
+  border: '2px solid #a78bfa',
+  borderRadius: '12px',
+  padding: '10px 20px',
+  marginTop: '15px',
+  display: 'inline-block',
+  color: '#4c1d95',
+  fontWeight: '600'
 };
 
 const warningContent: React.CSSProperties = {
