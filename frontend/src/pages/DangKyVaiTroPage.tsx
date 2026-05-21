@@ -40,36 +40,45 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // === PI LOGIN ĐÃ FIX CHUẨN SDK (giống bản cũ chạy tốt) ===
-  const handlePiLogin = () => {
+  // === PI LOGIN ĐÚNG NHƯ COMMIT 5a1aa91 (ĐANG HOẠT ĐỘNG) ===
+  const handlePiLogin = async () => {
     if (!window.Pi) {
-      alert("Vui lòng mở trong Pi Browser!");
+      alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
       return;
     }
 
     setIsLoading(true);
+    try {
+      const scopes = ['username'];
 
-    window.Pi.authenticate(
-      ['username'],
-      (payment: any) => { 
-        console.log("Payment incomplete:", payment); 
-        return Promise.resolve(); 
-      },
-      (authResult: any) => {
-        const username = authResult.user.username;
-        console.log("✅ Pi login thành công:", username);
-        setIsPiConnected(true);
-        setPiUsername(username);
-        localStorage.setItem('piUsername', username);
-        setIsLoading(false);
-        setAuth(username, localStorage.getItem('userRole') || '');
-      },
-      (error: any) => {
-        console.error("❌ Lỗi Pi:", error);
-        setIsLoading(false);
-        alert("Kết nối Pi thất bại! Vui lòng thử lại.");
-      }
-    );
+      const onIncompletePaymentFound = (payment: any) => {
+        console.log("Payment incomplete:", payment);
+        return Promise.resolve();
+      };
+
+      const authenticateResponse = await window.Pi.authenticate(
+        scopes,
+        onIncompletePaymentFound
+      );
+
+      console.log("✅ Pi Auth Response:", authenticateResponse);
+
+      const username = authenticateResponse.user?.username || "unknown";
+
+      setIsPiConnected(true);
+      setPiUsername(username);
+      localStorage.setItem('piUsername', username);
+      setIsLoading(false);
+
+      // Đồng bộ AuthContext
+      setAuth(username, localStorage.getItem('userRole') || '');
+
+      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${username}`);
+    } catch (err) {
+      console.error("❌ Lỗi Pi:", err);
+      setIsLoading(false);
+      alert("Kết nối Pi thất bại! Vui lòng thử lại.");
+    }
   };
 
   const handleSelectRole = async (role: string, label: string) => {
@@ -77,7 +86,12 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
       const response = await fetch('/api/users/register-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ piUsername, role, label, timestamp: Date.now() }),
+        body: JSON.stringify({ 
+          piUsername, 
+          role, 
+          label,
+          timestamp: Date.now() 
+        }),
       });
 
       if (response.ok) {
@@ -107,9 +121,15 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
 
       <div style={headerStyle}>
         <div style={avatarContainerStyle} onClick={handleAvatarClick}>
-          <img src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} alt="Avatar" style={avatarImageStyle} />
+          <img 
+            src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} 
+            alt="Avatar" 
+            style={avatarImageStyle} 
+          />
         </div>
+        
         <h1 style={titleStyle}>CHỌN VAI TRÒ CỦA BẠN</h1>
+        
         {isPiConnected ? (
           <div style={statusBoxStyle}>✅ Đã kết nối @{piUsername}</div>
         ) : (
