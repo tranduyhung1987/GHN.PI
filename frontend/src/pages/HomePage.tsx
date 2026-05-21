@@ -36,37 +36,6 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     setShowLoginModal(false);
   };
 
-  // ===================== TEST THANH TOÁN PI (GIỮ NGUYÊN GỐC) =====================
-  const handleTestPayment = async () => {
-    if (typeof window.Pi === 'undefined') {
-      alert("⚠️ Lỗi: Không tìm thấy window.Pi. Bạn có chắc đang mở trong Pi Browser không?");
-      return;
-    }
-    try {
-      alert("Đang khởi tạo SDK...");
-      await (window as any).Pi.init({ version: "2.0", sandbox: true });
-      alert("SDK sẵn sàng! Đang gọi lệnh thanh toán...");
-
-      const paymentData = {
-        amount: 0.1,
-        memo: "Thử nghiệm thanh toán",
-        metadata: { orderId: "test_123" },
-      };
-
-      const callbacks = {
-        onReadyForServerApproval: (paymentId: string) => alert("✅ Đã sẵn sàng duyệt: " + paymentId),
-        onReadyForServerCompletion: (paymentId: string, txid: string) => alert("🎉 Giao dịch thành công! TXID: " + txid),
-        onCancel: (paymentId: string) => alert("❌ Người dùng đã hủy giao dịch"),
-        onError: (error: any, paymentId: string) => alert("❌ Lỗi SDK: " + JSON.stringify(error)),
-      };
-
-      window.Pi.requestPayment(paymentData, callbacks);
-    } catch (err) {
-      alert("❌ Lỗi hệ thống khi gọi thanh toán: " + err);
-      console.error("Lỗi chi tiết:", err);
-    }
-  };
-
   const handleLogout = () => {
     if (window.confirm("Bạn có chắc muốn đăng xuất tài khoản Pi Network?")) {
       localStorage.clear();
@@ -145,14 +114,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
       <div style={piButtonContainer}>
         {isPiConnected ? (
-          <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
-            <button style={{...piButton, marginBottom: '10px', background: 'linear-gradient(135deg, #059669, #10b981)'}} onClick={handleLogout}>
-              ⚡ @{piUsername} ({currentRole === 'driver' || currentRole === 'tai-xe' ? 'Tài Xế' : 'Khách Hàng'})
-            </button>
-            <button style={{...piButton, background: '#f59e0b', maxWidth: '340px'}} onClick={handleTestPayment}>
-              💰 Test Thanh Toán (SDK)
-            </button>
-          </div>
+          <button 
+            style={{...piButton, background: 'linear-gradient(135deg, #059669, #10b981)'}} 
+            onClick={handleLogout}
+          >
+            ⚡ @{piUsername} ({(currentRole === 'driver' || currentRole === 'tai-xe') ? 'Tài Xế' : 'Khách Hàng'})
+          </button>
         ) : (
           <button style={piButton} onClick={() => setShowLoginModal(true)}>
             🔮 Kết Nối Pi Network
@@ -160,7 +127,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         )}
       </div>
 
-      {/* === PHẦN QUAN TRỌNG: RENDER THEO ROLE === */}
+      {/* Render theo vai trò */}
       {(currentRole === 'driver' || currentRole === 'tai-xe') 
         ? renderDriverHome() 
         : renderDefaultHome()
