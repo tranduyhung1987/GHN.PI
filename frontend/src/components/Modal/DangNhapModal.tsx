@@ -14,43 +14,45 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
 
   if (!isOpen) return null;
 
-  const handlePiLogin = async () => {
-    setIsLoading(true);
+const handlePiLogin = async () => {
+  setIsLoading(true);
 
-    // Đảm bảo Pi SDK đã load
-    if (typeof (window as any).Pi === 'undefined') {
-      alert("⚠️ Vui lòng mở ứng dụng trong Pi Browser để đăng nhập Pi Network!");
-      setIsLoading(false);
-      return;
-    }
+  if (typeof (window as any).Pi === 'undefined') {
+    alert("⚠️ Vui lòng mở trong Pi Browser!");
+    setIsLoading(false);
+    return;
+  }
 
-    try {
-      const scopes = ['payments'];
+  try {
+    // 🔥 SỬA Ở ĐÂY: Thêm scope 'username' để lấy tên thật
+    const scopes = ['username', 'payments'];
 
-      const onIncompletePaymentFound = (payment: any) => {
-        console.log("📌 Có payment dang dở:", payment);
-        return Promise.resolve();
-      };
+    const onIncompletePaymentFound = (payment: any) => {
+      console.log("📌 Có payment dang dở:", payment);
+      return Promise.resolve();
+    };
 
-      // 🔥 CÚ PHÁP ĐÚNG CỦA PI SDK - LẤY TÊN THẬT
-      const authenticateResponse = await (window as any).Pi.authenticate(
-        scopes,
-        onIncompletePaymentFound
-      );
+    const authenticateResponse = await (window as any).Pi.authenticate(
+      scopes,
+      onIncompletePaymentFound
+    );
 
-      const realUsername = authenticateResponse.user.username; // ← TÊN THẬT CỦA PI
+    // Debug để xem toàn bộ dữ liệu trả về
+    console.log("✅ Pi Auth Response:", authenticateResponse);
 
-      setIsLoading(false);
-      onLoginSuccess?.(realUsername);     // Truyền tên thật vào HomePage
-      onClose();
+    const realUsername = authenticateResponse?.user?.username || "unknown";
 
-      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${realUsername}`);
-    } catch (error: any) {
-      setIsLoading(false);
-      console.error("Pi Auth error:", error);
-      alert("❌ Đăng nhập Pi thất bại: " + (error?.message || error));
-    }
-  };
+    setIsLoading(false);
+    onLoginSuccess?.(realUsername);
+    onClose();
+
+    alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${realUsername}`);
+  } catch (error: any) {
+    setIsLoading(false);
+    console.error("Pi Auth error:", error);
+    alert("❌ Đăng nhập Pi thất bại: " + (error?.message || error));
+  }
+};
 
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
