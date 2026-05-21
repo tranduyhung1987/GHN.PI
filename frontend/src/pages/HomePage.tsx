@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import BottomNav from '../components/BottomNav';
 import DangNhapModal from '../components/Modal/DangNhapModal';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -258,7 +260,7 @@ const cardTitle: React.CSSProperties = {
   display: 'block'
 };
 
-// Giữ nguyên size 13.5px gốc và màu xám xanh nguyên bản của bạn
+// Giữ nguyên size 13.5px gốc và màu xám xanh nguyên bản
 const cardDesc: React.CSSProperties = { 
   fontSize: '13.5px', 
   color: '#64748b', 
