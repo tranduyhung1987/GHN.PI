@@ -8,44 +8,73 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
-  const { userRole, piUsername, setAuth } = useAuth();
+  const { userRole, piUsername } = useAuth();
   const [isPiConnected, setIsPiConnected] = useState(false);
   const [currentRole, setCurrentRole] = useState<string>('');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
-    const savedPi = localStorage.getItem('piUsername');
     const savedRole = localStorage.getItem('userRole') || userRole || '';
-
+    const savedPi = localStorage.getItem('piUsername');
+    
     setCurrentRole(savedRole);
+    
     if (savedPi) {
       setIsPiConnected(true);
     }
 
-    // Pi SDK init
     if (window.Pi) {
       window.Pi.init({ version: "2.0" })
-        .then(() => console.log("✅ Pi SDK initialized"))
+        .then(() => console.log("✅ Pi SDK initialized successfully"))
         .catch((err: any) => console.warn("Pi SDK init warning:", err));
     }
   }, [userRole]);
 
-  // ===================== LOGIN SUCCESS =====================
   const handleLoginSuccess = (username: string) => {
     setIsPiConnected(true);
     localStorage.setItem('piUsername', username);
-    setAuth(username, localStorage.getItem('userRole') || '');
+    setShowLoginModal(false);
   };
 
-  // ===================== LOGOUT =====================
+  // ===================== TEST THANH TOÁN PI (GIỮ NGUYÊN GỐC) =====================
+  const handleTestPayment = async () => {
+    if (typeof window.Pi === 'undefined') {
+      alert("⚠️ Lỗi: Không tìm thấy window.Pi. Bạn có chắc đang mở trong Pi Browser không?");
+      return;
+    }
+    try {
+      alert("Đang khởi tạo SDK...");
+      await (window as any).Pi.init({ version: "2.0", sandbox: true });
+      alert("SDK sẵn sàng! Đang gọi lệnh thanh toán...");
+
+      const paymentData = {
+        amount: 0.1,
+        memo: "Thử nghiệm thanh toán",
+        metadata: { orderId: "test_123" },
+      };
+
+      const callbacks = {
+        onReadyForServerApproval: (paymentId: string) => alert("✅ Đã sẵn sàng duyệt: " + paymentId),
+        onReadyForServerCompletion: (paymentId: string, txid: string) => alert("🎉 Giao dịch thành công! TXID: " + txid),
+        onCancel: (paymentId: string) => alert("❌ Người dùng đã hủy giao dịch"),
+        onError: (error: any, paymentId: string) => alert("❌ Lỗi SDK: " + JSON.stringify(error)),
+      };
+
+      window.Pi.requestPayment(paymentData, callbacks);
+    } catch (err) {
+      alert("❌ Lỗi hệ thống khi gọi thanh toán: " + err);
+      console.error("Lỗi chi tiết:", err);
+    }
+  };
+
   const handleLogout = () => {
-    if (window.confirm("Bạn có chắc muốn đăng xuất?")) {
+    if (window.confirm("Bạn có chắc muốn đăng xuất tài khoản Pi Network?")) {
       localStorage.clear();
-      setIsPiConnected(false);
       window.location.reload();
     }
   };
 
-  // ===================== RENDER THEO ROLE =====================
+  // ===================== GIAO DIỆN TÀI XẾ =====================
   const renderDriverHome = () => (
     <div style={cardsGrid}>
       <div style={cardStyle} onClick={() => onNavigate('tai-xe')}>
@@ -71,9 +100,9 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     </div>
   );
 
+  // ===================== GIAO DIỆN MẶC ĐỊNH (6 THẺ GỐC) =====================
   const renderDefaultHome = () => (
     <div style={cardsGrid}>
-      {/* 6 thẻ cũ giữ nguyên */}
       <div style={cardStyle} onClick={() => onNavigate('gui-hang')}>
         <span style={iconStyle}>📦</span>
         <h3 style={cardTitle}>Gửi Hàng Hỏa Tốc</h3>
@@ -109,33 +138,37 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div style={pageContainer}>
-      {/* LOGO + PI STATUS */}
       <div style={logoContainer}>
         <h1 style={logoStyle}>GHN.PI</h1>
-        <p style={subtitleStyle}>Hệ Thống Giao Nhận Phi Tập Trung</p>
+        <p style={subtitleStyle}>Hệ Thống Giao Nhận Phi Tập Trung Tiên Phong</p>
       </div>
 
       <div style={piButtonContainer}>
         {isPiConnected ? (
-          <button style={{...piButton, background: 'linear-gradient(135deg, #059669, #10b981)'}} onClick={handleLogout}>
-            ⚡ @{piUsername} ({currentRole === 'driver' || currentRole === 'tai-xe' ? 'Tài Xế' : 'Khách Hàng'})
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
+            <button style={{...piButton, marginBottom: '10px', background: 'linear-gradient(135deg, #059669, #10b981)'}} onClick={handleLogout}>
+              ⚡ @{piUsername} ({currentRole === 'driver' || currentRole === 'tai-xe' ? 'Tài Xế' : 'Khách Hàng'})
+            </button>
+            <button style={{...piButton, background: '#f59e0b', maxWidth: '340px'}} onClick={handleTestPayment}>
+              💰 Test Thanh Toán (SDK)
+            </button>
+          </div>
         ) : (
-          <button style={piButton} onClick={() => { /* mở modal nếu cần */ }}>
+          <button style={piButton} onClick={() => setShowLoginModal(true)}>
             🔮 Kết Nối Pi Network
           </button>
         )}
       </div>
 
-      {/* RENDER THEO ROLE */}
+      {/* === PHẦN QUAN TRỌNG: RENDER THEO ROLE === */}
       {(currentRole === 'driver' || currentRole === 'tai-xe') 
         ? renderDriverHome() 
         : renderDefaultHome()
       }
 
       <DangNhapModal 
-        isOpen={false} 
-        onClose={() => {}} 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
         onLoginSuccess={handleLoginSuccess}
       />
 
@@ -144,9 +177,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   );
 };
 
-/* ==================== STYLES (GIỮ NGUYÊN 100%) ==================== */
+/* ==================== SYSTEM STYLES (GIỮ NGUYÊN 100% GỐC) ==================== */
 const pageContainer: React.CSSProperties = { 
-  minHeight: '100vh', background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', padding: '16px 14px 90px', boxSizing: 'border-box' 
+  minHeight: '100vh', 
+  background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', 
+  padding: '16px 14px 90px', 
+  boxSizing: 'border-box' 
 };
 const logoContainer: React.CSSProperties = { textAlign: 'center' as const, marginBottom: '30px' };
 const logoStyle: React.CSSProperties = { fontSize: '52px', fontWeight: '700', color: '#4c1d95' };
