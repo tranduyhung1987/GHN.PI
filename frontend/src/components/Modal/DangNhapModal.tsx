@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { db } from '../../firebase';  
 
 interface DangNhapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess?: (username: string) => void;   // ← Đã sửa đúng
+  onLoginSuccess?: (username: string) => void; 
 }
 
 const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
@@ -24,7 +25,6 @@ const handlePiLogin = async () => {
   }
 
   try {
-    // 🔥 SỬA Ở ĐÂY: Thêm scope 'username' để lấy tên thật
     const scopes = ['username', 'payments'];
 
     const onIncompletePaymentFound = (payment: any) => {
@@ -37,16 +37,31 @@ const handlePiLogin = async () => {
       onIncompletePaymentFound
     );
 
-    // Debug để xem toàn bộ dữ liệu trả về
     console.log("✅ Pi Auth Response:", authenticateResponse);
 
-    const realUsername = authenticateResponse?.user?.username || "unknown";
+    const userData = authenticateResponse.user;
+    const realUsername = userData?.username || "unknown";
+
+    // 🔥 LƯU VÀO FIRESTORE
+    if (realUsername !== "unknown") {
+      const { doc, setDoc } = await import("firebase/firestore");
+      const userRef = doc(db, "users", realUsername);   // Dùng username làm ID
+
+      await setDoc(userRef, {
+        username: realUsername,
+        uid: userData.uid,
+        avatar: userData.avatar || null,
+        roles: userData.roles || [],
+        lastLogin: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      }, { merge: true });   // merge = không ghi đè dữ liệu cũ
+    }
 
     setIsLoading(false);
     onLoginSuccess?.(realUsername);
     onClose();
 
-    alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${realUsername}`);
+    alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${realUsername}\nĐã lưu vào Firestore!`);
   } catch (error: any) {
     setIsLoading(false);
     console.error("Pi Auth error:", error);
