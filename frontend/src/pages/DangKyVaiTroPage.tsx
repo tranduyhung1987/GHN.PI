@@ -40,72 +40,43 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // === PI LOGIN ĐÚNG NHƯ COMMIT 5a1aa91 (ĐANG HOẠT ĐỘNG) ===
+  // PI LOGIN (đã OK từ commit trước)
   const handlePiLogin = async () => {
     if (!window.Pi) {
-      alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
+      alert("Vui lòng mở trong Pi Browser!");
       return;
     }
-
     setIsLoading(true);
     try {
       const scopes = ['username'];
-
       const onIncompletePaymentFound = (payment: any) => {
         console.log("Payment incomplete:", payment);
         return Promise.resolve();
       };
-
-      const authenticateResponse = await window.Pi.authenticate(
-        scopes,
-        onIncompletePaymentFound
-      );
-
-      console.log("✅ Pi Auth Response:", authenticateResponse);
-
-      const username = authenticateResponse.user?.username || "unknown";
-
+      const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+      const username = auth.user?.username || "unknown";
       setIsPiConnected(true);
       setPiUsername(username);
       localStorage.setItem('piUsername', username);
-      setIsLoading(false);
-
-      // Đồng bộ AuthContext
       setAuth(username, localStorage.getItem('userRole') || '');
-
-      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${username}`);
-    } catch (err) {
-      console.error("❌ Lỗi Pi:", err);
       setIsLoading(false);
-      alert("Kết nối Pi thất bại! Vui lòng thử lại.");
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      alert("Kết nối Pi thất bại!");
     }
   };
 
-  const handleSelectRole = async (role: string, label: string) => {
-    try {
-      const response = await fetch('/api/users/register-role', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          piUsername, 
-          role, 
-          label,
-          timestamp: Date.now() 
-        }),
-      });
+  // === FIX CHỌN VAI TRÒ - SIÊU NHANH, KHÔNG CHỜ BACKEND ===
+  const handleSelectRole = (role: string, label: string) => {
+    console.log(`🎯 Chọn vai trò: ${label} (${role})`);
 
-      if (response.ok) {
-        setAuth(piUsername, role);
-        localStorage.setItem('userRole', role);
-        alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nĐã đồng bộ backend!`);
-        onNavigate('home');
-      }
-    } catch (err) {
-      console.error('Backend error → fallback local', err);
-      setAuth(piUsername, role);
-      localStorage.setItem('userRole', role);
-      onNavigate('home');
-    }
+    setAuth(piUsername || '', role);
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('currentPage', 'home');
+
+    alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nChuyển về trang chủ...`);
+    onNavigate('home');   // chuyển ngay, không reload
   };
 
   const roles = [
@@ -121,15 +92,9 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
 
       <div style={headerStyle}>
         <div style={avatarContainerStyle} onClick={handleAvatarClick}>
-          <img 
-            src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} 
-            alt="Avatar" 
-            style={avatarImageStyle} 
-          />
+          <img src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} alt="Avatar" style={avatarImageStyle} />
         </div>
-        
         <h1 style={titleStyle}>CHỌN VAI TRÒ CỦA BẠN</h1>
-        
         {isPiConnected ? (
           <div style={statusBoxStyle}>✅ Đã kết nối @{piUsername}</div>
         ) : (
@@ -150,7 +115,11 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
       ) : (
         <div style={rolesGrid}>
           {roles.map((role) => (
-            <div key={role.id} onClick={() => handleSelectRole(role.id, role.label)} style={roleCard}>
+            <div 
+              key={role.id} 
+              onClick={() => handleSelectRole(role.id, role.label)} 
+              style={roleCard}
+            >
               <div style={roleIcon}>{role.icon}</div>
               <h3 style={roleTitle}>{role.label}</h3>
               <p style={roleDesc}>{role.desc}</p>
