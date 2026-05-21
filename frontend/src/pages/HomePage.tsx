@@ -69,7 +69,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     </div>
   );
 
-  // ===================== GIAO DIỆN MẶC ĐỊNH (6 THẺ GỐC) =====================
+  // ===================== 6 THẺ GỐC =====================
   const renderDefaultHome = () => (
     <div style={cardsGrid}>
       <div style={cardStyle} onClick={() => onNavigate('gui-hang')}>
@@ -105,6 +105,26 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     </div>
   );
 
+  // ===================== CHƯA CHỌN VAI TRÒ =====================
+  const renderNoRoleHome = () => (
+    <div style={noRoleContainer}>
+      <div style={noRoleBox}>
+        <span style={{ fontSize: '80px', marginBottom: '20px' }}>👤</span>
+        <h2 style={{ color: '#4c1d95', marginBottom: '8px' }}>Chào @{piUsername || 'Pioneer'}</h2>
+        <p style={{ color: '#6b21a8', fontSize: '18px', marginBottom: '30px', textAlign: 'center' as const }}>
+          Bạn chưa chọn vai trò.<br />
+          Vui lòng chọn vai trò để sử dụng đầy đủ tính năng GHN.PI
+        </p>
+        <button 
+          onClick={() => onNavigate('dang-ky-vai-tro')}
+          style={chooseRoleButton}
+        >
+          🎯 Chọn vai trò ngay
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div style={pageContainer}>
       <div style={logoContainer}>
@@ -127,10 +147,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         )}
       </div>
 
-      {/* Render theo vai trò */}
-      {(currentRole === 'driver' || currentRole === 'tai-xe') 
-        ? renderDriverHome() 
-        : renderDefaultHome()
+      {/* === LOGIC HIỂN THỊ THEO TRẠNG THÁI === */}
+      {!currentRole 
+        ? renderNoRoleHome()
+        : (currentRole === 'driver' || currentRole === 'tai-xe') 
+          ? renderDriverHome() 
+          : renderDefaultHome()
       }
 
       <DangNhapModal 
@@ -144,7 +166,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   );
 };
 
-/* ==================== SYSTEM STYLES (GIỮ NGUYÊN 100% GỐC) ==================== */
+/* ==================== STYLES (GIỮ NGUYÊN 100% GỐC + THÊM PHẦN CHƯA CHỌN VAI TRÒ) ==================== */
 const pageContainer: React.CSSProperties = { 
   minHeight: '100vh', 
   background: 'linear-gradient(180deg, #f3e8ff 0%, #ede9fe 100%)', 
@@ -161,5 +183,16 @@ const cardStyle: React.CSSProperties = { background: 'white', padding: '20px 14p
 const iconStyle: React.CSSProperties = { fontSize: '48px', marginBottom: '12px', display: 'block', textAlign: 'center' as const };
 const cardTitle: React.CSSProperties = { fontSize: '17px', fontWeight: '700', color: '#4c1d95', margin: '0 0 6px 0', textAlign: 'center' as const, width: '100%', display: 'block' };
 const cardDesc: React.CSSProperties = { fontSize: '13.5px', color: '#64748b', margin: 0, textAlign: 'center' as const, width: '100%', display: 'block' };
+
+// === PHẦN MỚI: CHƯA CHỌN VAI TRÒ ===
+const noRoleContainer: React.CSSProperties = { 
+  display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', padding: '20px' 
+};
+const noRoleBox: React.CSSProperties = { 
+  background: 'white', borderRadius: '24px', padding: '40px 20px', textAlign: 'center' as const, boxShadow: '0 4px 20px rgba(124, 58, 237, 0.1)', maxWidth: '340px', width: '100%' 
+};
+const chooseRoleButton: React.CSSProperties = { 
+  background: '#4c1d95', color: 'white', border: 'none', borderRadius: '9999px', padding: '18px 40px', fontSize: '17px', fontWeight: '700', width: '100%', cursor: 'pointer' 
+};
 
 export default HomePage;
