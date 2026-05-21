@@ -40,34 +40,37 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // ===================== FIX PI LOGIN =====================
-  const handlePiLogin = () => {
+  // === HÀM PI LOGIN GIỮ NGUYÊN Y HỆT BẢN CŨ (đã chạy tốt) ===
+  const handlePiLogin = async () => {
     if (!window.Pi) {
       alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
       return;
     }
 
     setIsLoading(true);
-
-    window.Pi.authenticate(['username'],
-      (authResult: any) => {
-        const username = authResult.user.username;
-        setIsPiConnected(true);
-        setPiUsername(username);
-        localStorage.setItem('piUsername', username);
-        setIsLoading(false);
-        
-        // Tự động đồng bộ AuthContext
-        setAuth(username, localStorage.getItem('userRole') || '');
-      },
-      (error: any) => {
-        console.error("Lỗi xác thực Pi:", error);
-        setIsLoading(false);
-        alert("Kết nối Pi thất bại! Vui lòng thử lại.");
-      }
-    );
+    try {
+      await window.Pi.authenticate(['username'], 
+        (authResult: any) => {
+          const username = authResult.user.username; 
+          setIsPiConnected(true);
+          setPiUsername(username);
+          localStorage.setItem('piUsername', username);
+          setIsLoading(false);
+          
+          // Đồng bộ AuthContext ngay
+          setAuth(username, localStorage.getItem('userRole') || '');
+        }, 
+        (error: any) => {
+          console.error("Lỗi xác thực Pi:", error);
+          setIsLoading(false);
+          alert("Kết nối Pi thất bại!");
+        }
+      );
+    } catch (err) {
+      console.error("Lỗi:", err);
+      setIsLoading(false);
+    }
   };
-  // =======================================================
 
   const handleSelectRole = async (role: string, label: string) => {
     try {
