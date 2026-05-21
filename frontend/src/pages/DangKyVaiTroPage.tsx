@@ -40,41 +40,35 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // === HÀM PI LOGIN GIỮ NGUYÊN Y HỆT BẢN CỐT LÕI CỦA BẠN ===
-  const handlePiLogin = async () => {
+  // === PI LOGIN GIỮ NGUYÊN Y HỆT BẢN CŨ ĐÃ CHẠY TỐT ===
+  const handlePiLogin = () => {
     if (!window.Pi) {
       alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
       return;
     }
 
     setIsLoading(true);
-    try {
-      await window.Pi.authenticate(['username'], 
-        (authResult: any) => {
-          const username = authResult.user.username; 
-          setIsPiConnected(true);
-          setPiUsername(username);
-          localStorage.setItem('piUsername', username);
-          setIsLoading(false);
-          
-          // Đồng bộ AuthContext ngay
-          setAuth(username, localStorage.getItem('userRole') || '');
-        }, 
-        (error: any) => {
-          console.error("Lỗi xác thực Pi:", error);
-          setIsLoading(false);
-          alert("Kết nối Pi thất bại!");
-        }
-      );
-    } catch (err) {
-      console.error("Lỗi:", err);
-      setIsLoading(false);
-    }
+
+    window.Pi.authenticate(['username'],
+      (authResult: any) => {
+        const username = authResult.user.username;
+        console.log("✅ Pi login thành công:", username);   // debug
+        setIsPiConnected(true);
+        setPiUsername(username);
+        localStorage.setItem('piUsername', username);
+        setIsLoading(false);
+        setAuth(username, localStorage.getItem('userRole') || '');
+      },
+      (error: any) => {
+        console.error("❌ Lỗi xác thực Pi:", error);
+        setIsLoading(false);
+        alert("Kết nối Pi thất bại! Vui lòng thử lại.");
+      }
+    );
   };
 
   const handleSelectRole = async (role: string, label: string) => {
     try {
-      // Gọi API backend (giữ nguyên logic gốc của bạn)
       const response = await fetch('/api/users/register-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
