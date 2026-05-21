@@ -40,19 +40,24 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // === PI LOGIN GIỮ NGUYÊN Y HỆT BẢN CŨ ĐÃ CHẠY TỐT ===
+  // === PI LOGIN ĐÃ FIX CHUẨN SDK (giống bản cũ chạy tốt) ===
   const handlePiLogin = () => {
     if (!window.Pi) {
-      alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
+      alert("Vui lòng mở trong Pi Browser!");
       return;
     }
 
     setIsLoading(true);
 
-    window.Pi.authenticate(['username'],
+    window.Pi.authenticate(
+      ['username'],
+      (payment: any) => { 
+        console.log("Payment incomplete:", payment); 
+        return Promise.resolve(); 
+      },
       (authResult: any) => {
         const username = authResult.user.username;
-        console.log("✅ Pi login thành công:", username);   // debug
+        console.log("✅ Pi login thành công:", username);
         setIsPiConnected(true);
         setPiUsername(username);
         localStorage.setItem('piUsername', username);
@@ -60,7 +65,7 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
         setAuth(username, localStorage.getItem('userRole') || '');
       },
       (error: any) => {
-        console.error("❌ Lỗi xác thực Pi:", error);
+        console.error("❌ Lỗi Pi:", error);
         setIsLoading(false);
         alert("Kết nối Pi thất bại! Vui lòng thử lại.");
       }
@@ -72,12 +77,7 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
       const response = await fetch('/api/users/register-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          piUsername, 
-          role, 
-          label,
-          timestamp: Date.now() 
-        }),
+        body: JSON.stringify({ piUsername, role, label, timestamp: Date.now() }),
       });
 
       if (response.ok) {
@@ -107,15 +107,9 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
 
       <div style={headerStyle}>
         <div style={avatarContainerStyle} onClick={handleAvatarClick}>
-          <img 
-            src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} 
-            alt="Avatar" 
-            style={avatarImageStyle} 
-          />
+          <img src={avatarUrl || "https://minepi.com/wp-content/uploads/2019/04/pi-logo.png"} alt="Avatar" style={avatarImageStyle} />
         </div>
-        
         <h1 style={titleStyle}>CHỌN VAI TRÒ CỦA BẠN</h1>
-        
         {isPiConnected ? (
           <div style={statusBoxStyle}>✅ Đã kết nối @{piUsername}</div>
         ) : (

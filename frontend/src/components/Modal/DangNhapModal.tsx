@@ -17,37 +17,36 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
   if (!isOpen) return null;
 
 // Sửa lại hàm handlePiLogin trong DangNhapModal.tsx
-const handlePiLogin = async () => {
-  setIsLoading(true);
-  try {
-    await (window as any).Pi.authenticate(
-      ['username', 'payments'], 
-      (payment: any) => { 
-        // Bắt buộc phải có callback này để xử lý payment dở dang
-        console.log("Xử lý payment dở dang", payment);
-        return Promise.resolve(); 
-      },
-      (authResult: any) => {
-        // Callback thành công
-        const realUsername = authResult.user.username;
-        console.log("Đăng nhập thành công:", realUsername);
-        // Lưu Firestore và xử lý tiếp...
-        setIsLoading(false);
-        onLoginSuccess?.(realUsername);
-        onClose();
-      },
-      (error: any) => {
-        // Callback lỗi
-        console.error("Lỗi xác thực:", error);
-        setIsLoading(false);
-        alert("Kết nối Pi thất bại: " + error.message);
-      }
-    );
-  } catch (err) {
-    setIsLoading(false);
-    console.error("Lỗi hệ thống:", err);
+const handlePiLogin = () => {
+  if (!window.Pi) {
+    alert("Vui lòng mở trong Pi Browser!");
+    return;
   }
+
+  setIsLoading(true);
+
+  window.Pi.authenticate(
+    ['username', 'payments'],
+    (payment: any) => { 
+      console.log("Payment incomplete:", payment); 
+      return Promise.resolve(); 
+    },
+    (authResult: any) => {
+      const username = authResult.user.username;
+      console.log("✅ Pi login thành công:", username);
+      setIsLoading(false);
+      onLoginSuccess?.(username);
+      onClose();
+    },
+    (error: any) => {
+      console.error("❌ Lỗi Pi:", error);
+      setIsLoading(false);
+      alert("Kết nối Pi thất bại!");
+    }
+  );
 };
+
+// ... (phần còn lại giữ nguyên)
 
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
