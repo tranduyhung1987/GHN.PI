@@ -40,7 +40,7 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // === HÀM PI LOGIN GIỮ NGUYÊN Y HỆT BẢN CŨ (đã chạy tốt) ===
+  // === HÀM PI LOGIN GIỮ NGUYÊN Y HỆT BẢN CỐT LÕI CỦA BẠN ===
   const handlePiLogin = async () => {
     if (!window.Pi) {
       alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
@@ -74,6 +74,7 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
 
   const handleSelectRole = async (role: string, label: string) => {
     try {
+      // Gọi API backend (giữ nguyên logic gốc của bạn)
       const response = await fetch('/api/users/register-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

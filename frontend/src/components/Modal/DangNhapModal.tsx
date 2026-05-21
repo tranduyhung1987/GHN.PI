@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { db } from '../../firebase'; // Đảm bảo đường dẫn này đúng với project của bạn
+import { doc, setDoc } from 'firebase/firestore';
 
 interface DangNhapModalProps {
   isOpen: boolean;
@@ -25,10 +27,30 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginS
     }
 
     try {
-      const scopes = ['username'];
-      const auth = await (window as any).Pi.authenticate(scopes, 
-        (authResult: any) => {
-          const realUsername = authResult.user.username;
+      const scopes = ['username', 'payments'];
+      
+      const onIncompletePaymentFound = (payment: any) => {
+        console.log("📌 Có payment dang dở:", payment);
+        return Promise.resolve();
+      };
+
+      await (window as any).Pi.authenticate(scopes, 
+        async (authResult: any) => {
+          const userData = authResult.user;
+          const realUsername = userData.username;
+
+          // 🔥 LƯU VÀO FIRESTORE
+          try {
+            const userRef = doc(db, "users", realUsername);
+            await setDoc(userRef, {
+              username: realUsername,
+              uid: userData.uid,
+              lastLogin: new Date().toISOString(),
+            }, { merge: true });
+          } catch (fireStoreErr) {
+            console.error("Lỗi lưu Firestore:", fireStoreErr);
+          }
+
           setIsLoading(false);
           onLoginSuccess?.(realUsername);
           onClose();
