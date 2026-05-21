@@ -1,77 +1,65 @@
-import { useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface RoleSelectorProps {
-  onNavigate?: (page: string) => void;
+interface AuthContextType {
+  userRole: string | null;
+  piUsername: string | null;
+  loading: boolean;
+  setAuth: (username: string, role: string) => void;
+  clearAuth: () => void;
 }
 
-const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-  const handleSelectRole = (role: string) => {
-    setSelectedRole(role);
-    console.log(`Đã chọn vai trò: ${role}`);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [piUsername, setPiUsername] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // TỐI ƯU: Load từ localStorage khi app khởi động (đồng bộ 2 chiều)
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('piUsername');
+    const savedRole = localStorage.getItem('userRole');
     
-    if (onNavigate) {
-      setTimeout(() => {
-        onNavigate('home');
-      }, 800);
-    } else {
-      alert(`Đã chọn vai trò: ${role} - Đang chuyển sang trang chủ...`);
-    }
+    if (savedUsername) setPiUsername(savedUsername);
+    if (savedRole) setUserRole(savedRole);
+    
+    setLoading(false); // loading xong ngay
+  }, []);
+
+  // TỐI ƯU: setAuth đồng bộ localStorage + context
+  const setAuth = (username: string, role: string) => {
+    setPiUsername(username);
+    setUserRole(role);
+    localStorage.setItem('piUsername', username);
+    localStorage.setItem('userRole', role);
+    
+    // (Tùy chọn) Gọi backend register-role ở đây nếu muốn
+    // fetch('/api/users/register-role', { ... });
+  };
+
+  // Tiện ích logout / xóa auth
+  const clearAuth = () => {
+    setPiUsername(null);
+    setUserRole(null);
+    localStorage.removeItem('piUsername');
+    localStorage.removeItem('userRole');
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-violet-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-purple-900 mb-2">Chào mừng đến với GHN.PI</h1>
-          <p className="text-gray-600">Vui lòng chọn vai trò của bạn</p>
-        </div>
-
-        <div className="space-y-4">
-          <button
-            onClick={() => handleSelectRole('sender')}
-            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📦</div>
-            <div className="text-left">
-              <div className="font-semibold text-lg">Người gửi hàng</div>
-              <div className="text-sm text-gray-500">Tạo đơn, theo dõi vận chuyển</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleSelectRole('receiver')}
-            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📬</div>
-            <div className="text-left">
-              <div className="font-semibold text-lg">Người nhận hàng</div>
-              <div className="text-sm text-gray-500">Nhận hàng, khiếu nại</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleSelectRole('driver')}
-            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
-            <div className="text-left">
-              <div className="font-semibold text-lg">Tài xế</div>
-              <div className="text-sm text-gray-500">Nhận đơn, giao hàng</div>
-            </div>
-          </button>
-        </div>
-
-        {selectedRole && (
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-2xl text-center text-green-700 text-sm">
-            Đã chọn: <strong>{selectedRole === 'sender' ? 'Người gửi hàng' : selectedRole === 'receiver' ? 'Người nhận hàng' : 'Tài xế'}</strong><br />
-            Đang chuyển hướng...
-          </div>
-        )}
-      </div>
-    </div>
+    <AuthContext.Provider value={{ 
+      userRole, 
+      piUsername, 
+      loading, 
+      setAuth,
+      clearAuth 
+    }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-export default RoleSelector;
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth phải được dùng trong AuthProvider');
+  return context;
+};
