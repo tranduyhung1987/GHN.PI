@@ -68,16 +68,18 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
   };
 
   // === FIX CHỌN VAI TRÒ - SIÊU NHANH, KHÔNG CHỜ BACKEND ===
-  const handleSelectRole = (role: string, label: string) => {
-    console.log(`🎯 Chọn vai trò: ${label} (${role})`);
-
-    setAuth(piUsername || '', role);
+const handleSelectRole = async (role: string, label: string) => {
+  try {
+    await setAuth(piUsername || '', role);   // ← đã lưu Firebase
     localStorage.setItem('userRole', role);
-    localStorage.setItem('currentPage', 'home');
-
-    alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nChuyển về trang chủ...`);
-    onNavigate('home');   // chuyển ngay, không reload
-  };
+    alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nĐã đồng bộ Firebase!`);
+    onNavigate('home');
+  } catch (err) {
+    console.error(err);
+    setAuth(piUsername || '', role); // fallback
+    onNavigate('home');
+  }
+};
 
   const roles = [
     { id: 'sender', label: 'Người Gửi Hàng', icon: '📦', desc: 'Tạo đơn & thanh toán Pi' },
