@@ -1,3 +1,4 @@
+// src/contexts/ThemeContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface ThemeContextType {
@@ -10,15 +11,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('ghnpi-theme');
+    // Mặc định kiểm tra hệ thống nếu chưa có lưu
     return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
   });
 
   useEffect(() => {
+    const root = window.document.documentElement;
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
       localStorage.setItem('ghnpi-theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
       localStorage.setItem('ghnpi-theme', 'light');
     }
   }, [isDark]);
@@ -34,6 +37,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (!context) throw new Error('useTheme must be used within ThemeProvider');
+  if (!context) throw new Error('useTheme phải được sử dụng trong ThemeProvider');
   return context;
 };

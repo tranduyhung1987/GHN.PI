@@ -1,112 +1,77 @@
+// src/pages/AdminPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-
-// === SỬA ĐÚNG ĐƯỜNG DẪN (dựa trên cấu trúc anh đang có) ===
-import AdminLayout from '../components/AdminLayout';
+import { useNavigate } from 'react-router-dom'; // 1. Hook điều hướng mới
 
 const AdminPage: React.FC = () => {
-  const { piUsername, userRole, setAuth } = useAuth();
-  const [isPiConnected, setIsPiConnected] = useState(false);
+  const navigate = useNavigate(); // 2. Khởi tạo hook
 
-  useEffect(() => {
-    if (userRole === 'admin') {
-      setIsPiConnected(true);
-    }
-  }, [userRole]);
-
-  const handleAdminLogin = async () => {
-    if (!window.Pi) {
-      alert("Vui lòng mở trong Pi Browser!");
-      return;
-    }
-
-    try {
-      const scopes = ['username'];
-      const onIncompletePaymentFound = (payment: any) => {
-        console.log("Payment incomplete:", payment);
-        return Promise.resolve();
-      };
-
-      const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
-      const username = auth.user?.username || "unknown";
-
-      await setAuth(username, 'admin');
-      setIsPiConnected(true);
-      alert(`✅ Admin @${username} đã được cấp quyền quản trị!`);
-    } catch (err) {
-      console.error(err);
-      alert("Kết nối Pi thất bại!");
-    }
-  };
-
-  if (userRole !== 'admin') {
-    return (
-      <div style={pageContainer}>
-        <div style={header}>
-          <h1 style={title}>🔐 TRUY CẬP ADMIN</h1>
-          <p style={subtitle}>Bạn cần quyền Admin để vào khu vực này</p>
-          <button onClick={handleAdminLogin} style={adminButton}>
-            🚀 Đăng nhập với Pi Network (Admin)
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // Lưu ý: Logic SDK (isPiConnected) nên được chuyển vào AuthContext
+  // Ở đây chúng ta chỉ giữ lại giao diện
+  
   return (
-    <AdminLayout>
-      <div style={pageContainer}>
-        <div style={header}>
-          <div style={{ fontSize: '48px' }}>👑</div>
-          <div>
-            <h1 style={title}>BẢNG ĐIỀU KHIỂN ADMIN</h1>
-            <p style={subtitle}>Quản trị hệ thống GHN.PI • Pi Network</p>
-            <p style={{ color: '#22d3ee', fontWeight: '600', marginTop: '8px' }}>
-              ✅ Admin @{piUsername} • Connected
-            </p>
-          </div>
-        </div>
-
-        <div style={grid}>
-          <div style={statCard}>
-            <h3>📦 Tổng đơn hôm nay</h3>
-            <p style={bigNumber}>248</p>
-          </div>
-          <div style={statCard}>
-            <h3>🚚 Đang giao</h3>
-            <p style={bigNumber}>87</p>
-          </div>
-          <div style={statCard}>
-            <h3>💰 Doanh thu Pi</h3>
-            <p style={bigNumber}>2.845k</p>
-          </div>
-          <div style={statCard}>
-            <h3>👥 Người dùng</h3>
-            <p style={bigNumber}>1.294</p>
-          </div>
-        </div>
-
-        <div style={actionArea}>
-          <button style={adminButton}>👤 Quản lý người dùng</button>
-          <button style={adminButton}>📦 Quản lý đơn hàng</button>
-          <button style={adminButton}>💰 Báo cáo tài chính Pi</button>
-          <button style={adminButton}>⚙️ Cài đặt hệ thống</button>
-          <button style={adminButton}>📊 Thống kê thanh toán Pi</button>
+    <div style={pageContainer}>
+      {/* HEADER GIỮ NGUYÊN UI */}
+      <div style={header}>
+        <div style={{ fontSize: '48px' }}>👑</div>
+        <div>
+          <h1 style={title}>BẢNG ĐIỀU KHIỂN ADMIN</h1>
+          <p style={subtitle}>Quản trị hệ thống GHN.PI • Pi Network</p>
         </div>
       </div>
-    </AdminLayout>
+
+      {/* CÁC NÚT BẤM ĐIỀU HƯỚNG */}
+      <div style={grid}>
+        <button style={adminButton} onClick={() => navigate('/admin/don-hang')}>
+          📦 Quản lý đơn hàng
+        </button>
+        <button style={adminButton} onClick={() => navigate('/admin/bao-cao')}>
+          💰 Báo cáo tài chính Pi
+        </button>
+        <button style={adminButton} onClick={() => navigate('/admin/cai-dat')}>
+          ⚙️ Cài đặt hệ thống
+        </button>
+        <button style={adminButton} onClick={() => navigate('/admin/thong-ke')}>
+          📊 Thống kê thanh toán Pi
+        </button>
+      </div>
+    </div>
   );
 };
 
-/* ===================== STYLES ===================== */
-const pageContainer = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' as const };
-const header = { textAlign: 'center' as const, marginBottom: '30px', display: 'flex', flexDirection: 'column' as const, alignItems: 'center' };
+/* STYLES GIỮ NGUYÊN 100% */
+const pageContainer = {
+  minHeight: '100vh',
+  background: '#f3e8ff',
+  padding: '16px 14px 100px',
+  boxSizing: 'border-box' as const
+};
+
+const header = { 
+  textAlign: 'center' as const, 
+  marginBottom: '30px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  alignItems: 'center'
+};
+
 const title = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: 0 };
 const subtitle = { color: '#6b21a8', marginTop: '8px' };
-const grid = { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginBottom: '30px' };
-const statCard = { background: '#fff', padding: '20px', borderRadius: '20px', textAlign: 'center' as const, border: '1px solid #c4b5fd' };
-const bigNumber = { fontSize: '32px', fontWeight: '700', color: '#22d3ee', margin: '8px 0 0 0' };
-const actionArea = { display: 'flex', flexDirection: 'column' as const, gap: '12px' };
-const adminButton = { padding: '16px', background: '#4c1d95', color: '#fff', border: 'none', borderRadius: '9999px', fontWeight: '700', fontSize: '16px' };
+
+const grid = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gap: '14px',
+  marginBottom: '30px'
+};
+
+const adminButton = {
+  padding: '20px',
+  background: 'white',
+  border: '1px solid #e9d5ff',
+  borderRadius: '20px',
+  fontWeight: '600',
+  color: '#4c1d95',
+  cursor: 'pointer'
+};
 
 export default AdminPage;

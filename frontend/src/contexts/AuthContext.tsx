@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -13,40 +14,30 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [piUsername, setPiUsername] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole'));
+  const [piUsername, setPiUsername] = useState<string | null>(localStorage.getItem('piUsername'));
   const [loading, setLoading] = useState(true);
 
-  // Load từ localStorage khi app khởi động
   useEffect(() => {
-    const savedUsername = localStorage.getItem('piUsername');
-    const savedRole = localStorage.getItem('userRole');
-    
-    if (savedUsername) setPiUsername(savedUsername);
-    if (savedRole) setUserRole(savedRole);
-    
+    // Chỉ cập nhật lại state nếu cần, nếu không cứ để giá trị từ localStorage (initial state)
     setLoading(false);
   }, []);
 
-  // TỐI ƯU: setAuth + lưu lên Firebase
   const setAuth = async (username: string, role: string) => {
     setPiUsername(username);
     setUserRole(role);
     localStorage.setItem('piUsername', username);
     localStorage.setItem('userRole', role);
 
-    // === LƯU LÊN FIREBASE ===
     if (username) {
       try {
         await setDoc(doc(db, "users", username), {
           piUsername: username,
           role: role,
-          lastLogin: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }, { merge: true }); // merge = không ghi đè dữ liệu cũ
-        console.log(`✅ Đã lưu role lên Firebase: ${username} → ${role}`);
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
       } catch (err) {
-        console.error("❌ Lỗi lưu Firebase:", err);
+        console.error("Lỗi lưu Firebase:", err);
       }
     }
   };
@@ -67,6 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth phải được dùng trong AuthProvider');
+  if (!context) throw new Error('useAuth phải được sử dụng trong AuthProvider');
   return context;
 };

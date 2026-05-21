@@ -1,38 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import BottomNav from '../components/BottomNav';
-
-declare global {
-  interface Window {
-    Pi: any;
-  }
-}
 
 interface ShopLayoutProps {
   children: React.ReactNode;
   onNavigate: (page: string) => void;
   currentPage: string;
+  // Truyền dữ liệu từ ngoài vào (đã tách logic SDK ra khỏi file này)
+  isPiConnected: boolean;
+  piUsername: string;
+  role: string;
 }
 
 const ShopLayout: React.FC<ShopLayoutProps> = ({ 
   children, 
   onNavigate, 
-  currentPage 
+  currentPage,
+  isPiConnected,
+  piUsername,
+  role
 }) => {
-  const [isPiConnected, setIsPiConnected] = useState(false);
-  const [piUsername, setPiUsername] = useState('');
-  const [role, setRole] = useState<string>('shop');
-
-  useEffect(() => {
-    if (window.Pi) {
-      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
-        .then((user: any) => {
-          setIsPiConnected(true);
-          setPiUsername(user?.username || 'Member');
-        })
-        .catch(() => setIsPiConnected(false));
-    }
-  }, []);
-
   return (
     <div style={container}>
       <div style={header}>
@@ -66,51 +52,13 @@ const ShopLayout: React.FC<ShopLayoutProps> = ({
   );
 };
 
-/* ===================== STYLES ===================== */
-const container = {
-  minHeight: '100vh',
-  background: '#f3e8ff',
-  paddingBottom: '90px',
-  boxSizing: 'border-box' as const
-};
-
-const header = {
-  background: '#4c1d95',
-  color: '#fff',
-  padding: '14px 16px',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-};
-
+/* STYLES GIỮ NGUYÊN */
+const container = { minHeight: '100vh', background: '#f3e8ff', paddingBottom: '90px', boxSizing: 'border-box' as const };
+const header = { background: '#4c1d95', color: '#fff', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' };
 const title = { margin: 0, fontSize: '22px', fontWeight: '700' };
-
-const rightSection = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px'
-};
-
-const roleBadge = { 
-  fontSize: '14px', 
-  padding: '6px 14px', 
-  background: 'rgba(255,255,255,0.25)', 
-  borderRadius: '9999px',
-  fontWeight: '600'
-};
-
-const piBadge = {
-  background: '#22d3ee',
-  color: '#0f172a',
-  padding: '6px 12px',
-  borderRadius: '9999px',
-  fontSize: '13px',
-  fontWeight: '600'
-};
-
-const mainContent = {
-  padding: '16px'
-};
+const rightSection = { display: 'flex', alignItems: 'center', gap: '8px' };
+const roleBadge = { background: '#22d3ee', color: '#0f172a', padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700' };
+const piBadge = { background: '#67e8f9', color: '#0f172a', padding: '4px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: '600' };
+const mainContent = { padding: '20px 16px' };
 
 export default ShopLayout;

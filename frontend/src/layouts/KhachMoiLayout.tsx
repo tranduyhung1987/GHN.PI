@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import DangNhapModal from '../components/Modal/DangNhapModal';
+import React from 'react';
 
+// 1. Định nghĩa Props: Nhận hàm mở modal từ cha truyền vào
 interface KhachMoiLayoutProps {
   children: React.ReactNode;
+  onOpenLogin: () => void; // Thay vì tự chứa state showLogin, ta nhận hàm này từ ngoài
 }
 
-const KhachMoiLayout: React.FC<KhachMoiLayoutProps> = ({ children }) => {
-  const [showLogin, setShowLogin] = useState(false);
-
+const KhachMoiLayout: React.FC<KhachMoiLayoutProps> = ({ 
+  children, 
+  onOpenLogin 
+}) => {
   return (
     <div style={pageContainer}>
-      {/* Guest Header */}
+      {/* GUEST HEADER - UI thuần túy */}
       <div style={guestHeader}>
-        <div style={logo}>
-          🚚 GHN.PI
-        </div>
+        <div style={logo}>🚚 GHN.PI</div>
         <p style={subtitle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
 
         <button 
-          onClick={() => setShowLogin(true)}
+          onClick={onOpenLogin}
           style={loginButton}
         >
           ⭐ Đăng nhập Pi Network
@@ -28,16 +28,15 @@ const KhachMoiLayout: React.FC<KhachMoiLayoutProps> = ({ children }) => {
       <main style={mainContent}>
         {children}
       </main>
-
-      <DangNhapModal 
-        isOpen={showLogin} 
-        onClose={() => setShowLogin(false)} 
-      />
+      
+      {/* Lưu ý: Modal sẽ không nằm ở đây nữa. 
+         Nó sẽ được quản lý tại MainLayout hoặc trang cha để tránh re-render layout.
+      */}
     </div>
   );
 };
 
-/* ===================== STYLES ===================== */
+/* STYLES (Giữ nguyên giao diện của bạn) */
 const pageContainer: React.CSSProperties = {
   minHeight: '100vh',
   background: '#f3e8ff',
@@ -55,33 +54,17 @@ const guestHeader: React.CSSProperties = {
   boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
 };
 
-const logo: React.CSSProperties = {
-  fontSize: '32px',
-  fontWeight: '800',
-  marginBottom: '8px'
-};
-
-const subtitle: React.CSSProperties = {
-  color: '#c4b5fd',
-  marginBottom: '20px',
-  fontSize: '15px'
-};
-
+const logo: React.CSSProperties = { fontSize: '32px', fontWeight: '800', marginBottom: '8px' };
+const subtitle: React.CSSProperties = { color: '#c4b5fd', fontSize: '14px', marginBottom: '16px' };
 const loginButton: React.CSSProperties = {
-  background: 'linear-gradient(90deg, #22d3ee, #67e8f9)',
-  color: '#0f172a',
+  background: '#ffffff',
+  color: '#4c1d95',
   border: 'none',
-  padding: '14px 32px',
+  padding: '12px 24px',
   borderRadius: '9999px',
   fontWeight: '700',
-  fontSize: '16px',
-  cursor: 'pointer',
-  boxShadow: '0 6px 20px rgba(34,211,238,0.4)'
+  cursor: 'pointer'
 };
-
-const mainContent: React.CSSProperties = {
-  padding: '16px 14px',
-  paddingBottom: '100px'
-};
+const mainContent: React.CSSProperties = { padding: '20px 16px' };
 
 export default KhachMoiLayout;

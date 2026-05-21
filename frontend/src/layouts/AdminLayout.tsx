@@ -1,39 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import BottomNav from '../components/BottomNav';
+import React from 'react';
 
-declare global {
-  interface Window {
-    Pi: any;
-  }
-}
-
+// Định nghĩa dữ liệu cần thiết cho giao diện Admin
 interface AdminLayoutProps {
   children: React.ReactNode;
-  onNavigate: (page: string) => void;
-  currentPage: string;
+  isPiConnected: boolean;
+  piUsername: string;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ 
   children, 
-  onNavigate, 
-  currentPage 
+  isPiConnected,
+  piUsername 
 }) => {
-  const [isPiConnected, setIsPiConnected] = useState(false);
-  const [piUsername, setPiUsername] = useState('');
-
-  useEffect(() => {
-    if (window.Pi) {
-      window.Pi.authenticate(['payments'], { onIncompletePaymentFound: () => {} })
-        .then((user: any) => {
-          setIsPiConnected(true);
-          setPiUsername(user?.username || 'Admin');
-        })
-        .catch(() => setIsPiConnected(false));
-    }
-  }, []);
-
   return (
     <div style={container}>
+      {/* HEADER - ADMIN (UI Thuần túy) */}
       <div style={adminHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ fontSize: '32px' }}>👑</div>
@@ -50,20 +31,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
       </div>
 
+      {/* Nội dung trang */}
       <main style={mainContent}>
         {children}
       </main>
-
-      <BottomNav onNavigate={onNavigate} currentPage={currentPage} />
     </div>
   );
 };
 
-/* ===================== STYLES ===================== */
+/* STYLES (Giữ nguyên giao diện gốc của bạn) */
 const container = {
   minHeight: '100vh',
   background: '#f3e8ff',
-  paddingBottom: '90px',
   boxSizing: 'border-box' as const
 };
 
@@ -78,27 +57,9 @@ const adminHeader = {
 };
 
 const adminTitle = { margin: 0, fontSize: '22px', fontWeight: '800' };
-
-const rightHeader = { display: 'flex', alignItems: 'center', gap: '12px' };
-
-const roleBadge = { 
-  background: '#eab308', 
-  color: '#1e2937', 
-  padding: '6px 14px', 
-  borderRadius: '9999px', 
-  fontWeight: '700',
-  fontSize: '14px'
-};
-
-const piBadge = {
-  background: '#22d3ee',
-  color: '#0f172a',
-  padding: '6px 12px',
-  borderRadius: '9999px',
-  fontSize: '13px',
-  fontWeight: '600'
-};
-
+const rightHeader = { display: 'flex', alignItems: 'center', gap: '10px' };
+const roleBadge = { background: '#f59e0b', color: '#0f172a', padding: '6px 16px', borderRadius: '9999px', fontSize: '14px', fontWeight: '700' };
+const piBadge = { background: '#67e8f9', color: '#0f172a', padding: '6px 12px', borderRadius: '9999px', fontSize: '13px', fontWeight: '600' };
 const mainContent = { padding: '20px 16px' };
 
 export default AdminLayout;
