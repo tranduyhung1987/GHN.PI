@@ -7,31 +7,26 @@ interface DangKyVaiTroPageProps {
 }
 
 const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
-  const { setAuth } = useAuth();
+  const { setAuth, piUsername: contextPiUsername } = useAuth();
   const [isPiConnected, setIsPiConnected] = useState(false);
-  const [piUsername, setPiUsername] = useState('');
+  const [piUsername, setPiUsername] = useState(contextPiUsername || '');
   const [isLoading, setIsLoading] = useState(false);
   
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load trạng thái từ localStorage khi trang khởi tạo
+  // TỐI ƯU: Sync tự động với AuthContext
   useEffect(() => {
-    const savedPi = localStorage.getItem('piUsername');
+    const savedPi = localStorage.getItem('piUsername') || contextPiUsername;
     if (savedPi) {
       setIsPiConnected(true);
       setPiUsername(savedPi);
     }
-    
     const savedAvatar = localStorage.getItem('userAvatar');
-    if (savedAvatar) {
-      setAvatarUrl(savedAvatar);
-    }
-  }, []);
+    if (savedAvatar) setAvatarUrl(savedAvatar);
+  }, [contextPiUsername]);
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleAvatarClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,20 +41,17 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  // HÀM ĐĂNG NHẬP PI VỚI DỮ LIỆU THẬT
+  // HÀM ĐĂNG NHẬP PI (giữ nguyên)
   const handlePiLogin = async () => {
     if (!window.Pi) {
       alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
       return;
     }
-
     setIsLoading(true);
     try {
       await window.Pi.authenticate(['username'], 
         (authResult: any) => {
-          // Lấy username thật từ Pi
           const username = authResult.user.username; 
-          
           setIsPiConnected(true);
           setPiUsername(username);
           localStorage.setItem('piUsername', username);
@@ -77,11 +69,32 @@ const DangKyVaiTroPage: React.FC<DangKyVaiTroPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleSelectRole = (role: string, label: string) => {
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('currentPage', 'home');
-    alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nTrang sẽ tải lại để áp dụng giao diện!`);
-    window.location.reload();
+  // TỐI ƯU: handleSelectRole mới – gọi backend + sync AuthContext + không reload
+  const handleSelectRole = async (role: string, label: string) => {
+    try {
+      const response = await fetch('/api/users/register-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          piUsername, 
+          role, 
+          label,
+          timestamp: Date.now() 
+        }),
+      });
+
+      if (response.ok) {
+        setAuth(piUsername, role);
+        localStorage.setItem('userRole', role);
+        alert(`🎉 ĐÃ CHỌN VAI TRÒ: ${label}\n\nĐã đồng bộ backend!`);
+        onNavigate('home');
+      }
+    } catch (err) {
+      console.error('Backend error → fallback local', err);
+      setAuth(piUsername, role);
+      localStorage.setItem('userRole', role);
+      onNavigate('home');
+    }
   };
 
   const roles = [
@@ -148,13 +161,13 @@ const avatarImageStyle: React.CSSProperties = { width: '100%', height: '100%', o
 const titleStyle: React.CSSProperties = { fontSize: '28px', fontWeight: '700', color: '#4c1d95', margin: '0 0 8px 0' };
 const subtitleStyle: React.CSSProperties = { color: '#6b21a8', fontSize: '15.5px' };
 const warningBox: React.CSSProperties = { background: 'white', border: '3px solid #ef4444', borderRadius: '20px', padding: '24px 20px', marginBottom: '30px', textAlign: 'center' as const };
-const statusBoxStyle: React.CSSProperties = { background: '#ffffff', border: '2px solid #a78bfa', borderRadius: '12px', padding: '10px 20px', marginTop: '15px', display: 'inline-block', color: '#4c1d95', fontWeight: '600' };
-const warningContent: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', fontSize: '17px', color: '#b91c1c' };
-const piLoginButton: React.CSSProperties = { width: '100%', padding: '18px', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', border: 'none', borderRadius: '9999px', fontSize: '17px', fontWeight: '700', cursor: 'pointer' };
-const rolesGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' };
-const roleCard: React.CSSProperties = { background: 'white', borderRadius: '20px', padding: '24px 16px', textAlign: 'center' as const, border: '1px solid #e0d4ff', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', cursor: 'pointer' };
-const roleIcon: React.CSSProperties = { fontSize: '52px', marginBottom: '12px' };
-const roleTitle: React.CSSProperties = { fontSize: '17px', fontWeight: '700', color: '#4c1d95', margin: '0 0 6px 0' };
-const roleDesc: React.CSSProperties = { fontSize: '13.5px', color: '#64748b', margin: 0 };
+const statusBoxStyle: React.CSSProperties = { background: '#ffffff', border: '2px solid #a78bfa', borderRadius: '12px', padding: '10px 20px', marginTop: '15px', display: 'inline-block', color: '#4c1d95' };
+const warningContent: React.CSSProperties = { display: 'flex', alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: '20px' };
+const piLoginButton: React.CSSProperties = { backgroundColor: '#4c1d95', color: '#fff', border: 'none', borderRadius: '9999px', padding: '14px 28px', fontSize: '16px', fontWeight: '600', width: '100%', marginTop: '12px', cursor: 'pointer' };
+const rolesGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' };
+const roleCard: React.CSSProperties = { background: 'white', borderRadius: '20px', padding: '24px 16px', textAlign: 'center' as const, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', cursor: 'pointer', transition: 'all 0.2s ease' };
+const roleIcon: React.CSSProperties = { fontSize: '42px', marginBottom: '12px' };
+const roleTitle: React.CSSProperties = { fontSize: '18px', fontWeight: '700', color: '#4c1d95', marginBottom: '6px' };
+const roleDesc: React.CSSProperties = { fontSize: '13px', color: '#6b21a8', margin: 0 };
 
 export default DangKyVaiTroPage;
