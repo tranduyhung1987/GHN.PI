@@ -9,23 +9,28 @@ const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
   const { setAuth, piUsername, userRole } = useAuth();
   const [selectedRole, setSelectedRole] = useState<string | null>(userRole);
 
-  // Tự động load role từ AuthContext
   useEffect(() => {
     if (userRole) setSelectedRole(userRole);
   }, [userRole]);
 
-  const handleSelectRole = (role: string) => {
+  const handleSelectRole = (role: string, displayName: string) => {
     setSelectedRole(role);
-    console.log(`🎯 Chọn vai trò: ${role} cho user: ${piUsername}`);
+    console.log(`🎯 Chọn vai trò: ${displayName} (${role})`);
 
-    // Đồng bộ AuthContext + localStorage
     setAuth(piUsername || '', role);
+    localStorage.setItem('userRole', role);
+
+    // Chuyển hướng ngay theo vai trò
+    let targetPage = 'home';
+    if (role === 'driver' || role === 'tai-xe') targetPage = 'tai-xe';
+    else if (role === 'warehouse' || role === 'kho-hub') targetPage = 'kho-hub';
+    else if (role === 'sender') targetPage = 'gui-hang';
+    else if (role === 'receiver') targetPage = 'nhan-hang';
 
     if (onNavigate) {
-      // Chuyển mượt mà không reload
-      setTimeout(() => onNavigate('home'), 600);
+      setTimeout(() => onNavigate(targetPage), 500);
     } else {
-      window.location.href = '/';
+      window.location.href = `/${targetPage}`;
     }
   };
 
@@ -39,7 +44,7 @@ const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
 
         <div className="space-y-4">
           <button
-            onClick={() => handleSelectRole('sender')}
+            onClick={() => handleSelectRole('sender', 'Người gửi hàng')}
             className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
           >
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📦</div>
@@ -50,7 +55,7 @@ const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
           </button>
 
           <button
-            onClick={() => handleSelectRole('receiver')}
+            onClick={() => handleSelectRole('receiver', 'Người nhận hàng')}
             className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
           >
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📬</div>
@@ -61,7 +66,7 @@ const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
           </button>
 
           <button
-            onClick={() => handleSelectRole('driver')}
+            onClick={() => handleSelectRole('driver', 'Tài xế')}
             className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
           >
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
