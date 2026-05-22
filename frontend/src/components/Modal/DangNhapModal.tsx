@@ -5,9 +5,10 @@ interface DangNhapModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLoginSuccess?: (username: string) => void;
+  onLogin: () => Promise<void>;
 }
 
-const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
+const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLogin, onLoginSuccess }) => {
   const [loginMethod, setLoginMethod] = useState<'pi' | 'email'>('pi');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

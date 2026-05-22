@@ -46,7 +46,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
       return [
         { label: 'Tổng quan', icon: '🏠', page: 'home' },
         { label: 'Hệ thống', icon: '👑', page: 'admin' },
-        { label: 'Hồ sơ', icon: '👤', page: 'ca-nhan' }
+        { label: 'Hồ sơ', icon: '💎', page: 'ca-nhan' }
       ];
     }
 
@@ -56,7 +56,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
         { label: 'Trang chủ', icon: '🏠', page: 'home' },
         { label: 'Bưu cục', icon: '🏬', page: 'kho-hub' },
         { label: 'Đơn Kho', icon: '📦', page: 'don-hang' },
-        { label: 'Hồ sơ', icon: '👤', page: 'ca-nhan' }
+        { label: 'Hồ sơ', icon: '💎', page: 'ca-nhan' }
       ];
     }
 
@@ -80,7 +80,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
         },
         { 
           label: 'Hồ sơ',      // Tab quản lý ví tiền Pi thu nhập, thông tin cá nhân tài xế
-          icon: '👤', 
+          icon: '💎', 
           page: 'ca-nhan' 
         }
       ];
@@ -92,7 +92,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
         { label: 'Trang chủ', icon: '🏠', page: 'home' },
         { label: 'Theo dõi', icon: '📍', page: 'tracking' },
         { label: 'Nhận hàng', icon: '🖐️', page: 'nhan-hang' },
-        { label: 'Hồ sơ', icon: '👤', page: 'ca-nhan' }
+        { label: 'Hồ sơ', icon: '💎', page: 'ca-nhan' }
       ];
     }
 
@@ -102,7 +102,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
       { label: 'Gửi hàng', icon: '📦', page: 'gui-hang' },
       { label: 'Tra cước', icon: '📊', page: 'tra-cuu-cuoc' },
       { label: 'Theo dõi', icon: '📍', page: 'tracking' },
-      { label: 'Hồ sơ', icon: '👤', page: 'ca-nhan' }
+      { label: 'Hồ sơ', icon: '💎', page: 'ca-nhan' }
     ];
   };
 
