@@ -1,39 +1,38 @@
-// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { RoleType } from '../utils/constants';
 
 interface AuthContextType {
-  userRole: string | null;
+  userRole: RoleType | null;
   piUsername: string | null;
   loading: boolean;
-  setAuth: (username: string, role: string) => Promise<void>;
+  setAuth: (username: string, role: RoleType) => Promise<void>;
   clearAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole'));
+  const [userRole, setUserRole] = useState<RoleType | null>(localStorage.getItem('userRole') as RoleType | null);
   const [piUsername, setPiUsername] = useState<string | null>(localStorage.getItem('piUsername'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Chỉ cập nhật lại state nếu cần, nếu không cứ để giá trị từ localStorage (initial state)
     setLoading(false);
   }, []);
 
-  const setAuth = async (username: string, role: string) => {
+  const setAuth = async (username: string, role: RoleType) => {
     setPiUsername(username);
     setUserRole(role);
     localStorage.setItem('piUsername', username);
     localStorage.setItem('userRole', role);
 
-    if (username) {
+    if (username && db) {
       try {
         await setDoc(doc(db, "users", username), {
           piUsername: username,
-          role: role,
+          role,
           lastLogin: new Date().toISOString()
         }, { merge: true });
       } catch (err) {
@@ -58,6 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth phải được sử dụng trong AuthProvider');
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };

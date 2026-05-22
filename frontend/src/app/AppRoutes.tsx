@@ -1,9 +1,11 @@
 // src/app/AppRoutes.tsx
+import { ROLES } from '../utils/constants'; // Import hằng số
+import ProtectedRoute from '../components/ProtectedRoute';
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 
-// Sử dụng lazy để tách code
+// Import các trang bằng lazy để tối ưu hiệu năng
 const HomePage = lazy(() => import('../pages/HomePage'));
 const KhoHubPage = lazy(() => import('../pages/KhoHubPage'));
 const GuiHangPage = lazy(() => import('../pages/GuiHangPage'));
@@ -18,21 +20,51 @@ const ChatPage = lazy(() => import('../pages/ChatPage'));
 
 export const AppRoutes = () => {
   return (
-    // Suspense hiển thị nội dung thay thế (loading) khi file đang được tải
-    <Suspense fallback={<div>Đang tải...</div>}>
+    <Suspense fallback={<div className="p-10 text-center">Đang tải...</div>}>
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="kho-hub" element={<KhoHubPage />} />
-          <Route path="gui-hang" element={<GuiHangPage />} />
+          
+          {/* Các route bảo vệ theo role */}
+          <Route path="admin" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AdminPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="kho-hub" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.WAREHOUSE]}>
+              <KhoHubPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="tai-xe" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.DRIVER]}>
+              <TaiXePage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="gui-hang" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.SENDER]}>
+              <GuiHangPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="nhan-hang" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.RECEIVER]}>
+              <NhanHangPage />
+            </ProtectedRoute>
+          } />
+
+          {/* Các route công cộng */}
           <Route path="tracking" element={<TrackingPage />} />
-          <Route path="nhan-hang" element={<NhanHangPage />} />
           <Route path="tra-cuu-cuoc" element={<TraCuuCuocPage />} />
-          <Route path="tai-xe" element={<TaiXePage />} />
           <Route path="ca-nhan" element={<CaNhanPage />} />
-          <Route path="admin" element={<AdminPage />} />
           <Route path="dang-ky" element={<DangKyVaiTroPage />} />
           <Route path="chat" element={<ChatPage />} />
+          
+          {/* Redirect mặc định */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </Suspense>

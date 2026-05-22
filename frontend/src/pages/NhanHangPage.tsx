@@ -27,7 +27,7 @@ export default function NhanHangPage() {
     <div style={container}>
       {/* UI GIAO DIỆN GIỮ NGUYÊN */}
       <div style={headerStyle}>
-        <h2 style={{ color: 'white' }}>Nhận hàng</h2>
+        <h2 style={{ color: 'white' }}>Người nhận hàng</h2>
       </div>
 
       <div style={tabContainer}>

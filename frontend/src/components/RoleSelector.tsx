@@ -1,91 +1,62 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { RoleType, ROLES } from '../utils/constants';
 
-interface RoleSelectorProps {
-  onNavigate?: (page: string) => void;
+interface AuthContextType {
+  userRole: RoleType | null;
+  piUsername: string | null;
+  loading: boolean;
+  setAuth: (username: string, role: RoleType) => Promise<void>;
+  clearAuth: () => void;
 }
 
-const RoleSelector = ({ onNavigate }: RoleSelectorProps) => {
-  const { setAuth, piUsername, userRole } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<string | null>(userRole);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [userRole, setUserRole] = useState<RoleType | null>(localStorage.getItem('userRole') as RoleType | null);
+  const [piUsername, setPiUsername] = useState<string | null>(localStorage.getItem('piUsername'));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userRole) setSelectedRole(userRole);
-  }, [userRole]);
+    setLoading(false);
+  }, []);
 
-  const handleSelectRole = (role: string, displayName: string) => {
-    setSelectedRole(role);
-    console.log(`🎯 Chọn vai trò: ${displayName} (${role})`);
-
-    setAuth(piUsername || '', role);
+  const setAuth = async (username: string, role: RoleType) => {
+    setPiUsername(username);
+    setUserRole(role);
+    localStorage.setItem('piUsername', username);
     localStorage.setItem('userRole', role);
 
-    // Chuyển hướng ngay theo vai trò
-    let targetPage = 'home';
-    if (role === 'driver' || role === 'tai-xe') targetPage = 'tai-xe';
-    else if (role === 'warehouse' || role === 'kho-hub') targetPage = 'kho-hub';
-    else if (role === 'sender') targetPage = 'gui-hang';
-    else if (role === 'receiver') targetPage = 'nhan-hang';
-
-    if (onNavigate) {
-      setTimeout(() => onNavigate(targetPage), 500);
-    } else {
-      window.location.href = `/${targetPage}`;
+    if (username && db) {
+      try {
+        await setDoc(doc(db, "users", username), {
+          piUsername: username,
+          role: role,
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+      } catch (err) {
+        console.error("Lỗi lưu Firebase:", err);
+      }
     }
   };
 
+  const clearAuth = () => {
+    setPiUsername(null);
+    setUserRole(null);
+    localStorage.removeItem('piUsername');
+    localStorage.removeItem('userRole');
+  };
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-violet-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-purple-900 mb-2">Chào mừng đến với GHN.PI</h1>
-          <p className="text-gray-600">Vui lòng chọn vai trò của bạn</p>
-        </div>
-
-        <div className="space-y-4">
-          <button
-            onClick={() => handleSelectRole('sender', 'Người gửi hàng')}
-            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📦</div>
-            <div className="text-left">
-              <div className="font-semibold text-lg">Người gửi hàng</div>
-              <div className="text-sm text-gray-500">Tạo đơn, theo dõi vận chuyển</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleSelectRole('receiver', 'Người nhận hàng')}
-            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">📬</div>
-            <div className="text-left">
-              <div className="font-semibold text-lg">Người nhận hàng</div>
-              <div className="text-sm text-gray-500">Nhận hàng, khiếu nại</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleSelectRole('driver', 'Tài xế')}
-            className="w-full p-6 bg-white border-2 border-purple-200 hover:border-purple-500 rounded-2xl flex items-center gap-4 transition-all hover:shadow-md active:scale-95"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">🏍️</div>
-            <div className="text-left">
-              <div className="font-semibold text-lg">Tài xế</div>
-              <div className="text-sm text-gray-500">Nhận đơn, giao hàng</div>
-            </div>
-          </button>
-        </div>
-
-        {selectedRole && (
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-2xl text-center text-green-700 text-sm">
-            Đã chọn: <strong>{selectedRole === 'sender' ? 'Người gửi hàng' : selectedRole === 'receiver' ? 'Người nhận hàng' : 'Tài xế'}</strong><br />
-            Đang chuyển hướng...
-          </div>
-        )}
-      </div>
-    </div>
+    <AuthContext.Provider value={{ userRole, piUsername, loading, setAuth, clearAuth }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-export default RoleSelector;
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  return context;
+};

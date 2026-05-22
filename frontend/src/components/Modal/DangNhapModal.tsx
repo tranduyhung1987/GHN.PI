@@ -1,96 +1,98 @@
 import React, { useState } from 'react';
-import { db } from '../../firebase'; 
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { ROLES } from '../../utils/constants';     // ← Import ROLES để dùng constant
 
 interface DangNhapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess?: (username: string) => void;
-  onLogin: () => Promise<void>;
 }
 
-const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLogin, onLoginSuccess }) => {
-  const [loginMethod, setLoginMethod] = useState<'pi' | 'email'>('pi');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setAuth } = useAuth();
+
+  const fromPage = (location.state as any)?.from?.pathname || '/home';
 
   if (!isOpen) return null;
 
-  // === HÀM PI LOGIN ĐÚNG NHƯ COMMIT 5a1aa91 (ĐANG HOẠT ĐỘNG) ===
   const handlePiLogin = async () => {
     if (!window.Pi) {
-      alert("Vui lòng mở ứng dụng trong Pi Browser để đăng nhập!");
+      alert("Vui lòng mở trong Pi Browser để đăng nhập!");
       return;
     }
 
     setIsLoading(true);
     try {
       const scopes = ['username', 'payments'];
+      const auth = await window.Pi.authenticate(scopes, () => Promise.resolve());
 
-      const onIncompletePaymentFound = (payment: any) => {
-        console.log("Payment incomplete:", payment);
-        return Promise.resolve();
-      };
+      const username = auth.user?.username || "pi_user";
 
-      const authenticateResponse = await window.Pi.authenticate(
-        scopes,
-        onIncompletePaymentFound
-      );
+      // SỬ DỤNG CONSTANT ROLES.SENDER thay vì string cứng
+      await setAuth(username, ROLES.SENDER);
 
-      console.log("✅ Pi Auth Response:", authenticateResponse);
-
-      const userData = authenticateResponse.user;
-      const realUsername = userData?.username || "unknown";
-
-      // Lưu vào localStorage + AuthContext
-      localStorage.setItem('piUsername', realUsername);
-      setIsLoading(false);
-      onLoginSuccess?.(realUsername);
       onClose();
-
-      alert(`✅ Đăng nhập Pi Network thành công!\nUsername: @${realUsername}`);
+      navigate(fromPage, { replace: true });
+      alert(`✅ Đăng nhập thành công!\nUsername: @${username}`);
     } catch (err) {
-      console.error("❌ Lỗi Pi:", err);
+      console.error(err);
+      alert("Đăng nhập Pi thất bại! Vui lòng thử lại.");
+    } finally {
       setIsLoading(false);
-      alert("Kết nối Pi thất bại! Vui lòng thử lại.");
     }
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert("Vui lòng ưu tiên đăng nhập bằng Pi Network!");
-  };
-
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: 'white', padding: '24px', borderRadius: '24px', width: '90%', maxWidth: '400px' }}>
-        <h2 style={{ textAlign: 'center', color: '#4c1d95', marginBottom: '20px' }}>Đăng Nhập</h2>
-        <div style={{ marginBottom: '20px' }}>
-          {loginMethod === 'pi' ? (
-            <button 
-              onClick={handlePiLogin} 
-              disabled={isLoading} 
-              style={{
-                width: '100%', padding: '16px', background: '#4c1d95', color: 'white', border: 'none',
-                borderRadius: '9999px', fontSize: '17px', fontWeight: '700', cursor: isLoading ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {isLoading ? 'Đang kết nối...' : '🚀 Đăng nhập bằng Pi Network'}
-            </button>
-          ) : (
-            <form onSubmit={handleEmailLogin}>
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} required />
-              <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} required />
-              <button type="submit" disabled={isLoading} style={emailButtonStyle}>Đăng Nhập</button>
-            </form>
-          )}
-        </div>
+    <div style={modalOverlay}>
+      <div style={modalContent}>
+        <h2 style={{ textAlign: 'center', color: '#4c1d95', marginBottom: '24px' }}>Đăng Nhập</h2>
+        
+        <button 
+          onClick={handlePiLogin} 
+          disabled={isLoading}
+          style={piButtonStyle}
+        >
+          {isLoading ? 'Đang kết nối...' : '🚀 Đăng nhập bằng Pi Network'}
+        </button>
+
+        <p style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
+          Hoặc đăng ký vai trò sau khi đăng nhập
+        </p>
+
+        <button 
+          onClick={onClose}
+          style={cancelButtonStyle}
+        >
+          Đóng
+        </button>
       </div>
     </div>
   );
 };
 
-const inputStyle: React.CSSProperties = { width: '100%', padding: '14px', marginBottom: '12px', border: '1px solid #c4b5fd', borderRadius: '12px', fontSize: '15px', background: '#f8fafc', boxSizing: 'border-box' };
-const emailButtonStyle: React.CSSProperties = { width: '100%', padding: '14px', background: '#7c3aed', color: 'white', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' };
+const modalOverlay: React.CSSProperties = {
+  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  background: 'rgba(0,0,0,0.6)', display: 'flex',
+  alignItems: 'center', justifyContent: 'center', zIndex: 9999
+};
+
+const modalContent: React.CSSProperties = {
+  background: 'white', padding: '32px 24px', borderRadius: '24px',
+  width: '90%', maxWidth: '420px', textAlign: 'center'
+};
+
+const piButtonStyle: React.CSSProperties = {
+  width: '100%', padding: '18px', background: '#4c1d95', color: 'white',
+  border: 'none', borderRadius: '9999px', fontSize: '17px', fontWeight: '700',
+  marginBottom: '16px', cursor: 'pointer'
+};
+
+const cancelButtonStyle: React.CSSProperties = {
+  width: '100%', padding: '14px', background: '#f3f4f6', color: '#4c1d95',
+  border: 'none', borderRadius: '12px', fontWeight: '600', cursor: 'pointer'
+};
 
 export default DangNhapModal;
