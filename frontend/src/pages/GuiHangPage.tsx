@@ -124,7 +124,7 @@ export default function GuiHangPage({ onNavigate }: any) {
         <div style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <label style={{...labelStyle, marginBottom: 0}}>👤 Thông tin người gửi</label>
-            <button type="button" onClick={handleQuickFillSender} style={banDoButtonStyle}>(Bản đồ)</button>
+            <button type="button" onClick={handleQuickFillSender} style={banDoButtonStyle}> Bản đồ </button>
           </div>
           <input style={inputStyle} placeholder="Họ tên" value={form.nguoiGui} onChange={(e) => setForm({...form, nguoiGui: e.target.value})} />
           <input style={inputStyle} placeholder="Số điện thoại" value={form.sdtGui} onChange={(e) => setForm({...form, sdtGui: e.target.value})} />
@@ -136,8 +136,8 @@ export default function GuiHangPage({ onNavigate }: any) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <label style={{...labelStyle, marginBottom: 0}}>👤 Thông tin người nhận</label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button" onClick={handleQuickFillReceiver} style={danhBaButtonStyle}>(Danh bạ)</button>
-              <button type="button" onClick={handleQuickFillPi} style={piQuickButtonStyle}>(Lấy nhanh)</button>
+              <button type="button" onClick={handleQuickFillReceiver} style={danhBaButtonStyle}> Danh bạ </button>
+              <button type="button" onClick={handleQuickFillPi} style={piQuickButtonStyle}> Lấy nhanh </button>
             </div>
           </div>
           <input style={inputStyle} placeholder="Họ tên" value={form.nguoiNhan} onChange={(e) => setForm({...form, nguoiNhan: e.target.value})} />
@@ -150,7 +150,7 @@ export default function GuiHangPage({ onNavigate }: any) {
           <label style={labelStyle}>📝 Ghi chú cho tài xế</label>
           <textarea 
             style={{...inputStyle, minHeight: '100px', resize: 'vertical'}} 
-            placeholder="Ví dụ: Gọi trước khi giao, để trước cửa,..." 
+            placeholder="Ví dụ: Gọi trước khi giao, hàng dễ vỡ, cần chuyển gấp,..." 
             value={form.ghiChu} 
             onChange={(e) => setForm({...form, ghiChu: e.target.value})}
           />

@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
         
         {/* Thẻ Đóng góp cộng đồng */}
         <div 
-          style={{...cardStyle, borderColor: '#f472b6', borderWidth: '2px'}} 
+          style={{...cardStyle, borderColor: '#f472b6', borderWidth: '1px'}} 
           onClick={() => window.open('LINK_GOOGLE_FORM_CUA_BAN', '_blank')}
         >
           <span style={{fontSize: '35px', marginBottom: '8px', display: 'block'}}>❤️</span>
@@ -72,11 +72,11 @@ const subtitleStyle: React.CSSProperties = { color: '#6b21a8', marginTop: '4px' 
 const piButtonContainer: React.CSSProperties = { whiteSpace: 'nowrap', display: 'flex', justifyContent: 'center', marginBottom: '40px', padding: '0 14px', width: 'auto', margin: '0 auto 40px auto' };
 const piButton: React.CSSProperties = { padding: '18px 40px', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '700', fontSize: '17px', cursor: 'pointer', width: '100%', maxWidth: '340px' };
 const cardsGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' };
-const cardStyle: React.CSSProperties = { background: 'white', padding: '20px 10px', borderRadius: '20px', textAlign: 'center', border: '1px solid #e0d4ff', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', cursor: 'pointer' };
+const cardStyle: React.CSSProperties = { background: 'white', padding: '20px 10px', borderRadius: '20px', textAlign: 'center', border: '1px solid #f472b6', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', cursor: 'pointer' };
 const iconStyle: React.CSSProperties = { fontSize: '32px', marginBottom: '8px' };
 const cardTitle: React.CSSProperties = { fontSize: '14px', fontWeight: '700', color: '#4c1d95', margin: '0 0 4px 0' };
 const cardDesc: React.CSSProperties = { fontSize: '11px', color: '#6b7280', margin: 0 };
-const warningStyle: React.CSSProperties = { marginTop: '25px', padding: '15px', background: '#fef2f2', color: '#991b1b', borderRadius: '16px', fontSize: '12px', textAlign: 'center', border: '1px solid #fecaca' };
+const warningStyle: React.CSSProperties = { marginTop: '25px', padding: '15px', background: '#fef2f2', color: '#991b1b', borderRadius: '16px', fontSize: '12px', textAlign: 'center', border: '1px solid #4c1d95' };
 const headerContainer: React.CSSProperties = { border: '2px solid #4c1d95', borderRadius: '16px', padding: '8px', margin: '8px 0', background: '#fcfcfc', boxShadow: '0 4px 6px rgba(0,0,0,0.9)'};
 
 export default HomePage;
