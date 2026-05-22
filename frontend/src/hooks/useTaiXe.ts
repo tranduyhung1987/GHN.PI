@@ -23,14 +23,14 @@ export const useTaiXe = () => {
       try {
         const parsed = JSON.parse(saved);
         const mapped: Order[] = parsed.map((o: any) => ({
-          maDon: o.maDon || o.id || `DH${Date.now()}`,
+          maDon: o.maDon || `DH${Date.now()}`,
           status: o.status === 'cho-lay-hang' || o.status === 'pending' ? 'pending' :
                   o.status === 'dang-giao' || o.status === 'shipping' ? 'shipping' : 'completed',
           customer: o.nguoiNhan || 'Khách hàng',
           address: o.diaChiNhan || '',
           fee: o.totalAmount ? `${o.totalAmount} Pi` : '0 Pi',
           time: o.createdAt || new Date().toLocaleString('vi-VN'),
-          loai: o.loaiDon || o.loai || 'Thường',
+          loai: o.loaiDon || 'Thường',
           paymentType: o.paymentMethod,
           ghiChu: o.ghiChu,
         }));
@@ -41,7 +41,6 @@ export const useTaiXe = () => {
     }
   };
 
-  // Load dữ liệu khi mount
   useEffect(() => {
     loadOrders();
     const handleStorage = () => loadOrders();
@@ -49,9 +48,7 @@ export const useTaiXe = () => {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const filteredOrders = orders.filter(order => 
-    filter === 'all' || order.status === filter
-  );
+  const filteredOrders = orders.filter(o => filter === 'all' || o.status === filter);
 
   return {
     filter,
