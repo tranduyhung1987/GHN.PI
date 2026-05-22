@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { ROLES } from '../../utils/constants';     // ← Import ROLES để dùng constant
+import { ROLES } from '../../utils/constants';
 
 interface DangNhapModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLogin?: () => Promise<void>;        // ← Giữ lại để tương thích với HomePage
 }
 
-const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose }) => {
+const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose, onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,10 +32,13 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose }) => {
 
       const username = auth.user?.username || "pi_user";
 
-      // SỬ DỤNG CONSTANT ROLES.SENDER thay vì string cứng
       await setAuth(username, ROLES.SENDER);
 
       onClose();
+
+      // Gọi onLogin nếu có (tương thích cũ)
+      if (onLogin) await onLogin();
+
       navigate(fromPage, { replace: true });
       alert(`✅ Đăng nhập thành công!\nUsername: @${username}`);
     } catch (err) {
@@ -62,10 +66,7 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({ isOpen, onClose }) => {
           Hoặc đăng ký vai trò sau khi đăng nhập
         </p>
 
-        <button 
-          onClick={onClose}
-          style={cancelButtonStyle}
-        >
+        <button onClick={onClose} style={cancelButtonStyle}>
           Đóng
         </button>
       </div>
