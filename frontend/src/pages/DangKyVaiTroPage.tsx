@@ -1,8 +1,7 @@
 // src/pages/DangKyVaiTroPage.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; // 1. Hook điều hướng
-import { useAuth } from '../contexts/AuthContext';
-
+import { useAuth } from '../core/auth/AuthContext';
 const DangKyVaiTroPage: React.FC = () => {
   const navigate = useNavigate(); // 2. Khởi tạo hook
   const { setAuth, piUsername: contextPiUsername } = useAuth();

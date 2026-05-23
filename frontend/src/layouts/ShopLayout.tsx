@@ -38,7 +38,8 @@ const ShopLayout: React.FC<ShopLayoutProps> = ({
             {role === 'driver' && '🏍️ Tài Xế'}
             {role === 'warehouse' && '🏬 Kho Hub'}
             {role === 'admin' && '👑 Admin'}
-            {role === 'sender' && '📦 Sender'}
+            {role === 'seller' && '📦 Seller'}
+            {role === 'buyer' && '🚚 Buyer'}          
           </div>
         </div>
       </div>

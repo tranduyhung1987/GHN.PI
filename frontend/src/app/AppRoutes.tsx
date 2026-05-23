@@ -45,13 +45,13 @@ export const AppRoutes = () => {
           } />
 
           <Route path="gui-hang" element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.SENDER]}>
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.SELLER]}>
               <GuiHangPage />
             </ProtectedRoute>
           } />
 
           <Route path="nhan-hang" element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.RECEIVER]}>
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.BUYER]}>
               <NhanHangPage />
             </ProtectedRoute>
           } />

@@ -20,14 +20,14 @@ export const useGuiHang = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [codAmount, setCodAmount] = useState<string>('0');
 
-  const handleQuickFillSender = () => {
+  const handleQuickFillSeller = () => {
     setForm(prev => ({
       ...prev,
       diaChiGui: '123 Đường XYZ, Quận 1, TP.HCM',
     }));
   };
 
-  const handleQuickFillReceiver = () => {
+  const handleQuickFillBuyer = () => {
     setForm(prev => ({
       ...prev,
       nguoiNhan: 'Người nhận mẫu',
@@ -80,8 +80,8 @@ export const useGuiHang = () => {
     shippingFee, 
     isProcessing, 
     totalAmount, 
-    handleQuickFillSender,
-    handleQuickFillReceiver,
+    handleQuickFillSeller,
+    handleQuickFillBuyer,
     handleQuickFillPi   // ← mới thêm
   };
 };

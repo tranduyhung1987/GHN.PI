@@ -13,7 +13,15 @@ export type PageKey =
   | "TRACKING"
   | "WAREHOUSE"
   | "DRIVER"
-  | "PROFILE";
+  | "PROFILE"
+  | "MAP"
+  | "JOURNEY"
+  | "EVENT_REPLAY"
+  | "SNAPSHOT"
+  | "CQRS"
+  | "WORKFLOW"
+  | "DISTRIBUTED"
+  | "SYSTEM";
 
 export interface PageConfig {
   key: PageKey;

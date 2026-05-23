@@ -5,7 +5,7 @@ export default function GuiHangPage({ onNavigate }: any) {
   const { 
     form, setForm, paymentMethod, setPaymentMethod, 
     codAmount, setCodAmount, handleSubmit, isProcessing, 
-    totalAmount, handleQuickFillSender, handleQuickFillReceiver, handleQuickFillPi 
+    totalAmount, handleQuickFillSeller, handleQuickFillBuyer, handleQuickFillPi 
   } = useGuiHang();
 
   // Stepper handler (giữ nguyên)
@@ -124,7 +124,7 @@ export default function GuiHangPage({ onNavigate }: any) {
         <div style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <label style={{...labelStyle, marginBottom: 0}}>👤 Thông tin người gửi</label>
-            <button type="button" onClick={handleQuickFillSender} style={banDoButtonStyle}> Bản đồ </button>
+            <button type="button" onClick={handleQuickFillSeller} style={banDoButtonStyle}> Bản đồ </button>
           </div>
           <input style={inputStyle} placeholder="Họ tên" value={form.nguoiGui} onChange={(e) => setForm({...form, nguoiGui: e.target.value})} />
           <input style={inputStyle} placeholder="Số điện thoại" value={form.sdtGui} onChange={(e) => setForm({...form, sdtGui: e.target.value})} />
@@ -136,7 +136,7 @@ export default function GuiHangPage({ onNavigate }: any) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <label style={{...labelStyle, marginBottom: 0}}>👤 Thông tin người nhận</label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button" onClick={handleQuickFillReceiver} style={danhBaButtonStyle}> Danh bạ </button>
+              <button type="button" onClick={handleQuickFillBuyer} style={danhBaButtonStyle}> Danh bạ </button>
               <button type="button" onClick={handleQuickFillPi} style={piQuickButtonStyle}> Lấy nhanh </button>
             </div>
           </div>

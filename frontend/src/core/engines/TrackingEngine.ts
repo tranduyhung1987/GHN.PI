@@ -1,64 +1,55 @@
-import { eventBus } from "@/core/events/eventBus";
+import { syncEngine } from "@/core/realtime/syncEngine";
 import { EVENTS } from "@/core/events/eventTypes";
+import { eventBus } from "@/core/events/eventBus";
 
-class TrackingEngine {
-  private trackingState = new Map<string, any>();
+class TrackingEngineCore {
+  // ================= CORE LOGIC =================
 
-  init() {
-    eventBus.on(EVENTS.ORDER_CREATED, this.onOrderCreated);
-    eventBus.on(EVENTS.DRIVER_ASSIGNED, this.onDriverAssigned);
-    eventBus.on(EVENTS.PICKED_UP, this.onPickedUp);
-    eventBus.on(EVENTS.IN_TRANSIT, this.onTransit);
-    eventBus.on(EVENTS.DELIVERED, this.onDelivered);
-  }
-
-  onOrderCreated = (data: any) => {
-    this.trackingState.set(data.orderId, data);
-
-    console.log("📦 ORDER_CREATED", data);
-  };
-
-  onDriverAssigned = (data: any) => {
-    this.update(data.orderId, {
-      driverId: data.driverId,
-      status: "driver_assigned",
-    });
-  };
-
-  onPickedUp = (data: any) => {
-    this.update(data.orderId, {
-      status: "picked_up",
-    });
-  };
-
-  onTransit = (data: any) => {
-    this.update(data.orderId, {
-      status: "in_transit",
-    });
-  };
-
-  onDelivered = (data: any) => {
-    this.update(data.orderId, {
-      status: "delivered",
-      deliveredAt: data.deliveredAt,
-    });
-  };
-
-  update(orderId: string, partial: any) {
-    const current = this.trackingState.get(orderId) || {};
-
-    this.trackingState.set(orderId, {
-      ...current,
-      ...partial,
+  updateTracking(data: any) {
+    syncEngine.emit(EVENTS.TRACKING_UPDATED, {
+      ...data,
       updatedAt: Date.now(),
     });
-
-    console.log("🚚 TRACKING UPDATE:", orderId);
   }
 
-  getTracking(orderId: string) {
-    return this.trackingState.get(orderId);
+  updateLocation(orderId: string, location: any) {
+    syncEngine.emit(EVENTS.TRACKING_LOCATION_UPDATED, {
+      orderId,
+      location,
+      timestamp: Date.now(),
+    });
+  }
+
+  // ================= MAP UPDATE FOR DRIVER LOCATION (STEP 13.2) =================
+  updateDriverLocation(payload: any) {
+    eventBus.emit("DRIVER_LOCATION_UPDATED", {
+      driverId: payload.driverId,
+      lat: payload.lat,
+      lng: payload.lng,
+      updatedAt: Date.now(),
+    });
+  }
+
+  // ================= ADAPTER LAYER (FOR APP CONTROLLER) =================
+
+  async update(payload: any) {
+    return this.updateTracking(payload);
+  }
+
+  async sync() {
+    // placeholder cho realtime sync engine
+    return true;
+  }
+
+  async init() {
+    // lifecycle init tracking system
+    return true;
+  }
+
+  // optional future-safe hook
+  async process(payload: any) {
+    return this.updateTracking(payload);
   }
 }
 
-export const trackingEngine = new TrackingEngine();
+export const TrackingEngine = new TrackingEngineCore();

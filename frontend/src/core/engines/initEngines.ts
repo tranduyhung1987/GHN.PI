@@ -1,16 +1,27 @@
-import { trackingEngine } from "./TrackingEngine";
-import { initRealtime } from "@/core/realtime/initRealtime";
+import { TrackingEngine } from './TrackingEngine';
+import { initRealtime } from '@/core/realtime/initRealtime';
 
 let initialized = false;
 
-export function initEngines() {
-  if (initialized) return;
+export const initEngines = () => {
+  if (initialized) {
+    console.log('[Engine] already initialized');
+    return;
+  }
 
   initialized = true;
 
-  trackingEngine.init();
+  console.log('🚀 Initializing GHN.PI engines...');
 
+  /**
+   * Core Engines
+   */
+  TrackingEngine.init();
+
+  /**
+   * Realtime Layer
+   */
   initRealtime();
 
-  console.log("🔥 GHN.PI PRO ENGINES READY");
-}
+  console.log('🔥 GHN.PI PRO ENGINES READY');
+};

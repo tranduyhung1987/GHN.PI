@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../core/auth/AuthContext';
 import { ROLES } from '../utils/constants';
 
 export default function CaNhanPage() {
@@ -13,8 +13,8 @@ export default function CaNhanPage() {
       case ROLES.ADMIN: return 'Quản trị viên (Admin)';
       case ROLES.WAREHOUSE: return 'Quản lý Kho Hub';
       case ROLES.DRIVER: return 'Tài xế giao hàng';
-      case ROLES.SENDER: return 'Người gửi hàng';
-      case ROLES.RECEIVER: return 'Người nhận hàng';
+      case ROLES.BUYER: return 'Người gửi hàng';
+      case ROLES.SELLER: return 'Người nhận hàng';
       default: return role;
     }
   };

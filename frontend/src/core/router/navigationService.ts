@@ -1,32 +1,45 @@
-import { PAGE_REGISTRY } from "./pageRegistry";
+// src/core/router/navigationService.ts
 
-let navigateFn: any = null;
+import { NavigateFunction } from 'react-router-dom';
 
+let navigator: NavigateFunction | null = null;
+
+/**
+ * React Router navigator setter
+ */
+export const setNavigator = (navigateFn: NavigateFunction) => {
+  navigator = navigateFn;
+};
+
+/**
+ * SPA navigation using React Router
+ */
+export const routerNavigate = (path: string) => {
+  if (!navigator) {
+    console.error('Navigator not initialized');
+    return;
+  }
+
+  navigator(path);
+};
+
+/**
+ * Hard navigation (full page reload)
+ * Useful for:
+ * - Pi Browser deep links
+ * - external redirects
+ * - auth reset
+ * - emergency fallback
+ */
+export const navigate = (path: string) => {
+  window.location.href = path;
+};
+
+/**
+ * Main navigation service
+ */
 export const navigationService = {
-  setNavigator(navigate: any) {
-    navigateFn = navigate;
-  },
-
-  go(path: string) {
-    navigateFn?.(path);
-  },
-
-  goLogin() {
-    navigateFn?.(PAGE_REGISTRY.LOGIN.path);
-  },
-
-  goHome() {
-    navigateFn?.(PAGE_REGISTRY.HOME.path);
-  },
-
-  guardGo(pageKey: keyof typeof PAGE_REGISTRY, role: string) {
-    const page = PAGE_REGISTRY[pageKey];
-
-    if (!page.roles.includes(role as any)) {
-      navigateFn?.(PAGE_REGISTRY.HOME.path);
-      return;
-    }
-
-    navigateFn?.(page.path);
-  },
+  setNavigator,
+  navigate: routerNavigate,
+  hardNavigate: navigate,
 };

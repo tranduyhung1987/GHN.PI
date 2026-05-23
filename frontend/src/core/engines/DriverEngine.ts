@@ -1,53 +1,49 @@
 import { syncEngine } from "@/core/realtime/syncEngine";
 import { EVENTS } from "@/core/events/eventTypes";
 
-class DriverEngine {
-  private deliveredOrders = new Set<string>();
+class DriverEngineCore {
+  // ================= CORE LOGIC =================
 
   assignDriver(orderId: string, driverId: string) {
     syncEngine.emit(EVENTS.DRIVER_ASSIGNED, {
       orderId,
       driverId,
-      timestamp: Date.now(),
+      assignedAt: Date.now(),
+      status: "assigned",
     });
   }
 
-  pickup(orderId: string, driverId: string) {
-    syncEngine.emit(EVENTS.PICKED_UP, {
-      orderId,
+  updateDriverStatus(driverId: string, status: string) {
+    syncEngine.emit(EVENTS.DRIVER_STATUS_UPDATED, {
       driverId,
-      status: "picked_up",
-      timestamp: Date.now(),
+      status,
+      updatedAt: Date.now(),
     });
   }
 
-  inTransit(orderId: string, driverId: string) {
-    syncEngine.emit(EVENTS.IN_TRANSIT, {
-      orderId,
-      driverId,
-      status: "in_transit",
-      timestamp: Date.now(),
-    });
+  // ================= ADAPTER LAYER (FOR APP CONTROLLER) =================
+
+  async assign(payload: any) {
+    return this.assignDriver(payload.orderId, payload.driverId);
   }
 
-  deliver(orderId: string, driverId: string) {
-    /**
-     * Anti double delivery
-     */
-    if (this.deliveredOrders.has(orderId)) {
-      console.warn("⚠️ Duplicate delivery blocked:", orderId);
-      return;
-    }
+  async update(payload: any) {
+    return this.updateDriverStatus(payload.driverId, payload.status);
+  }
 
-    this.deliveredOrders.add(orderId);
+  async sync() {
+    // placeholder sync layer (sau này gắn realtime engine)
+    return true;
+  }
 
-    syncEngine.emit(EVENTS.DELIVERED, {
-      orderId,
-      driverId,
-      status: "delivered",
-      deliveredAt: Date.now(),
-    });
+  async init() {
+    // lifecycle init driver system
+    return true;
+  }
+
+  async process(payload: any) {
+    return this.assignDriver(payload.orderId, payload.driverId);
   }
 }
 
-export const driverEngine = new DriverEngine();
+export const DriverEngine = new DriverEngineCore();

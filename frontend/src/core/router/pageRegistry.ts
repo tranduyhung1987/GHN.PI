@@ -59,4 +59,60 @@ export const PAGE_REGISTRY: Record<PageKey, PageConfig> = {
     component: lazy(() => import("@/pages/ProfilePage")),
     roles: ["buyer", "seller", "driver", "admin"],
   },
+
+  MAP: {
+    key: "MAP",
+    path: "/map",
+    component: lazy(() => import("@/core/map/MapPage")),
+    roles: ["admin", "driver", "seller"],
+  },
+
+  JOURNEY: {
+    key: "JOURNEY",
+    path: "/journey",
+    component: lazy(() => import("@/pages/OrderJourneyPage")),
+    roles: ["admin", "seller"],
+  },
+
+  EVENT_REPLAY: {
+    key: "EVENT_REPLAY",
+    path: "/event-replay",
+    component: lazy(() => import("@/pages/EventReplayPage")),
+    roles: ["admin"],
+  },
+
+  SNAPSHOT: {
+    key: "SNAPSHOT",
+    path: "/snapshot",
+    component: lazy(() => import("@/pages/SnapshotPage")),
+    roles: ["admin"],
+  },
+
+  CQRS: {
+    key: "CQRS",
+    path: "/cqrs",
+    component: lazy(() => import("@/pages/CQRSDashboardPage")),
+    roles: ["admin"],
+  },
+
+  WORKFLOW: {
+    key: "WORKFLOW",
+    path: "/workflow",
+    component: lazy(() => import("@/pages/WorkflowDashboardPage")),
+    roles: ["admin"],
+  },
+
+  DISTRIBUTED: {
+    key: "DISTRIBUTED",
+    path: "/distributed",
+    component: lazy(() => import("@/pages/DistributedRuntimePage")),
+    roles: ["admin"],
+  },
+
+  SYSTEM: {
+    key: "SYSTEM",
+    path: "/system",
+    component: lazy(() => import("@/pages/SystemDashboardPage")),
+    roles: ["admin"],
+  },
 };
