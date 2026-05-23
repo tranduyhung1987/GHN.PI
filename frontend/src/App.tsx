@@ -1,17 +1,26 @@
-// src/App.tsx
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AppRoutes } from './app/AppRoutes';
+import { BrowserRouter, Routes, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
+import { generateRoutes } from "@/core/router/routes";
+import { navigationService } from "@/core/router/navigationService";
+import { initEngines } from "@/core/engines/initEngines";
+
+function AppContent() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigationService.setNavigator(navigate);
+
+    initEngines();
+  }, []);
+
+  return <Routes>{generateRoutes()}</Routes>;
+}
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </ThemeProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }

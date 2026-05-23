@@ -1,88 +1,32 @@
-export type AppPage =
-  | 'home'
-  | 'tai-xe'
-  | 'gui-hang'
-  | 'nhan-hang'
-  | 'kho-hub'
-  | 'admin'
-  | 'ca-nhan'
-  | 'tracking'
-  | 'chat'
-  | 'dang-ky';
+import { PAGE_REGISTRY } from "./pageRegistry";
 
-class NavigationService {
-  private navigateHandler:
-    | ((page: AppPage) => void)
-    | null = null;
+let navigateFn: any = null;
 
-  /**
-   * Đăng ký navigate function từ React
-   */
-  registerNavigate(
-    handler: (page: AppPage) => void
-  ) {
-    this.navigateHandler = handler;
-  }
+export const navigationService = {
+  setNavigator(navigate: any) {
+    navigateFn = navigate;
+  },
 
-  /**
-   * Navigate tổng quát
-   */
-  navigate(page: AppPage) {
-    if (!this.navigateHandler) {
-      console.warn(
-        '[NavigationService] navigateHandler chưa được đăng ký'
-      );
+  go(path: string) {
+    navigateFn?.(path);
+  },
 
+  goLogin() {
+    navigateFn?.(PAGE_REGISTRY.LOGIN.path);
+  },
+
+  goHome() {
+    navigateFn?.(PAGE_REGISTRY.HOME.path);
+  },
+
+  guardGo(pageKey: keyof typeof PAGE_REGISTRY, role: string) {
+    const page = PAGE_REGISTRY[pageKey];
+
+    if (!page.roles.includes(role as any)) {
+      navigateFn?.(PAGE_REGISTRY.HOME.path);
       return;
     }
 
-    this.navigateHandler(page);
-  }
-
-  /* =========================
-     SHORTCUT METHODS
-  ========================= */
-
-  goHome() {
-    this.navigate('home');
-  }
-
-  goDriver() {
-    this.navigate('tai-xe');
-  }
-
-  goSender() {
-    this.navigate('gui-hang');
-  }
-
-  goReceiver() {
-    this.navigate('nhan-hang');
-  }
-
-  goWarehouse() {
-    this.navigate('kho-hub');
-  }
-
-  goAdmin() {
-    this.navigate('admin');
-  }
-
-  goProfile() {
-    this.navigate('ca-nhan');
-  }
-
-  goTracking() {
-    this.navigate('tracking');
-  }
-
-  goChat() {
-    this.navigate('chat');
-  }
-
-  goRegister() {
-    this.navigate('dang-ky');
-  }
-}
-
-export const navigationService =
-  new NavigationService();
+    navigateFn?.(page.path);
+  },
+};

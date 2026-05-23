@@ -22,8 +22,8 @@ export default function KhoHubPage() {
         false
       );
       scannerRef.current.render(
-        (decodedText) => handleScan(decodedText),
-        (error) => console.warn(error)
+        (decodedText: string) => handleScan(decodedText),
+        (error: any) => console.warn(error)
       );
     }
 
