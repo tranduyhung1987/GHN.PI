@@ -1,5 +1,6 @@
 import { lazy } from "react";
-import { AppRole, PageKey, PageConfig } from "./types";
+import type { AppRole } from "@/utils/constants";
+import type { PageKey, PageConfig } from "./types";
 
 export type { AppRole };
 
@@ -60,18 +61,19 @@ export const PAGE_REGISTRY: Record<PageKey, PageConfig> = {
     roles: ["buyer", "seller", "driver", "admin"],
   },
 
+  // ==================== ADVANCED ROUTES (ĐÃ CÓ CODE THẬT) ====================
   MAP: {
     key: "MAP",
     path: "/map",
     component: lazy(() => import("@/core/map/MapPage")),
-    roles: ["admin", "driver", "seller"],
+    roles: ["admin", "driver", "seller", "guest"],
   },
 
   JOURNEY: {
     key: "JOURNEY",
     path: "/journey",
     component: lazy(() => import("@/pages/OrderJourneyPage")),
-    roles: ["admin", "seller"],
+    roles: ["admin", "seller", "guest"],
   },
 
   EVENT_REPLAY: {
@@ -92,7 +94,7 @@ export const PAGE_REGISTRY: Record<PageKey, PageConfig> = {
     key: "CQRS",
     path: "/cqrs",
     component: lazy(() => import("@/pages/CQRSDashboardPage")),
-    roles: ["admin"],
+    roles: ["admin", "guest"],
   },
 
   WORKFLOW: {

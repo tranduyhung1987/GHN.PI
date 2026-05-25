@@ -1,99 +1,56 @@
+// src/core/router/index.tsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import ProtectedRoute from './ProtectedRoute';
+import HomePage from "@/pages/HomePage";
+import LoginPage from "@/pages/LoginPage";
+import MapPage from "@/core/map/MapPage";
+import OrderJourneyPage from "@/pages/OrderJourneyPage";
+import EventReplayPage from "@/pages/EventReplayPage";
+import CQRSDashboardPage from "@/pages/CQRSDashboardPage";
+import WorkflowDashboardPage from "@/pages/WorkflowDashboardPage";
+import DistributedRuntimePage from "@/pages/DistributedRuntimePage";
+import SystemDashboardPage from "@/pages/SystemDashboardPage";
+import WarehousePage from "@/pages/WarehousePage";
+import TaiXePage from "@/pages/TaiXePage";
+import TrackingPage from "@/pages/TrackingPage";
 
-// Pages
-import HomePage from "../../pages/HomePage";
-import LoginPage from "../../pages/LoginPage";
-import DashboardPage from "../../pages/DashboardPage";
-import DriverPage from "../../pages/DriverPage";
-import TaiXePage from "../../pages/TaiXePage";
-import AdminPage from "../../pages/AdminPage";
-import OrderPage from "../../pages/OrderPage";
-import TrackingPage from "../../pages/TrackingPage";
+// 3 TRANG MỚI
+import GuiHangPage from "@/pages/GuiHangPage";
+import TraCuuCuocPage from "@/pages/TraCuuCuocPage";
+import NhanHangPage from "@/pages/NhanHangPage";
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <Routes>
-
-        {/* ================= PUBLIC ================= */}
-
         <Route path="/" element={<HomePage />} />
-
         <Route path="/login" element={<LoginPage />} />
 
-        {/* ================= DASHBOARD ================= */}
+        {/* CÁC TRANG ĐÃ CÓ */}
+        <Route path="/map" element={<MapPage />} />
+        <Route path="/journey" element={<OrderJourneyPage />} />
+        <Route path="/event-replay" element={<EventReplayPage />} />
+        <Route path="/cqrs" element={<CQRSDashboardPage />} />
+        <Route path="/workflow" element={<WorkflowDashboardPage />} />
+        <Route path="/distributed" element={<DistributedRuntimePage />} />
+        <Route path="/system" element={<SystemDashboardPage />} />
+        <Route path="/warehouse" element={<WarehousePage />} />
+        
+        <Route path="/tracking" element={<TrackingPage />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ================= DRIVER ================= */}
-
-        <Route
-          path="/driver"
-          element={
-            <ProtectedRoute allowedRoles={['driver', 'admin']}>
-              <DriverPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ================= TAIXE ================= */}
-
-        <Route
-          path="/taixe"
-          element={
-            <ProtectedRoute allowedRoles={['driver', 'admin']}>
-              <TaiXePage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ================= ADMIN ================= */}
-
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <AdminPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ================= ORDER ================= */}
-
-        <Route
-          path="/orders"
-          element={
-            <ProtectedRoute>
-              <OrderPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ================= TRACKING ================= */}
-
-        <Route
-          path="/tracking"
-          element={
-            <ProtectedRoute>
-              <TrackingPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ================= FALLBACK ================= */}
+        {/* 3 TRANG MỚI (ĐÃ CÓ UI) */}
+        <Route path="/gui-hang" element={<GuiHangPage />} />
+        <Route path="/tra-cuu-cuoc" element={<TraCuuCuocPage />} />
+        <Route path="/nhan-hang" element={<NhanHangPage />} />
+        <Route path="/driver" element={<TaiXePage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-
       </Routes>
     </BrowserRouter>
   );

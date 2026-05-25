@@ -13,9 +13,9 @@ const HomePage: React.FC = () => {
       {/* Header */}
       <div style={logoContainer}>
         <div style={headerContainer}>
-        <div style={logoStyle}>🚚 GHN.PI</div>
-        <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
-      </div>
+          <div style={logoStyle}>🚚 GHN.PI</div>
+          <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
+        </div>
       </div>      
 
       {/* Button Đăng nhập */}
@@ -25,16 +25,17 @@ const HomePage: React.FC = () => {
         </button>
       </div>
 
-      {/* Grid Menu: Tổng cộng 7 thẻ */}
+      {/* Grid Menu - ĐÃ SỬA ĐƯỜNG DẪN */}
       <div style={cardsGrid}>
         <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn hàng" onClick={() => navigate('/gui-hang')} />
         <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-        <Card title="KHO HUB" icon="🏬" desc="Trung chuyển" onClick={() => navigate('/kho-hub')} />
-        <Card title="TÀI XẾ" icon="🏍️" desc="Đơn tài xế" onClick={() => navigate('/tai-xe')} />
+        
+        {/* ĐÃ SỬA */}
+        <Card title="KHO HUB" icon="🏬" desc="Trung chuyển" onClick={() => navigate('/warehouse')} />
+        <Card title="TÀI XẾ" icon="🏍️" desc="Đơn tài xế" onClick={() => navigate('/driver')} />
         <Card title="TRACKING" icon="🔍" desc="Tra cứu đơn" onClick={() => navigate('/tracking')} />
         <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
         
-        {/* Thẻ Đóng góp cộng đồng */}
         <div 
           style={{...cardStyle, borderColor: '#f472b6', borderWidth: '1px'}} 
           onClick={() => window.open('LINK_GOOGLE_FORM_CUA_BAN', '_blank')}
@@ -45,7 +46,6 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Cảnh báo bảo mật */}
       <div style={warningStyle}>
         ⚠️ <b>CẢNH BÁO:</b> Admin GHN.PI <b>KHÔNG BAO GIỜ</b> yêu cầu Passphrase/Mật khẩu ví Pi. Hãy cảnh giác!
       </div>
@@ -55,7 +55,6 @@ const HomePage: React.FC = () => {
   );
 };
 
-// Component Card dùng chung
 const Card = ({ title, icon, desc, onClick }: any) => (
   <div style={cardStyle} onClick={onClick}>
     <div style={iconStyle}>{icon}</div>
@@ -64,7 +63,7 @@ const Card = ({ title, icon, desc, onClick }: any) => (
   </div>
 );
 
-// --- STYLES CỐ ĐỊNH ---
+// STYLES (giữ nguyên)
 const pageContainer: React.CSSProperties = { padding: '20px', minHeight: '100vh', background: '#fcfcfc' };
 const logoContainer: React.CSSProperties = { textAlign: 'center', marginBottom: '30px' };
 const logoStyle: React.CSSProperties = { fontSize: '32px', fontWeight: '700', color: '#4c1d95' };

@@ -1,57 +1,35 @@
-// src/pages/NhanHangPage.tsx
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. Hook điều hướng
-
-interface Order {
-  maDon: string;
-  nguoiGui: string;
-  nguoiNhan: string;
-  diaChiNhan: string;
-  trangThai: string;
-  paymentMethod?: 'prepaid' | 'cod';
-  totalAmount?: number;
-  loaiDon?: string;
-  createdAt?: string;
-}
+import React from 'react';
 
 export default function NhanHangPage() {
-  const navigate = useNavigate(); // 2. Khởi tạo hook
-  const [activeTab, setActiveTab] = useState<'danhSach' | 'lichSu' | 'doiTra'>('danhSach');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  
-  // Các state khác giữ nguyên
-  const [orders, setOrders] = useState<Order[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const orders = [
+    { id: 'GHN784521', from: 'Hà Nội', status: 'Đang giao', time: '14:30' },
+    { id: 'GHN965874', from: 'TP.HCM', status: 'Chờ nhận', time: '09:15' },
+    { id: 'GHN312456', from: 'Đà Nẵng', status: 'Đang giao', time: '16:45' },
+    { id: 'GHN147852', from: 'Cần Thơ', status: 'Chờ nhận', time: '11:20' },
+  ];
 
   return (
-    <div style={container}>
-      {/* UI GIAO DIỆN GIỮ NGUYÊN */}
-      <div style={headerStyle}>
-        <h2 style={{ color: 'white' }}>Người nhận hàng</h2>
+    <div style={{ padding: 40 }}>
+      <div style={{ textAlign: 'center', marginBottom: 30 }}>
+        <div style={{ fontSize: 48, marginBottom: 10 }}>📥</div>
+        <h1 style={{ color: '#4c1d95', fontSize: 30, margin: 0 }}>ĐƠN CHỜ NHẬN</h1>
+        <p style={{ color: '#6b7280', marginTop: 6 }}>Danh sách đơn hàng đang chờ bạn nhận</p>
       </div>
 
-      <div style={tabContainer}>
-        <button style={activeTab === 'danhSach' ? selectedBtn : unselectedBtn} onClick={() => setActiveTab('danhSach')}>Danh sách</button>
-        <button style={activeTab === 'lichSu' ? selectedBtn : unselectedBtn} onClick={() => setActiveTab('lichSu')}>Lịch sử</button>
-        <button style={activeTab === 'doiTra' ? selectedBtn : unselectedBtn} onClick={() => setActiveTab('doiTra')}>Đổi trả</button>
+      <div style={{ maxWidth: 700, margin: '0 auto', display: 'grid', gap: 14 }}>
+        {orders.map((order, i) => (
+          <div key={i} style={{ background: 'white', padding: '20px 24px', borderRadius: 16, boxShadow: '0 4px 15px rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 18, color: '#1f2937' }}>{order.id}</div>
+              <div style={{ color: '#6b7280', fontSize: 14 }}>Từ: {order.from}</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ color: '#22c55e', fontWeight: 600, fontSize: 15 }}>{order.status}</div>
+              <div style={{ fontSize: 12, color: '#9ca3af' }}>{order.time}</div>
+            </div>
+          </div>
+        ))}
       </div>
-
-      {/* Nội dung danh sách đơn hàng... */}
-      
-      {/* Ví dụ nút điều hướng quay về trang chủ */}
-      <button style={purpleButton} onClick={() => navigate('/')}>
-        Về trang chủ
-      </button>
-
-      {/* ĐÃ XÓA BOTTOMNAV Ở ĐÂY - Layout đã tự xử lý */}
     </div>
   );
 }
-
-/* STYLES GIỮ NGUYÊN UI CỦA BẠN */
-const container: React.CSSProperties = { minHeight: '100vh', background: '#f8fafc', paddingBottom: '90px' };
-const headerStyle: React.CSSProperties = { padding: '20px', background: '#4c1d95' };
-const tabContainer: React.CSSProperties = { display: 'flex', gap: '10px', padding: '16px' };
-const purpleButton: React.CSSProperties = { width: '100%', padding: '16px', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer' };
-const selectedBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#7c3aed', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: '600' };
-const unselectedBtn: React.CSSProperties = { flex: 1, padding: '12px', background: '#f3e8ff', color: '#4c1d95', border: '1px solid #e9d5ff', borderRadius: '9999px', fontWeight: '600' };

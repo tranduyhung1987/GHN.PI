@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
-import { RoleType, ROLES } from '../utils/constants';
+import { RoleType, ROLES } from '@/utils/constants';
 
 interface AuthContextType {
   userRole: RoleType | null;

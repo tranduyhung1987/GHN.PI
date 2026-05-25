@@ -1,38 +1,24 @@
 // src/main.tsx
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // Import React Query
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { AuthProvider } from "@/core/auth/AuthContext";
 import { ThemeProvider } from './contexts/ThemeContext';
 import './index.css';
 
-// 1. Khởi tạo Query Client
+// Query Client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, // Tắt tự động tải lại khi quay lại tab
-      retry: 1, // Thử lại 1 lần nếu lỗi
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
 
-// Load Pi SDK
-const loadPiSDK = () => {
-  if (!document.getElementById('pi-sdk')) {
-    const script = document.createElement('script');
-    script.id = 'pi-sdk';
-    script.src = 'https://sdk.minepi.com/pi-sdk.js';
-    script.async = true;
-    document.head.appendChild(script);
-  }
-};
-
-loadPiSDK();
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* 2. Bao bọc Provider */}
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeProvider>

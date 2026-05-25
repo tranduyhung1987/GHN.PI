@@ -1,12 +1,26 @@
 // src/utils/constants.ts
 
-export const ROLES = {
-  ADMIN: 'admin',
-  WAREHOUSE: 'warehouse',
-  DRIVER: 'driver',
-  BUYER: 'buyer',
-  SELLER: 'seller',
-  GUEST: 'guest'
-} as const; // 'as const' giúp TypeScript hiểu đây là các giá trị cố định không đổi
+// ==================== ROLES ====================
+export type AppRole = 
+  | "guest"
+  | "buyer" 
+  | "seller"
+  | "driver"
+  | "admin"
+  | "warehouse";
 
-export type RoleType = typeof ROLES[keyof typeof ROLES];
+export type RoleType = AppRole;
+
+export const ROLES = {
+  GUEST: "guest" as const,
+  BUYER: "buyer" as const,
+  SELLER: "seller" as const,
+  DRIVER: "driver" as const,
+  ADMIN: "admin" as const,
+  WAREHOUSE: "warehouse" as const,
+} as const;
+
+// ==================== EXPORT DEFAULT (nếu cần) ====================
+export default {
+  ROLES,
+};

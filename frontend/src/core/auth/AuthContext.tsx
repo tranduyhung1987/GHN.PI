@@ -1,178 +1,91 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { piService, type PiUser } from '../pi/piService';
+import type { AppRole } from '@/utils/constants';
 
-type UserRole =
-  | "admin"
-  | "driver"
-  | "buyer"
-  | "seller"
-  | "warehouse"
-  | "guest"
-  | null;
-
-export interface AuthContextType {
+interface AuthContextType {
+  user: PiUser | null;
   isAuthenticated: boolean;
-  piUsername: string | null;
-  userRole: UserRole;
-  loading: boolean;
-
-  user: any;
-
-  setAuth: (data: {
-    piUsername: string;
-    userRole: UserRole;
-    user?: any;
-  }) => void;
-
-  clearAuth: () => void;
-
-  login: (userData: any, userRole: UserRole) => void;
-
+  isLoading: boolean;           // ← Giữ isLoading để rõ nghĩa
+  role: AppRole | null;
+  login: () => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
-const AuthContext =
-  createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [user, setUser] = useState<any>(null);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
-  const [piUsername, setPiUsername] =
-    useState<string | null>(null);
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  const [userRole, setUserRole] =
-    useState<UserRole>(null);
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<PiUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [role, setRole] = useState<AppRole | null>(null);
 
-  const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user;
 
-  useEffect(() => {
-    const savedAuth =
-      localStorage.getItem("ghnpi_auth");
-
-    if (savedAuth) {
-      try {
-        const parsed = JSON.parse(savedAuth);
-
-        setUser(parsed.user || null);
-
-        setPiUsername(
-          parsed.piUsername ||
-            parsed.user?.username ||
-            null
-        );
-
-        setUserRole(parsed.userRole || null);
-      } catch (error) {
-        console.error(
-          "Failed to restore auth session",
-          error
-        );
-
-        localStorage.removeItem("ghnpi_auth");
+  const loadUser = async () => {
+    try {
+      setIsLoading(true);
+      const currentUser = await piService.getUser();
+      setUser(currentUser);
+      if (currentUser?.role) {
+        setRole(currentUser.role as AppRole);
       }
+    } catch (error) {
+      console.error("Failed to load user:", error);
+      setUser(null);
+      setRole(null);
+    } finally {
+      setIsLoading(false);
     }
-
-    setLoading(false);
-  }, []);
-
-  const setAuth = ({
-    piUsername,
-    userRole,
-    user,
-  }: {
-    piUsername: string;
-    userRole: UserRole;
-    user?: any;
-  }) => {
-    const authData = {
-      piUsername,
-      userRole,
-      user: user || null,
-    };
-
-    setPiUsername(piUsername);
-
-    setUserRole(userRole);
-
-    setUser(user || null);
-
-    localStorage.setItem(
-      "ghnpi_auth",
-      JSON.stringify(authData)
-    );
   };
 
-  const clearAuth = () => {
-    setUser(null);
-
-    setPiUsername(null);
-
-    setUserRole(null);
-
-    localStorage.removeItem("ghnpi_auth");
-  };
-
-  const login = (
-    userData: any,
-    role: UserRole
-  ) => {
-    setAuth({
-      piUsername:
-        userData?.username ||
-        userData?.piUsername ||
-        "guest",
-      userRole: role,
-      user: userData,
-    });
+  const login = async () => {
+    try {
+      setIsLoading(true);
+      const loggedInUser = await piService.authenticate();
+      setUser(loggedInUser);
+      setRole((loggedInUser.role as AppRole) || null);
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
-    clearAuth();
+    piService.logout();
+    setUser(null);
+    setRole(null);
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated: !!userRole,
+  const refreshUser = async () => {
+    await loadUser();
+  };
 
-        piUsername,
+  useEffect(() => {
+    loadUser();
+  }, []);
 
-        userRole,
+  const value: AuthContextType = {
+    user,
+    isAuthenticated,
+    isLoading,
+    role,
+    login,
+    logout,
+    refreshUser,
+  };
 
-        loading,
-
-        user,
-
-        setAuth,
-
-        clearAuth,
-
-        login,
-
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error(
-      "useAuth must be used inside AuthProvider"
-    );
-  }
-
-  return context;
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

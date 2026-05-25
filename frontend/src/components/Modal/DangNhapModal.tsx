@@ -1,9 +1,8 @@
 // src/components/Modal/DangNhapModal.tsx
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from "@/core/auth/AuthContext";
-import { ROLES } from '../../utils/constants';
+import { usePiAuth } from '@/hooks/usePiAuth';
+import { ROLES } from '@/utils/constants';
 
 interface DangNhapModalProps {
   isOpen: boolean;
@@ -14,69 +13,44 @@ interface DangNhapModalProps {
 const DangNhapModal: React.FC<DangNhapModalProps> = ({
   isOpen,
   onClose,
-  onLogin
+  onLogin,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { setAuth } = useAuth();
+  const { loginWithPi, loading: authLoading, piUsername } = usePiAuth();
 
-  const fromPage =
-    (location.state as any)?.from?.pathname || '/home';
+  const fromPage = (location.state as any)?.from?.pathname || '/';
 
   if (!isOpen) return null;
 
+  const isLoading = localLoading || authLoading;
+
   /**
-   * PI LOGIN HANDLER
+   * PI LOGIN HANDLER - SỬ DỤNG ADAPTER
    */
   const handlePiLogin = async () => {
-    if (!window.Pi) {
-      alert("Vui lòng mở trong Pi Browser để đăng nhập!");
-      return;
-    }
-
-    setIsLoading(true);
+    setLocalLoading(true);
 
     try {
-      const scopes = ['username', 'payments'];
-
-      const auth = await window.Pi.authenticate(
-        scopes,
-        () => Promise.resolve()
-      );
-
-      const username =
-        auth?.user?.username || "pi_user";
-
-      /**
-       * ✅ FIX AUTH CONTEXT SHAPE (STEP UPDATE)
-       */
-      await setAuth({
-        piUsername: username,
-        userRole: ROLES.SELLER,
-      });
+      await loginWithPi();        // ← Đi qua PiAdapter (Real hoặc Mock)
 
       onClose();
 
-      /**
-       * backward compatible hook
-       */
       if (onLogin) {
         await onLogin();
       }
 
       navigate(fromPage, { replace: true });
 
-      alert(
-        `✅ Đăng nhập thành công!\nUsername: @${username}`
-      );
+      alert(`✅ Đăng nhập thành công!\nUsername: @${piUsername || 'pi_user'}`);
     } catch (err) {
       console.error("[Pi Login Error]", err);
       alert("Đăng nhập Pi thất bại! Vui lòng thử lại.");
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -90,19 +64,14 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({
           disabled={isLoading}
           style={piButtonStyle}
         >
-          {isLoading
-            ? 'Đang kết nối...'
-            : '🚀 Đăng nhập bằng Pi Network'}
+          {isLoading ? 'Đang kết nối...' : '🚀 Đăng nhập bằng Pi Network'}
         </button>
 
         <p style={hintStyle}>
           Hoặc đăng ký vai trò sau khi đăng nhập
         </p>
 
-        <button
-          onClick={onClose}
-          style={cancelButtonStyle}
-        >
+        <button onClick={onClose} style={cancelButtonStyle}>
           Đóng
         </button>
       </div>
@@ -110,10 +79,7 @@ const DangNhapModal: React.FC<DangNhapModalProps> = ({
   );
 };
 
-/**
- * STYLES
- */
-
+/* ==================== STYLES ==================== */
 const modalOverlay: React.CSSProperties = {
   position: 'fixed',
   top: 0,
@@ -124,7 +90,7 @@ const modalOverlay: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 9999
+  zIndex: 9999,
 };
 
 const modalContent: React.CSSProperties = {
@@ -133,13 +99,15 @@ const modalContent: React.CSSProperties = {
   borderRadius: '24px',
   width: '90%',
   maxWidth: '420px',
-  textAlign: 'center'
+  textAlign: 'center',
 };
 
 const titleStyle: React.CSSProperties = {
   textAlign: 'center',
   color: '#4c1d95',
-  marginBottom: '24px'
+  marginBottom: '24px',
+  fontSize: '24px',
+  fontWeight: 700,
 };
 
 const piButtonStyle: React.CSSProperties = {
@@ -152,7 +120,7 @@ const piButtonStyle: React.CSSProperties = {
   fontSize: '17px',
   fontWeight: '700',
   marginBottom: '16px',
-  cursor: 'pointer'
+  cursor: 'pointer',
 };
 
 const cancelButtonStyle: React.CSSProperties = {
@@ -163,14 +131,14 @@ const cancelButtonStyle: React.CSSProperties = {
   border: 'none',
   borderRadius: '12px',
   fontWeight: '600',
-  cursor: 'pointer'
+  cursor: 'pointer',
 };
 
 const hintStyle: React.CSSProperties = {
   textAlign: 'center',
   marginTop: '20px',
   color: '#666',
-  fontSize: '14px'
+  fontSize: '14px',
 };
 
 export default DangNhapModal;
