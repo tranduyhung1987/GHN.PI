@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function TraCuuCuocPage() {
+export default function ShippingFeePage() {
   const [result, setResult] = useState<any>(null);
 
   const calculateFee = () => {

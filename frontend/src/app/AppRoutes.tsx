@@ -1,21 +1,21 @@
 // src/app/AppRoutes.tsx
 import { ROLES } from '../utils/constants'; // Import hằng số
-import ProtectedRoute from '../components/ProtectedRoute';
+import ProtectedRoute from '../core/router/ProtectedRoute';
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 
 // Import các trang bằng lazy để tối ưu hiệu năng
 const HomePage = lazy(() => import('../pages/HomePage'));
-const KhoHubPage = lazy(() => import('../pages/KhoHubPage'));
-const GuiHangPage = lazy(() => import('../pages/GuiHangPage'));
+const WarehousePage = lazy(() => import('../pages/WarehousePage'));
+const CreateShipmentPage = lazy(() => import('../pages/CreateShipmentPage.tsx'));
 const TrackingPage = lazy(() => import('../pages/TrackingPage'));
-const NhanHangPage = lazy(() => import('../pages/NhanHangPage'));
-const TraCuuCuocPage = lazy(() => import('../pages/TraCuuCuocPage'));
-const TaiXePage = lazy(() => import('../pages/DriverPage'));
-const CaNhanPage = lazy(() => import('../pages/CaNhanPage'));
+const ReceivePackagePage = lazy(() => import('../pages/ReceivePackagePage.tsx'));
+const ShippingFeePage = lazy(() => import('../pages/ShippingFeePage.tsx'));
+const DriverPage = lazy(() => import('../pages/DriverPage'));
+const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
-const DangKyVaiTroPage = lazy(() => import('../pages/DangKyVaiTroPage'));
+const RegisterRolePage = lazy(() => import('../pages/RegisterRolePage.tsx'));
 const ChatPage = lazy(() => import('../pages/ChatPage'));
 
 export const AppRoutes = () => {
@@ -34,33 +34,33 @@ export const AppRoutes = () => {
 
           <Route path="kho-hub" element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.WAREHOUSE]}>
-              <KhoHubPage />
+              <WarehousePage />
             </ProtectedRoute>
           } />
 
           <Route path="tai-xe" element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.DRIVER]}>
-              <TaiXePage />
+              <DriverPage />
             </ProtectedRoute>
           } />
 
           <Route path="gui-hang" element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.SELLER]}>
-              <GuiHangPage />
+              <CreateShipmentPage />
             </ProtectedRoute>
           } />
 
           <Route path="nhan-hang" element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.BUYER]}>
-              <NhanHangPage />
+              <ReceivePackagePage />
             </ProtectedRoute>
           } />
 
           {/* Các route công cộng */}
           <Route path="tracking" element={<TrackingPage />} />
-          <Route path="tra-cuu-cuoc" element={<TraCuuCuocPage />} />
-          <Route path="ca-nhan" element={<CaNhanPage />} />
-          <Route path="dang-ky" element={<DangKyVaiTroPage />} />
+          <Route path="tra-cuu-cuoc" element={<ShippingFeePage />} />
+          <Route path="ca-nhan" element={<ProfilePage />} />
+          <Route path="dang-ky" element={<RegisterRolePage />} />
           <Route path="chat" element={<ChatPage />} />
           
           {/* Redirect mặc định */}

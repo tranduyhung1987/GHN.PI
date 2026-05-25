@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const KhieuNaiPage: React.FC = () => {
+const DisputePage: React.FC = () => {
   const navigate = useNavigate();
   const [moTa, setMoTa] = useState('');
 
@@ -34,4 +34,4 @@ const formGroup = { display: 'flex', flexDirection: 'column' as const, gap: '8px
 const textarea = { padding: '14px', border: '1px solid #c4b5fd', borderRadius: '12px', minHeight: '100px' };
 const submitButton = { width: '100%', padding: '16px', background: '#4c1d95', color: 'white', border: 'none', borderRadius: '99px' };
 
-export default KhieuNaiPage;
+export default DisputePage;

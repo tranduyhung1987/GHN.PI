@@ -11,14 +11,14 @@ import CQRSDashboardPage from "@/pages/CQRSDashboardPage";
 import WorkflowDashboardPage from "@/pages/WorkflowDashboardPage";
 import DistributedRuntimePage from "@/pages/DistributedRuntimePage";
 import SystemDashboardPage from "@/pages/SystemDashboardPage";
+
+// TRANG MỚI
 import WarehousePage from "@/pages/WarehousePage";
 import DriverPage from "@/pages/DriverPage";
 import TrackingPage from "@/pages/TrackingPage";
-
-// 3 TRANG MỚI
-import GuiHangPage from "@/pages/GuiHangPage";
-import TraCuuCuocPage from "@/pages/TraCuuCuocPage";
-import NhanHangPage from "@/pages/NhanHangPage";
+import CreateShipmentPage from "@/pages/CreateShipmentPage.tsx";
+import ShippingFeePage from "@/pages/ShippingFeePage";
+import ReceivePackagePage from "@/pages/ReceivePackagePage";
 
 export default function AppRouter() {
   return (
@@ -42,9 +42,9 @@ export default function AppRouter() {
         <Route path="/system" element={<SystemDashboardPage />} />        
         
         {/* TRANG MỚI (ĐÃ CÓ UI) */}
-        <Route path="/gui-hang" element={<GuiHangPage />} />
-        <Route path="/tra-cuu-cuoc" element={<TraCuuCuocPage />} />
-        <Route path="/nhan-hang" element={<NhanHangPage />} />
+        <Route path="/gui-hang" element={<CreateShipmentPage />} />
+        <Route path="/tra-cuu-cuoc" element={<ShippingFeePage />} />
+        <Route path="/nhan-hang" element={<ReceivePackagePage />} />
         <Route path="/driver" element={<DriverPage />} />
         <Route path="/tracking" element={<TrackingPage />} />
         <Route path="/tracking" element={<TrackingPage />} />

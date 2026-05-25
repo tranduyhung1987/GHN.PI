@@ -16,7 +16,7 @@ interface DonHangForm {
   ghiChu: string;
 }
 
-export default function GuiHangPage() {
+export default function CreateShipmentPage() {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);

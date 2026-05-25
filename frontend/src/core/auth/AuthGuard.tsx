@@ -25,10 +25,7 @@ export default function AuthGuard({ children, allowedRoles }: Props) {
   /**
    * ❌ ROLE CHECK
    */
-  if (
-    allowedRoles &&
-    !allowedRoles.includes(user.role)
-  ) {
+  if (allowedRoles && !allowedRoles.includes(user?.role ?? '')) {
     return (
       <div style={blockStyle}>
         ⛔ Không có quyền truy cập

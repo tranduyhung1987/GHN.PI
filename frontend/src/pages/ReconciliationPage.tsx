@@ -1,8 +1,8 @@
-// src/pages/DoiSoatPage.tsx
+// src/pages/ReconciliationPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // 1. Hook điều hướng mới
 
-// Đã xóa DoiSoatPageProps vì không còn cần truyền props từ App.tsx
+// Đã xóa ReconciliationPageProps vì không còn cần truyền props từ App.tsx
 
 interface Order {
   maDon: string;
@@ -16,7 +16,7 @@ interface Order {
   createdAt?: string;
 }
 
-const DoiSoatPage: React.FC = () => {
+const ReconciliationPage: React.FC = () => {
   const navigate = useNavigate(); // 2. Khởi tạo hook
   const [maDonHang, setMaDonHang] = useState('');
   const [ketQua, setKetQua] = useState<Order | null>(null);
@@ -100,4 +100,4 @@ const label: React.CSSProperties = { fontSize: '15px', color: '#4c1d95', marginB
 const input: React.CSSProperties = { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #ddd', marginBottom: '16px', boxSizing: 'border-box' };
 const actionButton: React.CSSProperties = { width: '100%', padding: '12px', background: '#4c1d95', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' };
 
-export default DoiSoatPage;
+export default ReconciliationPage;

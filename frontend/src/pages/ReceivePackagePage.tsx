@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function NhanHangPage() {
+export default function ReceivePackagePage() {
   const orders = [
     { id: 'GHN784521', from: 'Hà Nội', status: 'Đang giao', time: '14:30' },
     { id: 'GHN965874', from: 'TP.HCM', status: 'Chờ nhận', time: '09:15' },

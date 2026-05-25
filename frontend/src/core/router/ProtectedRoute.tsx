@@ -9,20 +9,20 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  const { userRole, loading } = useAuth();
+  const { role, isLoading } = useAuth();
 
   // ⏳ đang load session
-  if (loading) {
+  if (isLoading) {
     return <div>Loading session...</div>;
   }
 
   // ❌ chưa login
-  if (!userRole) {
+  if (!role) {
     return <Navigate to="/login" replace />;
   }
 
   // ❌ sai role
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
+  if (allowedRoles && !allowedRoles.includes(role)) {
     return <div>⛔ Không có quyền truy cập</div>;
   }
 
