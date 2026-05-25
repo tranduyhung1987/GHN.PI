@@ -12,7 +12,7 @@ import WorkflowDashboardPage from "@/pages/WorkflowDashboardPage";
 import DistributedRuntimePage from "@/pages/DistributedRuntimePage";
 import SystemDashboardPage from "@/pages/SystemDashboardPage";
 import WarehousePage from "@/pages/WarehousePage";
-import TaiXePage from "@/pages/TaiXePage";
+import DriverPage from "@/pages/DriverPage";
 import TrackingPage from "@/pages/TrackingPage";
 
 // 3 TRANG MỚI
@@ -39,16 +39,16 @@ export default function AppRouter() {
         <Route path="/cqrs" element={<CQRSDashboardPage />} />
         <Route path="/workflow" element={<WorkflowDashboardPage />} />
         <Route path="/distributed" element={<DistributedRuntimePage />} />
-        <Route path="/system" element={<SystemDashboardPage />} />
-        <Route path="/warehouse" element={<WarehousePage />} />
+        <Route path="/system" element={<SystemDashboardPage />} />        
         
-        <Route path="/tracking" element={<TrackingPage />} />
-
-        {/* 3 TRANG MỚI (ĐÃ CÓ UI) */}
+        {/* TRANG MỚI (ĐÃ CÓ UI) */}
         <Route path="/gui-hang" element={<GuiHangPage />} />
         <Route path="/tra-cuu-cuoc" element={<TraCuuCuocPage />} />
         <Route path="/nhan-hang" element={<NhanHangPage />} />
-        <Route path="/driver" element={<TaiXePage />} />
+        <Route path="/driver" element={<DriverPage />} />
+        <Route path="/tracking" element={<TrackingPage />} />
+        <Route path="/tracking" element={<TrackingPage />} />
+        <Route path="/warehouse" element={<WarehousePage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

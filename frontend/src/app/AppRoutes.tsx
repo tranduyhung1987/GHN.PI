@@ -12,7 +12,7 @@ const GuiHangPage = lazy(() => import('../pages/GuiHangPage'));
 const TrackingPage = lazy(() => import('../pages/TrackingPage'));
 const NhanHangPage = lazy(() => import('../pages/NhanHangPage'));
 const TraCuuCuocPage = lazy(() => import('../pages/TraCuuCuocPage'));
-const TaiXePage = lazy(() => import('../pages/TaiXePage'));
+const TaiXePage = lazy(() => import('../pages/DriverPage'));
 const CaNhanPage = lazy(() => import('../pages/CaNhanPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
 const DangKyVaiTroPage = lazy(() => import('../pages/DangKyVaiTroPage'));
