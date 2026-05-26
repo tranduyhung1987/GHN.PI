@@ -7,7 +7,7 @@ interface Order {
   [key: string]: any;
 }
 
-export const useKhoHub = () => {
+export const useWarehouse = () => {
   const [activeTab, setActiveTab] = useState<'nhap' | 'xuat' | 'ton'>('nhap');
   const [orders, setOrders] = useState<Order[]>([]);
   const [scanCode, setScanCode] = useState<string>('');

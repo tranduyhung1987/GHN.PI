@@ -10,7 +10,7 @@ interface Order {
   totalAmount?: number;
 }
 
-export const useNhanHang = () => {
+export const useReceivePackage = () => {
   const [activeTab, setActiveTab] = useState<'danhSach' | 'lichSu' | 'doiTra'>('danhSach');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);

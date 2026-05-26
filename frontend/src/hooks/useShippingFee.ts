@@ -12,7 +12,7 @@ interface FormData {
   loaiHang: string;
 }
 
-export const useTraCuuCuoc = () => {
+export const useShippingFee = () => {
   const [activeTab, setActiveTab] = useState<'tim' | 'cuoc'>('cuoc');
   const [ketQua, setKetQua] = useState<any>(null);
   const [calculating, setCalculating] = useState(false);
