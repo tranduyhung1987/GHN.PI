@@ -43,11 +43,10 @@ class RealtimeConsistencyEngine {
   // ================= HANDLER =================
 private async handle(event: EventPacket) {
   try {
-    // ================= CONFLICT RESOLUTION STEP 10 =================
     const result = conflictResolver.resolveBusiness(event);
 
     if (result === "REJECT") {
-      if (process.env.NODE_ENV !== "production") {
+      if (import.meta.env.MODE !== "production") {
         console.log("[CONSISTENCY REJECTED]", event);
       }
       return;
@@ -55,7 +54,7 @@ private async handle(event: EventPacket) {
 
     // MERGE case → conflictResolver đã merge state bên trong
     if (result === "MERGE") {
-      if (process.env.NODE_ENV !== "production") {
+      if (import.meta.env.MODE !== "production") {
         console.log("[CONSISTENCY MERGED]", event);
       }
     }

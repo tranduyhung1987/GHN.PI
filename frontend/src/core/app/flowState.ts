@@ -47,7 +47,7 @@ class FlowState {
       this.history.shift();
     }
 
-    if (process.env.NODE_ENV !== "production") {
+    if (import.meta.env.MODE !== "production") {
       console.log("[FLOW STATE]", snapshot);
     }
   }

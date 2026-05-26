@@ -25,7 +25,7 @@ class TraceEngine {
       this.traces.shift();
     }
 
-    if (process.env.NODE_ENV !== "production") {
+    if (import.meta.env.MODE ! !== "production") {
       console.log(`[TRACE:${layer}]`, trace);
     }
   }

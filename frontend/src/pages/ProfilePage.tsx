@@ -26,74 +26,182 @@ export default function ProfilePage() {
     }
   };
 
-  // Lấy username từ user object (tùy theo cấu trúc PiUser)
-  const username = user?.username || null;
+  const username = user?.username || 'Người dùng';
 
   return (
     <div style={pageContainer}>
-      <div style={roleBar}>
-        <span>👤 Cá nhân</span>
-        <button onClick={() => navigate('/ca-nhan')} style={changeRoleBtn}>
-          Đổi vai trò
-        </button>
+      {/* Header */}
+      <div style={headerStyle}>
+        <button onClick={() => navigate(-1)} style={backBtn}>← Quay lại</button>
+        <h2 style={{ color: '#4c1d95', margin: 0 }}>Trang Cá Nhân</h2>
+        <div style={{ width: 60 }}></div>
       </div>
 
-      <h1 style={titleStyle}>👤 TRANG CÁ NHÂN</h1>
-
+      {/* Thông tin người dùng */}
       <div style={cardStyle}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={avatarStyle}>👤</div>
-          <h2 style={{ fontSize: '24px', margin: '12px 0 4px' }}>
-            {username ? `@${username}` : 'Khách vãng lai'}
-          </h2>
-          <p style={{ color: '#666', fontSize: '14px' }}>Mã thành viên: T.H97</p>
+          <h3 style={{ margin: '12px 0 4px', color: '#1e2937' }}>@{username}</h3>
+          <p style={{ color: '#64748b', fontSize: 13 }}>Mã thành viên: T.H97</p>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
+        {/* Vai trò hiện tại */}
+        <div style={{ marginBottom: 20 }}>
           <label style={labelStyle}>Vai trò hiện tại</label>
-          <div style={roleBadgeStyle}>
+          <div style={roleBadge}>
             ✨ {getRoleDisplayName(role)}
           </div>
         </div>
 
-        <div style={{ marginBottom: '30px' }}>
+        {/* Trạng thái */}
+        <div style={{ marginBottom: 24 }}>
           <label style={labelStyle}>Trạng thái</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontWeight: '600' }}>
-            <span style={statusDotStyle}></span>
-            Đang trực tuyến
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#16a34a' }}>
+            <span style={statusDot}></span>
+            <span style={{ fontWeight: 600 }}>Đang hoạt động</span>
           </div>
         </div>
 
-        <button onClick={handleLogout} style={logoutButtonStyle}>
-          Đăng xuất 🚪
-        </button>
+        {/* Nút hành động */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <button 
+            onClick={() => navigate('/dang-ky')} 
+            style={primaryBtn}
+          >
+            🔄 Đổi vai trò
+          </button>
+
+          <button 
+            onClick={handleLogout} 
+            style={logoutBtn}
+          >
+            🚪 Đăng xuất
+          </button>
+        </div>
+      </div>
+
+      {/* Thông tin bổ sung (placeholder) */}
+      <div style={sectionStyle}>
+        <h4 style={{ color: '#4c1d95', marginBottom: 12 }}>Thông tin khác</h4>
+        <div style={infoRow}>
+          <span>Ngày tham gia</span>
+          <span style={{ fontWeight: 600 }}>15/05/2026</span>
+        </div>
+        <div style={infoRow}>
+          <span>Số đơn đã giao</span>
+          <span style={{ fontWeight: 600 }}>47 đơn</span>
+        </div>
       </div>
     </div>
   );
 }
 
-/* ===================== STYLES (GIỮ NGUYÊN) ===================== */
-const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f8f7ff', padding: '20px' };
-const roleBar: React.CSSProperties = { background: '#4c1d95', color: 'white', padding: '12px', display: 'flex', justifyContent: 'space-between', borderRadius: '12px' };
-const changeRoleBtn: React.CSSProperties = { background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', borderRadius: '99px', padding: '4px 12px' };
-const titleStyle: React.CSSProperties = { fontSize: '22px', color: '#4c1d95', textAlign: 'center', margin: '20px 0' };
-const cardStyle: React.CSSProperties = { background: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' };
+// ==================== STYLES ====================
+const pageContainer: React.CSSProperties = { 
+  minHeight: '100vh', 
+  background: '#f8fafc', 
+  padding: '20px' 
+};
+
+const headerStyle: React.CSSProperties = { 
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  alignItems: 'center', 
+  marginBottom: 24 
+};
+
+const backBtn: React.CSSProperties = { 
+  background: 'none', 
+  border: 'none', 
+  color: '#4c1d95', 
+  fontSize: 16, 
+  fontWeight: 600, 
+  cursor: 'pointer' 
+};
+
+const cardStyle: React.CSSProperties = { 
+  background: 'white', 
+  borderRadius: 20, 
+  padding: 24, 
+  boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+  marginBottom: 24
+};
 
 const avatarStyle: React.CSSProperties = { 
-  width: '90px', height: '90px', background: '#f3e8ff', borderRadius: '9999px', 
-  margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-  fontSize: '42px', border: '6px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+  width: 90, 
+  height: 90, 
+  background: '#f3e8ff', 
+  borderRadius: '9999px', 
+  margin: '0 auto', 
+  display: 'flex', 
+  alignItems: 'center', 
+  justifyContent: 'center', 
+  fontSize: 42,
+  border: '6px solid white',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
 };
 
-const labelStyle: React.CSSProperties = { fontWeight: '700', color: '#4c1d95', marginBottom: '8px', fontSize: '14px' };
-const roleBadgeStyle: React.CSSProperties = { 
-  display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', 
-  background: '#f3e8ff', color: '#4c1d95', borderRadius: '9999px', fontWeight: '600' 
+const labelStyle: React.CSSProperties = { 
+  fontSize: 13, 
+  color: '#64748b', 
+  marginBottom: 6, 
+  fontWeight: 600 
 };
-const statusDotStyle: React.CSSProperties = { 
-  display: 'inline-block', width: '10px', height: '10px', background: '#22c55e', borderRadius: '50%' 
+
+const roleBadge: React.CSSProperties = { 
+  display: 'inline-flex', 
+  alignItems: 'center', 
+  gap: 8, 
+  padding: '8px 16px', 
+  background: '#f3e8ff', 
+  color: '#4c1d95', 
+  borderRadius: 999, 
+  fontWeight: 600 
 };
-const logoutButtonStyle: React.CSSProperties = { 
-  width: '100%', padding: '16px', background: '#ef4444', color: 'white', 
-  border: 'none', borderRadius: '12px', fontWeight: '700', marginTop: '20px' 
+
+const statusDot: React.CSSProperties = { 
+  width: 10, 
+  height: 10, 
+  background: '#22c55e', 
+  borderRadius: '50%', 
+  display: 'inline-block' 
+};
+
+const primaryBtn: React.CSSProperties = { 
+  width: '100%', 
+  padding: 14, 
+  background: '#4c1d95', 
+  color: 'white', 
+  border: 'none', 
+  borderRadius: 12, 
+  fontWeight: 700, 
+  fontSize: 15,
+  cursor: 'pointer'
+};
+
+const logoutBtn: React.CSSProperties = { 
+  width: '100%', 
+  padding: 14, 
+  background: '#fee2e2', 
+  color: '#dc2626', 
+  border: 'none', 
+  borderRadius: 12, 
+  fontWeight: 700, 
+  fontSize: 15,
+  cursor: 'pointer'
+};
+
+const sectionStyle: React.CSSProperties = { 
+  background: 'white', 
+  borderRadius: 16, 
+  padding: 20, 
+  boxShadow: '0 2px 8px rgba(0,0,0,0.05)' 
+};
+
+const infoRow: React.CSSProperties = { 
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  padding: '10px 0', 
+  borderBottom: '1px solid #f1e7ff',
+  fontSize: 14
 };
