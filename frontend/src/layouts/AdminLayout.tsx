@@ -1,5 +1,4 @@
 import React from 'react';
-import { navigate } from '@/core/router/navigationService';
 
 // Định nghĩa dữ liệu cần thiết cho giao diện Admin
 interface AdminLayoutProps {
@@ -34,7 +33,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
           {/* ================= SYSTEM DASHBOARD BUTTON (STEP 12) ================= */}
           <button
-            onClick={() => navigate("/system")}
+            onClick={() => (window.location.href = "/system")}
             style={dashboardBtn}
           >
             🔥 System

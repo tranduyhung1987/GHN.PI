@@ -1,6 +1,5 @@
 import { flowState } from "./flowState";
 import { eventBus } from "../events/eventBus";
-import { navigate } from "../router/navigationService";
 
 // Engines
 import { OrderEngine } from "../engines/OrderEngine";
@@ -168,7 +167,7 @@ class AppController {
   private handleNavigate(route: string) {
     flowState.set("ROUTE_RESOLVE", { route });
 
-    navigate(route);
+    window.location.href = route;
 
     eventBus.emit("ROUTE_CHANGED", route);
     traceEngine.log("NAVIGATION", { route });
