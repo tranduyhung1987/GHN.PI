@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { useKhoHub } from '../hooks/useKhoHub';
+import { useWarehouse } from '../hooks/useWarehouse';
 
 export default function WarehousePage() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function WarehousePage() {
     activeTab, setActiveTab, 
     orders, scanCode, setScanCode, 
     handleScan, addMockOrder 
-  } = useKhoHub();
+  } = useWarehouse();
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 

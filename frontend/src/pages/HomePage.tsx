@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePiAuth } from '../hooks/usePiAuth';
-import DangNhapModal from '../components/Modal/DangNhapModal';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const { piUsername, loginWithPi } = usePiAuth();
 
   return (
@@ -20,7 +18,7 @@ const HomePage: React.FC = () => {
 
       {/* Button Đăng nhập */}
       <div style={piButtonContainer}>
-        <button style={piButton} onClick={() => setShowLoginModal(true)}>
+        <button style={piButton} onClick={() => navigate('/dang-ky')}>
           {piUsername ? `Đang kết nối: ${piUsername}` : '⭐ Đăng nhập với Pi Network'}
         </button>
       </div>
@@ -48,9 +46,7 @@ const HomePage: React.FC = () => {
 
       <div style={warningStyle}>
         ⚠️ <b>CẢNH BÁO:</b> Admin GHN.PI <b>KHÔNG BAO GIỜ</b> yêu cầu Passphrase/Mật khẩu ví Pi. Hãy cảnh giác!
-      </div>
-
-      <DangNhapModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onLogin={loginWithPi} />
+      </div>      
     </div>
   );
 };
