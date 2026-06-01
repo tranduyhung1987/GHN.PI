@@ -5,7 +5,7 @@ import { getIncompletePayments } from '../services/firebase/incompletePaymentSer
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const piUsername = user?.username || '';
 
   const [incompleteCount, setIncompleteCount] = useState(0);
@@ -71,17 +71,49 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* GRID CARDS */}
+      {/* GRID CARDS - Role Specific */}
       <div style={cardsGrid}>
-        <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
-        <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-        <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-        <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
-        <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
-        <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
-        
-        <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
-        <Card title="CHƯA CÓ VAI TRÒ?" icon="👋" desc="Đăng ký ngay" onClick={() => navigate('/dang-ky')} />
+        {role === 'driver' && (
+          <>
+            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📦" desc="Các đơn cần giao" onClick={() => navigate('/driver')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
+            <Card title="LỊCH SỬ GIAO" icon="📋" desc="Đơn đã hoàn thành" onClick={() => navigate('/orders')} />
+          </>
+        )}
+
+        {role === 'warehouse' && (
+          <>
+            <Card title="NHẬP KHO" icon="📥" desc="Nhận hàng vào kho" onClick={() => navigate('/warehouse')} />
+            <Card title="XUẤT KHO" icon="📤" desc="Giao hàng ra kho" onClick={() => navigate('/warehouse')} />
+            <Card title="TỒN KHO" icon="📊" desc="Quản lý hàng tồn" onClick={() => navigate('/warehouse')} />
+          </>
+        )}
+
+        {(role === 'buyer' || role === 'seller') && (
+          <>
+            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng mới" onClick={() => navigate('/gui-hang')} />
+            <Card title="ĐƠN HÀNG" icon="📋" desc="Quản lý đơn của bạn" onClick={() => navigate('/orders')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
+          </>
+        )}
+
+        {role === 'admin' && (
+          <>
+            <Card title="DASHBOARD" icon="📊" desc="Thống kê tổng quan" onClick={() => navigate('/admin')} />
+            <Card title="QUẢN LÝ" icon="👥" desc="Quản lý người dùng & đơn" onClick={() => navigate('/admin')} />
+            <Card title="BÁO CÁO" icon="📈" desc="Báo cáo tài chính" onClick={() => navigate('/admin')} />
+          </>
+        )}
+
+        {/* Fallback cho guest hoặc role chưa có UI riêng */}
+        {!role && (
+          <>
+            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} />
+          </>
+        )}
       </div>
 
       {/* WARNING */}
