@@ -32,6 +32,16 @@ const RegisterRolePage: React.FC = () => {
     }
   }, [user?.username, role]);
 
+  // Auto navigate to Home after successful role selection (more reliable than timeout)
+  useEffect(() => {
+    if (selectedRole && role === selectedRole && isPiConnected) {
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [role, selectedRole, isPiConnected, navigate]);
+
   // Tự động khôi phục role đã chọn trước đó
   useEffect(() => {
     const saved = localStorage.getItem('selectedRole') as AppRole | null;
@@ -79,10 +89,7 @@ const RegisterRolePage: React.FC = () => {
         localStorage.setItem('piUsername', piUsername);
       }
 
-      // Thành công → về trang chủ
-      setTimeout(() => {
-        navigate('/');
-      }, 400);
+      // Navigation is now handled by the useEffect above (more reliable)
     } finally {
       setIsSaving(false);
     }
