@@ -94,7 +94,7 @@ export default function HomePage() {
         )}
 
         {/* BUYER / SELLER (SHOP) */}
-        {(role === 'buyer' || role === 'seller') && (
+        {(role === 'sender' || role === 'receiver') && (
           <>
             <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} />

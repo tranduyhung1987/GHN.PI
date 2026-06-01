@@ -88,7 +88,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
     </div>
   );
 
-  // Chọn nav theo role
+  // Chọn nav theo role (đã chuẩn hóa 5 vai trò)
   let navContent;
   switch (role) {
     case 'driver':
@@ -97,9 +97,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
     case 'warehouse':
       navContent = renderWarehouseNav();
       break;
-    case 'buyer':
-    case 'seller':
-      navContent = renderShopNav();
+    case 'sender':
+    case 'receiver':
+      navContent = renderShopNav(); // Sender và Receiver dùng nav giống nhau (gửi + nhận hàng)
       break;
     case 'admin':
       navContent = renderAdminNav();

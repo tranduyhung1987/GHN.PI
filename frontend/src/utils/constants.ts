@@ -1,23 +1,23 @@
 // src/utils/constants.ts
 
-// ==================== ROLES ====================
+// ==================== ROLES (Chuẩn hóa 5 vai trò chính) ====================
 export type AppRole = 
   | "guest"
-  | "buyer" 
-  | "seller"
-  | "driver"
-  | "admin"
-  | "warehouse";
+  | "sender"      // Người gửi hàng
+  | "driver"      // Tài xế
+  | "warehouse"   // Kho trung chuyển
+  | "receiver"    // Người nhận hàng
+  | "admin";      // Admin
 
 export type RoleType = AppRole;
 
 export const ROLES = {
   GUEST: "guest" as const,
-  BUYER: "buyer" as const,
-  SELLER: "seller" as const,
-  DRIVER: "driver" as const,
+  SENDER: "sender" as const,       // Người gửi
+  DRIVER: "driver" as const,       // Tài xế
+  WAREHOUSE: "warehouse" as const, // Kho trung chuyển
+  RECEIVER: "receiver" as const,   // Người nhận hàng
   ADMIN: "admin" as const,
-  WAREHOUSE: "warehouse" as const,
 } as const;
 
 // ==================== EXPORT DEFAULT (nếu cần) ====================
