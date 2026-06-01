@@ -65,12 +65,29 @@
 
     <!-- Last-resort error handler for Pi Browser compatibility -->
     <script>
-      window.addEventListener('error', function(e) {
-        console.error('[Global] Uncaught error:', e.error || e.message);
-      });
-      window.addEventListener('unhandledrejection', function(e) {
-        console.error('[Global] Unhandled rejection:', e.reason);
-      });
+      (function() {
+        function showErrorScreen(error) {
+          var root = document.getElementById('root');
+          if (root) {
+            root.innerHTML = 
+              '<div style="padding:40px;text-align:center;font-family:system-ui;background:#fee2e2;color:#991b1b;min-height:100vh">' +
+              '<h2>Ứng dụng gặp lỗi khi khởi động</h2>' +
+              '<p style="margin:16px 0;">' + (error && error.message ? error.message : 'Unknown error') + '</p>' +
+              '<button onclick="location.reload()" style="padding:12px 24px;background:#4c1d95;color:white;border:none;border-radius:8px;font-size:15px;">Tải lại trang</button>' +
+              '</div>';
+          }
+        }
+
+        window.addEventListener('error', function(e) {
+          console.error('[Global] Uncaught error:', e.error || e.message);
+          showErrorScreen(e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+          console.error('[Global] Unhandled rejection:', e.reason);
+          showErrorScreen(e.reason);
+        });
+      })();
     </script>
 
     <script type="module" src="/src/main.tsx"></script>
