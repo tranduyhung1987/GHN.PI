@@ -19,8 +19,13 @@ const getAdminUsernames = (): string[] => {
 
 const isAdminUsername = (username?: string): boolean => {
   if (!username) return false;
-  const admins = getAdminUsernames();
-  const isAdmin = admins.includes(username.toLowerCase());
+
+  // Normalize: remove @ if user pastes with it, and lowercase
+  const normalized = username.replace(/^@/, '').toLowerCase();
+
+  const admins = getAdminUsernames().map(u => u.replace(/^@/, '').toLowerCase());
+
+  const isAdmin = admins.includes(normalized);
   if (isAdmin) {
     console.log(`[Auth] ✓ Auto-assigned ADMIN role for username: ${username}`);
   }
