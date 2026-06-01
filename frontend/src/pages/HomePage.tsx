@@ -31,58 +31,59 @@ export default function HomePage() {
     checkIncomplete();
   }, []);
 
-  // === Original beautiful desktop + Pi Browser phone mode (ultra minimal header so 8 cards show) ===
+  // === Reverted to original beautiful UI/UX (exact from bc8ef68) ===
+  // Only minimal change: 2 columns on small screens so the 8 cards can be seen without being tiny
   const mobile = isMobile;
 
-  // Desktop = exact original beautiful (bc8ef68)
+  // Exact original beautiful sizes (desktop and phone cards look "như cũ")
   const pageContainer: React.CSSProperties = { 
-    padding: mobile ? '4px' : '20px', 
+    padding: '20px', 
     background: '#f3e8ff', 
     minHeight: '100dvh', 
     boxSizing: 'border-box' 
   };
   const headerContainer: React.CSSProperties = { 
     textAlign: 'center', 
-    marginBottom: mobile ? '2px' : '30px' 
+    marginBottom: '30px' 
   };
   const logoStyle: React.CSSProperties = { 
-    fontSize: mobile ? '14px' : '42px', 
+    fontSize: '42px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: 0 
   };
   const subtitleStyle: React.CSSProperties = { 
     color: '#64748b', 
-    fontSize: mobile ? '7px' : '15px', 
-    margin: '0' 
+    fontSize: '15px', 
+    margin: '4px 0 0 0' 
   };
   const piButtonContainer: React.CSSProperties = { 
-    margin: mobile ? '0 auto 2px' : '0 auto 30px', 
-    maxWidth: mobile ? '200px' : '340px' 
+    margin: '0 auto 30px', 
+    maxWidth: '340px' 
   };
   const piButton: React.CSSProperties = { 
-    padding: mobile ? '6px 10px' : '18px 40px', 
+    padding: '18px 40px', 
     background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
     color: 'white', 
     border: 'none', 
     borderRadius: '9999px', 
     fontWeight: 700, 
-    fontSize: mobile ? '11px' : '17px', 
+    fontSize: '17px', 
     width: '100%', 
     cursor: 'pointer' 
   };
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
     gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : '1fr 1fr', 
-    gap: mobile ? '3px' : '16px' 
+    gap: '16px' 
   };
   const warningStyle: React.CSSProperties = { 
-    marginTop: mobile ? '2px' : '30px', 
-    padding: mobile ? '2px 3px' : '16px', 
+    marginTop: '30px', 
+    padding: '16px', 
     background: '#fef2f2', 
     color: '#991b1b', 
-    borderRadius: mobile ? '3px' : '16px', 
-    fontSize: mobile ? '7px' : '13px', 
+    borderRadius: '16px', 
+    fontSize: '13px', 
     textAlign: 'center', 
     border: '1px solid #f5a3a3' 
   };
@@ -94,25 +95,23 @@ export default function HomePage() {
         <div style={logoStyle}>🚚 GHN.PI</div>
         <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
 
-        {/* Pi Environment Indicator - hidden on Pi Browser to save space */}
-        {!mobile && (
-          <div style={{
-            marginTop: 8,
-            fontSize: 12,
-            padding: '2px 10px',
-            borderRadius: 999,
-            display: 'inline-block',
-            background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
-            color: (typeof window !== 'undefined' && window.Pi) ? '#166534' : '#92400e',
-          }}>
-            {typeof window !== 'undefined' && window.Pi 
-              ? '✓ Pi Browser (Real SDK)' 
-              : '⚠️ Development (Mock Pi)'}
-          </div>
-        )}
+        {/* Pi Environment Indicator (original) */}
+        <div style={{
+          marginTop: 8,
+          fontSize: 12,
+          padding: '2px 10px',
+          borderRadius: 999,
+          display: 'inline-block',
+          background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
+          color: (typeof window !== 'undefined' && window.Pi) ? '#166534' : '#92400e',
+        }}>
+          {typeof window !== 'undefined' && window.Pi 
+            ? '✓ Pi Browser (Real SDK)' 
+            : '⚠️ Development (Mock Pi)'}
+        </div>
 
-        {/* Incomplete Payment Warning - hidden on Pi Browser */}
-        {!mobile && incompleteCount > 0 && (
+        {/* Incomplete Payment Warning (original) */}
+        {incompleteCount > 0 && (
           <div 
             onClick={() => navigate('/incomplete-payments')}
             style={{
@@ -139,80 +138,63 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* On Pi Browser: show clear "8 thẻ HOME Người mới" + easy reset */}
-      {mobile && (
-        <div style={{ textAlign: 'center', margin: '2px 0 4px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#4c1d95' }}>
-            8 THẺ CHÍNH • NGƯỜI MỚI
-          </div>
-          {role && role !== 'guest' && (
-            <button 
-              onClick={() => { localStorage.removeItem('selectedRole'); window.location.reload(); }}
-              style={{ fontSize: '9px', marginTop: '2px', background: 'none', border: '1px solid #e0d4ff', padding: '1px 6px', borderRadius: '4px', color: '#4c1d95' }}
-            >
-              Đặt lại về Người mới (xem 8 thẻ gốc)
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* GRID CARDS - Role Specific (exact original beautiful on Chrome, decent 2-col on Pi Browser) */}
+      {/* GRID CARDS - Role Specific (original beautiful layout) */}
       <div style={cardsGrid}>
         {/* DRIVER */}
         {role === 'driver' && (
           <>
-            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📦" desc="Các đơn cần giao ngay" onClick={() => navigate('/driver')} mobile={mobile} />
-            <Card title="BẢN ĐỒ" icon="🗺️" desc="Xem tuyến đường" onClick={() => navigate('/tracking')} mobile={mobile} />
-            <Card title="LỊCH SỬ GIAO" icon="📋" desc="Đơn đã hoàn thành" onClick={() => navigate('/orders')} mobile={mobile} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} mobile={mobile} />
+            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📦" desc="Các đơn cần giao ngay" onClick={() => navigate('/driver')} />
+            <Card title="BẢN ĐỒ" icon="🗺️" desc="Xem tuyến đường" onClick={() => navigate('/tracking')} />
+            <Card title="LỊCH SỬ GIAO" icon="📋" desc="Đơn đã hoàn thành" onClick={() => navigate('/orders')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
           </>
         )}
 
         {/* WAREHOUSE */}
         {role === 'warehouse' && (
           <>
-            <Card title="NHẬP KHO" icon="📥" desc="Nhận hàng vào kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
-            <Card title="XUẤT KHO" icon="📤" desc="Giao hàng ra ngoài" onClick={() => navigate('/warehouse')} mobile={mobile} />
-            <Card title="TỒN KHO" icon="📊" desc="Quản lý hàng tồn" onClick={() => navigate('/warehouse')} mobile={mobile} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} mobile={mobile} />
+            <Card title="NHẬP KHO" icon="📥" desc="Nhận hàng vào kho" onClick={() => navigate('/warehouse')} />
+            <Card title="XUẤT KHO" icon="📤" desc="Giao hàng ra ngoài" onClick={() => navigate('/warehouse')} />
+            <Card title="TỒN KHO" icon="📊" desc="Quản lý hàng tồn" onClick={() => navigate('/warehouse')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
           </>
         )}
 
         {/* BUYER / SELLER (SHOP) */}
         {(role === 'sender' || role === 'receiver') && (
           <>
-            <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} mobile={mobile} />
-            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} mobile={mobile} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} mobile={mobile} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
-            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} mobile={mobile} />
-            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} mobile={mobile} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} mobile={mobile} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} mobile={mobile} />
+            <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
+            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
           </>
         )}
 
         {/* ADMIN */}
         {role === 'admin' && (
           <>
-            <Card title="DASHBOARD" icon="📊" desc="Thống kê tổng quan" onClick={() => navigate('/admin')} mobile={mobile} />
-            <Card title="QUẢN LÝ NGƯỜI DÙNG" icon="👥" desc="Quản lý tài khoản" onClick={() => navigate('/admin')} mobile={mobile} />
-            <Card title="BÁO CÁO" icon="📈" desc="Báo cáo & thống kê" onClick={() => navigate('/admin')} mobile={mobile} />
-            <Card title="INCOMPLETE PAYMENTS" icon="⚠️" desc="Giao dịch Pi chưa hoàn tất" onClick={() => navigate('/incomplete-payments')} mobile={mobile} />
+            <Card title="DASHBOARD" icon="📊" desc="Thống kê tổng quan" onClick={() => navigate('/admin')} />
+            <Card title="QUẢN LÝ NGƯỜI DÙNG" icon="👥" desc="Quản lý tài khoản" onClick={() => navigate('/admin')} />
+            <Card title="BÁO CÁO" icon="📈" desc="Báo cáo & thống kê" onClick={() => navigate('/admin')} />
+            <Card title="INCOMPLETE PAYMENTS" icon="⚠️" desc="Giao dịch Pi chưa hoàn tất" onClick={() => navigate('/incomplete-payments')} />
           </>
         )}
 
         {/* NGƯỜI MỚI (guest) - exact 8 HOME cards user wants */}
         {(!role || role === 'guest') && (
           <>
-            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} mobile={mobile} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} mobile={mobile} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
-            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} mobile={mobile} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} mobile={mobile} />
-            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} mobile={mobile} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} mobile={mobile} />
-            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} mobile={mobile} />
+            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} />
           </>
         )}
       </div>
@@ -225,25 +207,13 @@ export default function HomePage() {
   );
 }
 
-// Card: Exact original beautiful on desktop + decent usable on Pi Browser phone (8 cards visible)
+// Card - exact original beautiful style (from bc8ef68) - no size reduction
 const Card = ({ 
-  title, icon, desc, onClick, mobile = false 
+  title, icon, desc, onClick 
 }: { 
   title: string; icon: string; desc: string; onClick: () => void;
-  mobile?: boolean;
 }) => {
-  const cardStyle: React.CSSProperties = mobile ? {
-    // Good size for Pi Browser 2-col so 8 HOME cards are clear and tappable
-    background: 'white',
-    padding: '8px 4px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-    border: '1px solid #e0d4ff',
-    cursor: 'pointer',
-    minHeight: '54px',
-  } : {
-    // Exact original beautiful (from bc8ef68)
+  const cardStyle: React.CSSProperties = {
     background: 'white',
     padding: '20px 12px',
     borderRadius: '20px',
@@ -252,29 +222,20 @@ const Card = ({
     border: '2px solid #e0d4ff',
     cursor: 'pointer',
   };
-
   const iconStyle: React.CSSProperties = { 
-    fontSize: mobile ? '22px' : '36px', 
-    marginBottom: mobile ? '2px' : '8px', 
+    fontSize: '36px', 
+    marginBottom: '8px', 
     display: 'block',
     lineHeight: 1
   };
   const cardTitle: React.CSSProperties = { 
-    fontSize: mobile ? '11px' : '15px', 
+    fontSize: '15px', 
     fontWeight: 700, 
     color: '#4c1d95', 
-    margin: mobile ? '0' : '0 0 4px 0',
+    margin: '0 0 4px 0',
     lineHeight: '1.2'
   };
-  const cardDesc: React.CSSProperties = mobile ? {
-    fontSize: '8px', 
-    color: '#64748b', 
-    margin: 0,
-    lineHeight: '1.1',
-    whiteSpace: 'nowrap' as const,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis'
-  } : {
+  const cardDesc: React.CSSProperties = { 
     fontSize: '12px', 
     color: '#64748b', 
     margin: 0
