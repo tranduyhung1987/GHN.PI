@@ -317,6 +317,38 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Dev-only helper: Toggle devForceGuest for easy testing of locked guest cards */}
+      {import.meta.env.DEV && (
+        <button
+          onClick={() => {
+            if (localStorage.getItem('devForceGuest') === 'true') {
+              localStorage.removeItem('devForceGuest');
+            } else {
+              localStorage.setItem('devForceGuest', 'true');
+            }
+            // Reload to apply the new guest state immediately
+            window.location.reload();
+          }}
+          style={{
+            position: 'fixed',
+            bottom: '70px',
+            right: '8px',
+            zIndex: 99998,
+            padding: '4px 8px',
+            fontSize: '11px',
+            background: localStorage.getItem('devForceGuest') === 'true' ? '#dc2626' : '#4c1d95',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            opacity: 0.85,
+          }}
+          title="Dev tool: Bật/tắt chế độ ép Người mới (devForceGuest) để test luồng khóa thẻ"
+        >
+          {localStorage.getItem('devForceGuest') === 'true' ? 'Dev: Guest ON' : 'Dev: Guest OFF'}
+        </button>
+      )}
     </div>
   );
 }
