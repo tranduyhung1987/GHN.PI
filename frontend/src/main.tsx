@@ -1,5 +1,5 @@
 // src/main.tsx
-// Updated with ErrorBoundary for Pi Browser stability
+// Updated with ErrorBoundary + global error handlers for Pi Browser stability
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -10,6 +10,21 @@ import { initEngines } from '@/core/engines/initEngines';
 import { useAppController } from '@/hooks/useAppController';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
+
+// Global error handlers to prevent complete white screen on Pi Browser
+if (typeof window !== 'undefined') {
+  window.onerror = (message, source, lineno, colno, error) => {
+    console.error('[Global Error]', { message, source, lineno, colno, error });
+    // Prevent default browser error overlay in some cases
+    return true;
+  };
+
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('[Unhandled Promise Rejection]', event.reason);
+    // Prevent the error from crashing the app completely
+    event.preventDefault();
+  });
+}
 
 // Query Client
 const queryClient = new QueryClient({
