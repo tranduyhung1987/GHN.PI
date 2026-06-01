@@ -332,7 +332,7 @@ export default function HomePage() {
           }}
           style={{
             position: 'fixed',
-            bottom: '70px',
+            top: '8px',
             right: '8px',
             zIndex: 99998,
             padding: '4px 8px',
