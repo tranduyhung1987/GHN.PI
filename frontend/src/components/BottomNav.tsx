@@ -141,6 +141,5 @@ const navContainer: React.CSSProperties = {
   padding: '12px 0 14px', display: 'flex',
   boxShadow: '0 -4px 15px rgba(76,29,149,0.15)', zIndex: 99999
 };
-};
 
 export default BottomNav;
