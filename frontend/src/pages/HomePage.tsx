@@ -10,6 +10,16 @@ export default function HomePage() {
 
   const [incompleteCount, setIncompleteCount] = useState(0);
 
+  // Simple mobile detection for tighter layout on Pi Browser
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 480);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Kiểm tra Incomplete Payments (yêu cầu của Pi Network)
   useEffect(() => {
     const checkIncomplete = async () => {
@@ -149,15 +159,79 @@ const Card = ({ title, icon, desc, onClick }: { title: string; icon: string; des
   </div>
 );
 
-const pageContainer: React.CSSProperties = { padding: '20px', background: '#f3e8ff', minHeight: '100vh' };
-const headerContainer: React.CSSProperties = { textAlign: 'center', marginBottom: '30px' };
-const logoStyle: React.CSSProperties = { fontSize: '42px', fontWeight: 700, color: '#4c1d95', margin: 0 };
-const subtitleStyle: React.CSSProperties = { color: '#64748b', fontSize: '15px', margin: '4px 0 0 0' };
-const piButtonContainer: React.CSSProperties = { margin: '0 auto 30px', maxWidth: '340px' };
-const piButton: React.CSSProperties = { padding: '18px 40px', background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: 700, fontSize: '17px', width: '100%', cursor: 'pointer' };
-const cardsGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' };
-const cardStyle: React.CSSProperties = { background: 'white', padding: '20px 12px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', border: '2px solid #e0d4ff', cursor: 'pointer' };
-const iconStyle: React.CSSProperties = { fontSize: '36px', marginBottom: '8px', display: 'block' };
-const cardTitle: React.CSSProperties = { fontSize: '15px', fontWeight: 700, color: '#4c1d95', margin: '0 0 4px 0' };
-const cardDesc: React.CSSProperties = { fontSize: '12px', color: '#64748b', margin: 0 };
-const warningStyle: React.CSSProperties = { marginTop: '30px', padding: '16px', background: '#fef2f2', color: '#991b1b', borderRadius: '16px', fontSize: '13px', textAlign: 'center', border: '1px solid #f5a3a3' };
+const pageContainer: React.CSSProperties = { 
+  padding: isMobile ? '8px' : '12px', 
+  background: '#f3e8ff', 
+  minHeight: '100dvh', 
+  boxSizing: 'border-box' 
+};
+const headerContainer: React.CSSProperties = { 
+  textAlign: 'center', 
+  marginBottom: isMobile ? '6px' : '10px' 
+};
+const logoStyle: React.CSSProperties = { 
+  fontSize: isMobile ? '22px' : '28px', 
+  fontWeight: 700, 
+  color: '#4c1d95', 
+  margin: 0 
+};
+const subtitleStyle: React.CSSProperties = { 
+  color: '#64748b', 
+  fontSize: isMobile ? '10px' : '11px', 
+  margin: '0' 
+};
+const piButtonContainer: React.CSSProperties = { 
+  margin: isMobile ? '0 auto 4px' : '0 auto 8px', 
+  maxWidth: '280px' 
+};
+const piButton: React.CSSProperties = { 
+  padding: isMobile ? '8px 12px' : '10px 16px', 
+  background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
+  color: 'white', 
+  border: 'none', 
+  borderRadius: '9999px', 
+  fontWeight: 700, 
+  fontSize: isMobile ? '13px' : '14px', 
+  width: '100%', 
+  cursor: 'pointer' 
+};
+const cardsGrid: React.CSSProperties = { 
+  display: 'grid', 
+  gridTemplateColumns: '1fr 1fr', 
+  gap: isMobile ? '5px' : '8px' 
+};
+const cardStyle: React.CSSProperties = { 
+  background: 'white', 
+  padding: isMobile ? '6px 3px' : '8px 4px', 
+  borderRadius: '10px', 
+  textAlign: 'center', 
+  boxShadow: '0 1px 3px rgba(0,0,0,0.04)', 
+  border: '1px solid #e0d4ff', 
+  cursor: 'pointer' 
+};
+const iconStyle: React.CSSProperties = { 
+  fontSize: isMobile ? '18px' : '20px', 
+  marginBottom: '1px', 
+  display: 'block' 
+};
+const cardTitle: React.CSSProperties = { 
+  fontSize: isMobile ? '10px' : '11px', 
+  fontWeight: 700, 
+  color: '#4c1d95', 
+  margin: '0' 
+};
+const cardDesc: React.CSSProperties = { 
+  fontSize: isMobile ? '9px' : '9.5px', 
+  color: '#64748b', 
+  margin: 0 
+};
+const warningStyle: React.CSSProperties = { 
+  marginTop: isMobile ? '4px' : '6px', 
+  padding: isMobile ? '4px 6px' : '5px 7px', 
+  background: '#fef2f2', 
+  color: '#991b1b', 
+  borderRadius: '6px', 
+  fontSize: isMobile ? '9px' : '10px', 
+  textAlign: 'center', 
+  border: '1px solid #f5a3a3' 
+};
