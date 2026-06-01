@@ -62,6 +62,17 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Last-resort error handler for Pi Browser compatibility -->
+    <script>
+      window.addEventListener('error', function(e) {
+        console.error('[Global] Uncaught error:', e.error || e.message);
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('[Global] Unhandled rejection:', e.reason);
+      });
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
