@@ -26,14 +26,16 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: 'white', borderTop: '1px solid #e5d4ff',
-        padding: '8px 0 10px', display: 'flex',
+        padding: '12px 0 14px', display: 'flex',
         boxShadow: '0 -4px 15px rgba(76,29,149,0.15)', zIndex: 99999
       }}>
-        <button onClick={() => goTo('/')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/') ? '#4c1d95' : '#666' }}>
-          🏠<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Trang chủ</span>
+        <button onClick={() => goTo('/')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+          <div style={{ fontSize: '22px' }}>🏠</div>
+          <span style={{ fontSize: '13px', fontWeight: 600 }}>Trang chủ</span>
         </button>
-        <button onClick={() => goTo('/dang-ky')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/dang-ky') ? '#4c1d95' : '#666' }}>
-          📝<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Đăng ký vai trò</span>
+        <button onClick={() => goTo('/dang-ky')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/dang-ky') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+          <div style={{ fontSize: '22px' }}>📝</div>
+          <span style={{ fontSize: '13px', fontWeight: 600 }}>Đăng ký vai trò</span>
         </button>
       </div>
     );
@@ -44,20 +46,24 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
       background: 'white', borderTop: '1px solid #e5d4ff',
-      padding: '8px 0 10px', display: 'flex',
+      padding: '12px 0 14px', display: 'flex',
       boxShadow: '0 -4px 15px rgba(76,29,149,0.15)', zIndex: 99999
     }}>
-      <button onClick={() => goTo('/')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/') ? '#4c1d95' : '#666' }}>
-        🏠<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Trang chủ</span>
+      <button onClick={() => goTo('/')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+        <div style={{ fontSize: '22px' }}>🏠</div>
+        <span style={{ fontSize: '13px', fontWeight: 600 }}>Trang chủ</span>
       </button>
-      <button onClick={() => goTo('/tracking')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/tracking') ? '#4c1d95' : '#666' }}>
-        🔍<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Theo dõi</span>
+      <button onClick={() => goTo('/tracking')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/tracking') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+        <div style={{ fontSize: '22px' }}>🔍</div>
+        <span style={{ fontSize: '13px', fontWeight: 600 }}>Theo dõi</span>
       </button>
-      <button onClick={() => goTo('/orders')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/orders') || isActive('/don-hang') ? '#4c1d95' : '#666' }}>
-        📦<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Đơn hàng</span>
+      <button onClick={() => goTo('/orders')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/orders') || isActive('/don-hang') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+        <div style={{ fontSize: '22px' }}>📦</div>
+        <span style={{ fontSize: '13px', fontWeight: 600 }}>Đơn hàng</span>
       </button>
-      <button onClick={() => goTo('/ca-nhan')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/ca-nhan') || isActive('/profile') ? '#4c1d95' : '#666' }}>
-        👤<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Cá nhân</span>
+      <button onClick={() => goTo('/ca-nhan')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/ca-nhan') || isActive('/profile') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+        <div style={{ fontSize: '22px' }}>👤</div>
+        <span style={{ fontSize: '13px', fontWeight: 600 }}>Cá nhân</span>
       </button>
     </div>
   );
