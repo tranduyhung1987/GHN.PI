@@ -31,56 +31,56 @@ export default function HomePage() {
     checkIncomplete();
   }, []);
 
-  // === Balanced mobile-first styles for Pi Browser (visible + usable 8 cards, decent button & warning) ===
+  // === Dual-mode: Beautiful desktop + practical compact Pi Browser phone ===
   const mobile = isMobile;
 
   const pageContainer: React.CSSProperties = { 
-    padding: mobile ? '6px' : '12px', 
+    padding: mobile ? '6px' : '16px', 
     background: '#f3e8ff', 
     minHeight: '100dvh', 
     boxSizing: 'border-box' 
   };
   const headerContainer: React.CSSProperties = { 
     textAlign: 'center', 
-    marginBottom: mobile ? '4px' : '8px' 
+    marginBottom: mobile ? '4px' : '10px' 
   };
   const logoStyle: React.CSSProperties = { 
-    fontSize: mobile ? '20px' : '26px', 
+    fontSize: mobile ? '20px' : '28px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: 0 
   };
   const subtitleStyle: React.CSSProperties = { 
     color: '#64748b', 
-    fontSize: mobile ? '9px' : '11px', 
+    fontSize: mobile ? '9px' : '12px', 
     margin: '0' 
   };
   const piButtonContainer: React.CSSProperties = { 
-    margin: mobile ? '0 auto 4px' : '0 auto 8px', 
-    maxWidth: '280px' 
+    margin: mobile ? '0 auto 4px' : '0 auto 10px', 
+    maxWidth: '300px' 
   };
   const piButton: React.CSSProperties = { 
-    padding: mobile ? '9px 14px' : '10px 16px', 
+    padding: mobile ? '10px 14px' : '12px 20px', 
     background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
     color: 'white', 
     border: 'none', 
     borderRadius: '9999px', 
     fontWeight: 700, 
-    fontSize: mobile ? '13px' : '14px', 
+    fontSize: mobile ? '13px' : '15px', 
     width: '100%', 
     cursor: 'pointer' 
   };
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
-    gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(2, 1fr)', 
-    gap: mobile ? '4px' : '6px' 
+    gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+    gap: mobile ? '5px' : '8px' 
   };
   const warningStyle: React.CSSProperties = { 
-    marginTop: mobile ? '4px' : '6px', 
-    padding: mobile ? '4px 6px' : '5px 7px', 
+    marginTop: mobile ? '5px' : '8px', 
+    padding: mobile ? '5px 6px' : '6px 8px', 
     background: '#fef2f2', 
     color: '#991b1b', 
-    borderRadius: '5px', 
+    borderRadius: '6px', 
     fontSize: mobile ? '9px' : '10px', 
     textAlign: 'center', 
     border: '1px solid #f5a3a3' 
@@ -136,63 +136,63 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* GRID CARDS - Role Specific */}
+      {/* GRID CARDS - Role Specific (beautiful on desktop 4-col, compact usable on Pi phone 2-col) */}
       <div style={cardsGrid}>
         {/* DRIVER */}
         {role === 'driver' && (
           <>
-            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📦" desc="Các đơn cần giao ngay" onClick={() => navigate('/driver')} />
-            <Card title="BẢN ĐỒ" icon="🗺️" desc="Xem tuyến đường" onClick={() => navigate('/tracking')} />
-            <Card title="LỊCH SỬ GIAO" icon="📋" desc="Đơn đã hoàn thành" onClick={() => navigate('/orders')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
+            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📦" desc="Các đơn cần giao ngay" onClick={() => navigate('/driver')} mobile={mobile} />
+            <Card title="BẢN ĐỒ" icon="🗺️" desc="Xem tuyến đường" onClick={() => navigate('/tracking')} mobile={mobile} />
+            <Card title="LỊCH SỬ GIAO" icon="📋" desc="Đơn đã hoàn thành" onClick={() => navigate('/orders')} mobile={mobile} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} mobile={mobile} />
           </>
         )}
 
         {/* WAREHOUSE */}
         {role === 'warehouse' && (
           <>
-            <Card title="NHẬP KHO" icon="📥" desc="Nhận hàng vào kho" onClick={() => navigate('/warehouse')} />
-            <Card title="XUẤT KHO" icon="📤" desc="Giao hàng ra ngoài" onClick={() => navigate('/warehouse')} />
-            <Card title="TỒN KHO" icon="📊" desc="Quản lý hàng tồn" onClick={() => navigate('/warehouse')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
+            <Card title="NHẬP KHO" icon="📥" desc="Nhận hàng vào kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
+            <Card title="XUẤT KHO" icon="📤" desc="Giao hàng ra ngoài" onClick={() => navigate('/warehouse')} mobile={mobile} />
+            <Card title="TỒN KHO" icon="📊" desc="Quản lý hàng tồn" onClick={() => navigate('/warehouse')} mobile={mobile} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} mobile={mobile} />
           </>
         )}
 
         {/* BUYER / SELLER (SHOP) */}
         {(role === 'sender' || role === 'receiver') && (
           <>
-            <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
-            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
-            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
+            <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} mobile={mobile} />
+            <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} mobile={mobile} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} mobile={mobile} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} mobile={mobile} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} mobile={mobile} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} mobile={mobile} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} mobile={mobile} />
           </>
         )}
 
         {/* ADMIN */}
         {role === 'admin' && (
           <>
-            <Card title="DASHBOARD" icon="📊" desc="Thống kê tổng quan" onClick={() => navigate('/admin')} />
-            <Card title="QUẢN LÝ NGƯỜI DÙNG" icon="👥" desc="Quản lý tài khoản" onClick={() => navigate('/admin')} />
-            <Card title="BÁO CÁO" icon="📈" desc="Báo cáo & thống kê" onClick={() => navigate('/admin')} />
-            <Card title="INCOMPLETE PAYMENTS" icon="⚠️" desc="Giao dịch Pi chưa hoàn tất" onClick={() => navigate('/incomplete-payments')} />
+            <Card title="DASHBOARD" icon="📊" desc="Thống kê tổng quan" onClick={() => navigate('/admin')} mobile={mobile} />
+            <Card title="QUẢN LÝ NGƯỜI DÙNG" icon="👥" desc="Quản lý tài khoản" onClick={() => navigate('/admin')} mobile={mobile} />
+            <Card title="BÁO CÁO" icon="📈" desc="Báo cáo & thống kê" onClick={() => navigate('/admin')} mobile={mobile} />
+            <Card title="INCOMPLETE PAYMENTS" icon="⚠️" desc="Giao dịch Pi chưa hoàn tất" onClick={() => navigate('/incomplete-payments')} mobile={mobile} />
           </>
         )}
 
         {/* NGƯỜI MỚI (guest) - Hiển thị đầy đủ 8 thẻ như ban đầu */}
         {(!role || role === 'guest') && (
           <>
-            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
-            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
-            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} />
+            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} mobile={mobile} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} mobile={mobile} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} mobile={mobile} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} mobile={mobile} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} mobile={mobile} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} mobile={mobile} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} mobile={mobile} />
           </>
         )}
       </div>
@@ -205,37 +205,49 @@ export default function HomePage() {
   );
 }
 
-// Readable compact Card for Pi Browser phone (2-col grid, visible main Home tabs)
+// Dual beautiful desktop + compact Pi Browser Card
 const Card = ({ 
-  title, icon, desc, onClick 
+  title, icon, desc, onClick, mobile = false 
 }: { 
   title: string; icon: string; desc: string; onClick: () => void;
+  mobile?: boolean;
 }) => {
-  const cardStyle: React.CSSProperties = {
+  // Desktop = original beautiful look (larger, 4-col friendly)
+  // Mobile (Pi Browser) = practical compact 2-col, still readable & tappable
+  const cardStyle: React.CSSProperties = mobile ? {
     background: 'white',
     padding: '6px 4px',
-    borderRadius: '8px',
+    borderRadius: '7px',
     textAlign: 'center',
     boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
     border: '1px solid #e0d4ff',
     cursor: 'pointer',
-    minHeight: '64px', // decent tap target on phone
+    minHeight: '58px',
+  } : {
+    background: 'white',
+    padding: '10px 6px',
+    borderRadius: '10px',
+    textAlign: 'center',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+    border: '1px solid #e0d4ff',
+    cursor: 'pointer',
+    minHeight: '78px',
   };
+
   const iconStyle: React.CSSProperties = { 
-    fontSize: '20px', 
-    marginBottom: '2px', 
+    fontSize: mobile ? '18px' : '24px', 
+    marginBottom: mobile ? '1px' : '3px', 
     display: 'block',
     lineHeight: 1
   };
   const cardTitle: React.CSSProperties = { 
-    fontSize: '10px', 
+    fontSize: mobile ? '10px' : '11px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: '0',
-    lineHeight: '1.2'
-    // allow wrap for long Vietnamese labels like "TRA CỨU CƯỚC", "ĐĂNG KÝ VAI TRÒ"
+    lineHeight: '1.25'
   };
-  const cardDesc: React.CSSProperties = { 
+  const cardDesc: React.CSSProperties = mobile ? {
     fontSize: '8px', 
     color: '#64748b', 
     margin: 0,
@@ -243,6 +255,11 @@ const Card = ({
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis'
+  } : {
+    fontSize: '9px', 
+    color: '#64748b', 
+    margin: 0,
+    lineHeight: '1.2'
   };
   return (
     <div style={cardStyle} onClick={onClick}>
