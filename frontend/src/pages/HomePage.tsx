@@ -31,6 +31,61 @@ export default function HomePage() {
     checkIncomplete();
   }, []);
 
+  // === Mobile-first ultra-compact styles for Pi Browser phone viewport (show all 8 guest cards) ===
+  const mobile = isMobile;
+
+  const pageContainer: React.CSSProperties = { 
+    padding: mobile ? '3px' : '8px', 
+    background: '#f3e8ff', 
+    minHeight: '100dvh', 
+    boxSizing: 'border-box' 
+  };
+  const headerContainer: React.CSSProperties = { 
+    textAlign: 'center', 
+    marginBottom: mobile ? '3px' : '6px' 
+  };
+  const logoStyle: React.CSSProperties = { 
+    fontSize: mobile ? '18px' : '24px', 
+    fontWeight: 700, 
+    color: '#4c1d95', 
+    margin: 0 
+  };
+  const subtitleStyle: React.CSSProperties = { 
+    color: '#64748b', 
+    fontSize: mobile ? '8px' : '10px', 
+    margin: '0' 
+  };
+  const piButtonContainer: React.CSSProperties = { 
+    margin: mobile ? '0 auto 2px' : '0 auto 4px', 
+    maxWidth: '260px' 
+  };
+  const piButton: React.CSSProperties = { 
+    padding: mobile ? '5px 8px' : '8px 12px', 
+    background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
+    color: 'white', 
+    border: 'none', 
+    borderRadius: '9999px', 
+    fontWeight: 700, 
+    fontSize: mobile ? '11px' : '13px', 
+    width: '100%', 
+    cursor: 'pointer' 
+  };
+  const cardsGrid: React.CSSProperties = { 
+    display: 'grid', 
+    gridTemplateColumns: mobile ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)', 
+    gap: mobile ? '2px' : '4px' 
+  };
+  const warningStyle: React.CSSProperties = { 
+    marginTop: mobile ? '2px' : '4px', 
+    padding: mobile ? '2px 3px' : '3px 4px', 
+    background: '#fef2f2', 
+    color: '#991b1b', 
+    borderRadius: '3px', 
+    fontSize: mobile ? '7.5px' : '9px', 
+    textAlign: 'center', 
+    border: '1px solid #f5a3a3' 
+  };
+
   return (
     <div style={pageContainer}>
       {/* HEADER */}
@@ -150,88 +205,52 @@ export default function HomePage() {
   );
 }
 
-/* ==================== CARD COMPONENT & STYLES ==================== */
-const Card = ({ title, icon, desc, onClick }: { title: string; icon: string; desc: string; onClick: () => void }) => (
-  <div style={cardStyle} onClick={onClick}>
-    <span style={iconStyle}>{icon}</span>
-    <h3 style={cardTitle}>{title}</h3>
-    <p style={cardDesc}>{desc}</p>
-  </div>
-);
+// Ultra-compact Card for Pi Browser 4-col grid on tiny phone viewport (all 8 guest cards visible)
+const Card = ({ 
+  title, icon, desc, onClick 
+}: { 
+  title: string; icon: string; desc: string; onClick: () => void;
+}) => {
+  const cardStyle: React.CSSProperties = {
+    background: 'white',
+    padding: '3px 1px 2px',
+    borderRadius: '6px',
+    textAlign: 'center',
+    boxShadow: '0 0.5px 1.5px rgba(0,0,0,0.06)',
+    border: '1px solid #e0d4ff',
+    cursor: 'pointer',
+  };
+  const iconStyle: React.CSSProperties = { 
+    fontSize: '14px', 
+    marginBottom: '0px', 
+    display: 'block',
+    lineHeight: 1
+  };
+  const cardTitle: React.CSSProperties = { 
+    fontSize: '8px', 
+    fontWeight: 700, 
+    color: '#4c1d95', 
+    margin: '0',
+    lineHeight: '1.05',
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  };
+  const cardDesc: React.CSSProperties = { 
+    fontSize: '6.5px', 
+    color: '#64748b', 
+    margin: 0,
+    lineHeight: '1.0',
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  };
+  return (
+    <div style={cardStyle} onClick={onClick}>
+      <span style={iconStyle}>{icon}</span>
+      <h3 style={cardTitle}>{title}</h3>
+      <p style={cardDesc}>{desc}</p>
+    </div>
+  );
+};
 
-const pageContainer: React.CSSProperties = { 
-  padding: isMobile ? '8px' : '12px', 
-  background: '#f3e8ff', 
-  minHeight: '100dvh', 
-  boxSizing: 'border-box' 
-};
-const headerContainer: React.CSSProperties = { 
-  textAlign: 'center', 
-  marginBottom: isMobile ? '6px' : '10px' 
-};
-const logoStyle: React.CSSProperties = { 
-  fontSize: isMobile ? '22px' : '28px', 
-  fontWeight: 700, 
-  color: '#4c1d95', 
-  margin: 0 
-};
-const subtitleStyle: React.CSSProperties = { 
-  color: '#64748b', 
-  fontSize: isMobile ? '10px' : '11px', 
-  margin: '0' 
-};
-const piButtonContainer: React.CSSProperties = { 
-  margin: isMobile ? '0 auto 4px' : '0 auto 8px', 
-  maxWidth: '280px' 
-};
-const piButton: React.CSSProperties = { 
-  padding: isMobile ? '8px 12px' : '10px 16px', 
-  background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
-  color: 'white', 
-  border: 'none', 
-  borderRadius: '9999px', 
-  fontWeight: 700, 
-  fontSize: isMobile ? '13px' : '14px', 
-  width: '100%', 
-  cursor: 'pointer' 
-};
-const cardsGrid: React.CSSProperties = { 
-  display: 'grid', 
-  gridTemplateColumns: '1fr 1fr', 
-  gap: isMobile ? '5px' : '8px' 
-};
-const cardStyle: React.CSSProperties = { 
-  background: 'white', 
-  padding: isMobile ? '6px 3px' : '8px 4px', 
-  borderRadius: '10px', 
-  textAlign: 'center', 
-  boxShadow: '0 1px 3px rgba(0,0,0,0.04)', 
-  border: '1px solid #e0d4ff', 
-  cursor: 'pointer' 
-};
-const iconStyle: React.CSSProperties = { 
-  fontSize: isMobile ? '18px' : '20px', 
-  marginBottom: '1px', 
-  display: 'block' 
-};
-const cardTitle: React.CSSProperties = { 
-  fontSize: isMobile ? '10px' : '11px', 
-  fontWeight: 700, 
-  color: '#4c1d95', 
-  margin: '0' 
-};
-const cardDesc: React.CSSProperties = { 
-  fontSize: isMobile ? '9px' : '9.5px', 
-  color: '#64748b', 
-  margin: 0 
-};
-const warningStyle: React.CSSProperties = { 
-  marginTop: isMobile ? '4px' : '6px', 
-  padding: isMobile ? '4px 6px' : '5px 7px', 
-  background: '#fef2f2', 
-  color: '#991b1b', 
-  borderRadius: '6px', 
-  fontSize: isMobile ? '9px' : '10px', 
-  textAlign: 'center', 
-  border: '1px solid #f5a3a3' 
-};
