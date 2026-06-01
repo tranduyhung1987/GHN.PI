@@ -87,13 +87,14 @@ export default function HomePage() {
   };
   const warningStyle: React.CSSProperties = { 
     marginTop: '30px', 
-    padding: '16px', 
+    padding: '18px', 
     background: '#fef2f2', 
     color: '#991b1b', 
     borderRadius: '16px', 
-    fontSize: '13px', 
+    fontSize: '13.5px', 
     textAlign: 'center', 
-    border: '1px solid #f5a3a3' 
+    border: '2px solid #f87171',
+    lineHeight: '1.5'
   };
 
   return (
@@ -217,8 +218,12 @@ export default function HomePage() {
       </div>
 
       {/* WARNING */}
+      {/* WARNING BẢN CŨ - ĐÃ CHỈNH THEO YÊU CẦU CỦA BẠN */}
       <div style={warningStyle}>
-        ⚠️ Chỉ Admin mới có quyền passphrase Pi
+        ⚠️ <strong>CẢNH BÁO BẢO MẬT QUAN TRỌNG</strong><br />
+        ❌ Tuyệt đối KHÔNG nhập Passphrase hoặc mật khẩu ví Pi vào bất kỳ đâu!<br />
+        Chỉ dùng Pi Browser chính thức • Cảnh giác lừa đảo<br />
+        Ai yêu cầu bạn nhập mật khẩu ví → 99% là lừa đảo!
       </div>
 
       {/* Pi Login Required Prompt Modal for Người mới (guest) - functional only, no change to existing cards/UI */}
