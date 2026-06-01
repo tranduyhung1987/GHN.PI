@@ -318,36 +318,96 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Dev-only helper: Toggle devForceGuest for easy testing of locked guest cards */}
+      {/* Dev Tools - Top Right (only visible in development) */}
       {import.meta.env.DEV && (
-        <button
-          onClick={() => {
-            if (localStorage.getItem('devForceGuest') === 'true') {
-              localStorage.removeItem('devForceGuest');
-            } else {
-              localStorage.setItem('devForceGuest', 'true');
-            }
-            // Reload to apply the new guest state immediately
-            window.location.reload();
-          }}
+        <div
           style={{
             position: 'fixed',
             top: '8px',
             right: '8px',
             zIndex: 99998,
-            padding: '4px 8px',
-            fontSize: '11px',
-            background: localStorage.getItem('devForceGuest') === 'true' ? '#dc2626' : '#4c1d95',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            opacity: 0.85,
+            display: 'flex',
+            gap: '6px',
+            alignItems: 'center',
           }}
-          title="Dev tool: Bật/tắt chế độ ép Người mới (devForceGuest) để test luồng khóa thẻ"
         >
-          {localStorage.getItem('devForceGuest') === 'true' ? 'Dev: Guest ON' : 'Dev: Guest OFF'}
-        </button>
+          {/* Existing Guest Mode Toggle */}
+          <button
+            onClick={() => {
+              if (localStorage.getItem('devForceGuest') === 'true') {
+                localStorage.removeItem('devForceGuest');
+              } else {
+                localStorage.setItem('devForceGuest', 'true');
+              }
+              window.location.reload();
+            }}
+            style={{
+              padding: '4px 8px',
+              fontSize: '11px',
+              background: localStorage.getItem('devForceGuest') === 'true' ? '#dc2626' : '#4c1d95',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              opacity: 0.85,
+            }}
+            title="Dev tool: Bật/tắt chế độ ép Người mới (devForceGuest)"
+          >
+            {localStorage.getItem('devForceGuest') === 'true' ? 'Dev: Guest ON' : 'Dev: Guest OFF'}
+          </button>
+
+          {/* Role Switcher Dropdown */}
+          <select
+            value={localStorage.getItem('selectedRole') || ''}
+            onChange={(e) => {
+              const newRole = e.target.value;
+              if (newRole) {
+                localStorage.setItem('selectedRole', newRole);
+
+                // Auto handle guest mode
+                if (newRole === 'guest') {
+                  localStorage.setItem('devForceGuest', 'true');
+                } else {
+                  localStorage.removeItem('devForceGuest');
+                }
+
+                // Set a representative mock username for realism
+                const mockMap: Record<string, string> = {
+                  guest: 'guest_user',
+                  sender: 'sender_test',
+                  driver: 'driver_test',
+                  warehouse: 'warehouse_test',
+                  receiver: 'receiver_test',
+                  admin: 'nguyenhoi123455',
+                };
+                if (mockMap[newRole]) {
+                  localStorage.setItem('devMockPiUsername', mockMap[newRole]);
+                }
+
+                window.location.reload();
+              }
+            }}
+            style={{
+              fontSize: '11px',
+              padding: '3px 6px',
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+              background: '#f8fafc',
+              color: '#1e2937',
+              cursor: 'pointer',
+              opacity: 0.9,
+            }}
+            title="Dev tool: Chuyển nhanh giữa các vai trò để test giao diện"
+          >
+            <option value="">-- Chọn vai trò --</option>
+            <option value="guest">Người mới</option>
+            <option value="sender">Người gửi</option>
+            <option value="driver">Tài xế</option>
+            <option value="warehouse">Kho trung chuyển</option>
+            <option value="receiver">Người nhận</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
       )}
     </div>
   );
