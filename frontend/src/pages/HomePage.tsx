@@ -10,11 +10,11 @@ export default function HomePage() {
 
   const [incompleteCount, setIncompleteCount] = useState(0);
 
-  // Simple mobile detection for tighter layout on Pi Browser
+  // Mobile detection - more aggressive for Pi Browser WebView
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 480);
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -31,59 +31,58 @@ export default function HomePage() {
     checkIncomplete();
   }, []);
 
-  // === Return to original beautiful UI/UX (bc8ef68) as much as possible ===
+  // === Original beautiful desktop + Pi Browser phone mode (ultra minimal header so 8 cards show) ===
   const mobile = isMobile;
 
-  // Desktop: exact original beautiful sizes
-  // Mobile (Pi Browser): only header & spacing reduced to make the 8 HOME cards visible; cards themselves stay decent
+  // Desktop = exact original beautiful (bc8ef68)
   const pageContainer: React.CSSProperties = { 
-    padding: mobile ? '6px' : '20px', 
+    padding: mobile ? '4px' : '20px', 
     background: '#f3e8ff', 
     minHeight: '100dvh', 
     boxSizing: 'border-box' 
   };
   const headerContainer: React.CSSProperties = { 
     textAlign: 'center', 
-    marginBottom: mobile ? '3px' : '30px' 
+    marginBottom: mobile ? '2px' : '30px' 
   };
   const logoStyle: React.CSSProperties = { 
-    fontSize: mobile ? '18px' : '42px', 
+    fontSize: mobile ? '14px' : '42px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: 0 
   };
   const subtitleStyle: React.CSSProperties = { 
     color: '#64748b', 
-    fontSize: mobile ? '9px' : '15px', 
-    margin: mobile ? '0' : '4px 0 0 0' 
+    fontSize: mobile ? '7px' : '15px', 
+    margin: '0' 
   };
   const piButtonContainer: React.CSSProperties = { 
-    margin: mobile ? '0 auto 3px' : '0 auto 30px', 
-    maxWidth: mobile ? '240px' : '340px' 
+    margin: mobile ? '0 auto 2px' : '0 auto 30px', 
+    maxWidth: mobile ? '200px' : '340px' 
   };
   const piButton: React.CSSProperties = { 
-    padding: mobile ? '9px 14px' : '18px 40px', 
+    padding: mobile ? '6px 10px' : '18px 40px', 
     background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
     color: 'white', 
     border: 'none', 
     borderRadius: '9999px', 
     fontWeight: 700, 
-    fontSize: mobile ? '13px' : '17px', 
+    fontSize: mobile ? '11px' : '17px', 
     width: '100%', 
     cursor: 'pointer' 
   };
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
     gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : '1fr 1fr', 
-    gap: mobile ? '4px' : '16px' 
+    gap: mobile ? '3px' : '16px' 
   };
   const warningStyle: React.CSSProperties = { 
-    marginTop: mobile ? '4px' : '30px', 
-    padding: mobile ? '4px 5px' : '16px', 
+    marginTop: mobile ? '2px' : '30px', 
+    padding: mobile ? '2px 3px' : '16px', 
     background: '#fef2f2', 
     color: '#991b1b', 
-    borderRadius: mobile ? '5px' : '16px', 
-    fontSize: mobile ? '9px' : '13px', 
+    borderRadius: mobile ? '3px' : '16px', 
+    fontSize: mobile ? '7px' : '13px', 
     textAlign: 'center', 
     border: '1px solid #f5a3a3' 
   };
@@ -95,38 +94,40 @@ export default function HomePage() {
         <div style={logoStyle}>🚚 GHN.PI</div>
         <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
 
-        {/* Pi Environment Indicator - original size on desktop, minimal on Pi */}
-        <div style={{
-          marginTop: mobile ? 2 : 8,
-          fontSize: mobile ? 9 : 12,
-          padding: mobile ? '1px 6px' : '2px 10px',
-          borderRadius: 999,
-          display: 'inline-block',
-          background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
-          color: (typeof window !== 'undefined' && window.Pi) ? '#166534' : '#92400e',
-        }}>
-          {typeof window !== 'undefined' && window.Pi 
-            ? '✓ Pi Browser' 
-            : '⚠️ Development (Mock Pi)'}
-        </div>
+        {/* Pi Environment Indicator - hidden on Pi Browser to save space */}
+        {!mobile && (
+          <div style={{
+            marginTop: 8,
+            fontSize: 12,
+            padding: '2px 10px',
+            borderRadius: 999,
+            display: 'inline-block',
+            background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
+            color: (typeof window !== 'undefined' && window.Pi) ? '#166534' : '#92400e',
+          }}>
+            {typeof window !== 'undefined' && window.Pi 
+              ? '✓ Pi Browser (Real SDK)' 
+              : '⚠️ Development (Mock Pi)'}
+          </div>
+        )}
 
-        {/* Incomplete Payment Warning - original on desktop, minimal on Pi */}
-        {incompleteCount > 0 && (
+        {/* Incomplete Payment Warning - hidden on Pi Browser */}
+        {!mobile && incompleteCount > 0 && (
           <div 
             onClick={() => navigate('/incomplete-payments')}
             style={{
-              marginTop: mobile ? 3 : 10,
+              marginTop: 10,
               background: '#fee2e2',
               color: '#991b1b',
-              padding: mobile ? '4px 8px' : '10px 14px',
-              borderRadius: mobile ? 6 : 10,
-              fontSize: mobile ? 10 : 13,
+              padding: '10px 14px',
+              borderRadius: 10,
+              fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
               border: '1px solid #fca5a5',
             }}
           >
-            ⚠️ {incompleteCount} giao dịch Pi chưa hoàn tất
+            ⚠️ {incompleteCount} giao dịch Pi chưa hoàn tất. <u>Xem & xử lý</u>
           </div>
         )}
       </div>
@@ -138,7 +139,24 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* GRID CARDS - Role Specific (exact original beautiful on Chrome, extreme compact 2-col on Pi Browser so 8 HOME cards finally visible) */}
+      {/* On Pi Browser: show clear "8 thẻ HOME Người mới" + easy reset */}
+      {mobile && (
+        <div style={{ textAlign: 'center', margin: '2px 0 4px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#4c1d95' }}>
+            8 THẺ CHÍNH • NGƯỜI MỚI
+          </div>
+          {role && role !== 'guest' && (
+            <button 
+              onClick={() => { localStorage.removeItem('selectedRole'); window.location.reload(); }}
+              style={{ fontSize: '9px', marginTop: '2px', background: 'none', border: '1px solid #e0d4ff', padding: '1px 6px', borderRadius: '4px', color: '#4c1d95' }}
+            >
+              Đặt lại về Người mới (xem 8 thẻ gốc)
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* GRID CARDS - Role Specific (exact original beautiful on Chrome, decent 2-col on Pi Browser) */}
       <div style={cardsGrid}>
         {/* DRIVER */}
         {role === 'driver' && (
@@ -184,14 +202,9 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI MỚI (guest) - 8 thẻ HOME chính (original spirit) */}
+        {/* NGƯỜI MỚI (guest) - exact 8 HOME cards user wants */}
         {(!role || role === 'guest') && (
           <>
-            {mobile && (
-              <div style={{ gridColumn: '1 / -1', fontSize: '10px', fontWeight: 600, color: '#4c1d95', marginBottom: '2px', textAlign: 'center' }}>
-                8 chức năng chính • Người mới
-              </div>
-            )}
             <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} mobile={mobile} />
             <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} mobile={mobile} />
             <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
@@ -212,7 +225,7 @@ export default function HomePage() {
   );
 }
 
-// Card: Original beautiful on desktop + decent readable on Pi Browser (not microscopic)
+// Card: Exact original beautiful on desktop + decent usable on Pi Browser phone (8 cards visible)
 const Card = ({ 
   title, icon, desc, onClick, mobile = false 
 }: { 
@@ -220,17 +233,17 @@ const Card = ({
   mobile?: boolean;
 }) => {
   const cardStyle: React.CSSProperties = mobile ? {
-    // Decent compact for Pi Browser phone - 8 cards visible, still recognizable
+    // Good size for Pi Browser 2-col so 8 HOME cards are clear and tappable
     background: 'white',
-    padding: '7px 5px',
-    borderRadius: '10px',
+    padding: '8px 4px',
+    borderRadius: '8px',
     textAlign: 'center',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
     border: '1px solid #e0d4ff',
     cursor: 'pointer',
-    minHeight: '56px',
+    minHeight: '54px',
   } : {
-    // Exact original beautiful (bc8ef68)
+    // Exact original beautiful (from bc8ef68)
     background: 'white',
     padding: '20px 12px',
     borderRadius: '20px',
@@ -241,17 +254,17 @@ const Card = ({
   };
 
   const iconStyle: React.CSSProperties = { 
-    fontSize: mobile ? '20px' : '36px', 
+    fontSize: mobile ? '22px' : '36px', 
     marginBottom: mobile ? '2px' : '8px', 
     display: 'block',
     lineHeight: 1
   };
   const cardTitle: React.CSSProperties = { 
-    fontSize: mobile ? '10px' : '15px', 
+    fontSize: mobile ? '11px' : '15px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: mobile ? '0' : '0 0 4px 0',
-    lineHeight: '1.15'
+    lineHeight: '1.2'
   };
   const cardDesc: React.CSSProperties = mobile ? {
     fontSize: '8px', 
