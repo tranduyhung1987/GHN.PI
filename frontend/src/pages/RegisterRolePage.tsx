@@ -5,11 +5,12 @@ import { useAuth } from '../core/auth/AuthContext';
 import type { AppRole } from '../utils/constants';
 
 const ROLES: { key: AppRole; label: string; icon: string; desc: string }[] = [
+  { key: 'guest',     label: 'Người mới',          icon: '👋', desc: 'Chưa chọn vai trò, chỉ xem và đăng ký' },
   { key: 'sender',    label: 'Người gửi hàng',     icon: '📦', desc: 'Tạo đơn gửi hàng & thanh toán Pi' },
   { key: 'driver',    label: 'Tài xế',             icon: '🏍️', desc: 'Nhận đơn & giao hàng' },
-  { key: 'warehouse', label: 'Kho trung chuyển',   icon: '🏬', desc: 'Quản lý nhập - xuất kho' },
-  { key: 'receiver',  label: 'Người nhận hàng',    icon: '📥', desc: 'Nhận hàng & xác nhận' },
-  { key: 'admin',     label: 'Admin / Quản trị',   icon: '🛡️', desc: 'Quản lý hệ thống & báo cáo' },
+  { key: 'warehouse', label: 'Kho trung chuyển',   icon: '🏬', desc: 'Quản lý nhập - xuất kho, trung chuyển' },
+  { key: 'receiver',  label: 'Người nhận hàng',    icon: '📥', desc: 'Nhận hàng & xác nhận giao hàng' },
+  { key: 'admin',     label: 'Admin / Quản trị',   icon: '🛡️', desc: 'Quản lý toàn hệ thống & báo cáo' },
 ];
 
 const RegisterRolePage: React.FC = () => {

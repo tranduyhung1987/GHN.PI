@@ -113,13 +113,13 @@ export default function HomePage() {
           </>
         )}
 
-        {/* GUEST / Chưa có vai trò */}
-        {!role && (
+        {/* NGƯỜI MỚI (guest) - Chưa chọn vai trò */}
+        {(!role || role === 'guest') && (
           <>
             <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí ship" onClick={() => navigate('/tra-cuu-cuoc')} />
             <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
-            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò để sử dụng đầy đủ" onClick={() => navigate('/dang-ky')} />
           </>
         )}
       </div>
