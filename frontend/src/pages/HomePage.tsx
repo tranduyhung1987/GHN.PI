@@ -104,21 +104,6 @@ export default function HomePage() {
         <div style={logoStyle}>🚚 GHN.PI</div>
         <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
 
-        {/* Pi Environment Indicator (original) */}
-        <div style={{
-          marginTop: 8,
-          fontSize: 12,
-          padding: '2px 10px',
-          borderRadius: 999,
-          display: 'inline-block',
-          background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
-          color: (typeof window !== 'undefined' && window.Pi) ? '#166534' : '#92400e',
-        }}>
-          {typeof window !== 'undefined' && window.Pi 
-            ? '✓ Pi Browser (Real SDK)' 
-            : '⚠️ Development (Mock Pi)'}
-        </div>
-
         {/* Incomplete Payment Warning (original) */}
         {incompleteCount > 0 && (
           <div 
