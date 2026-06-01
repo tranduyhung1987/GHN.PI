@@ -10,6 +10,9 @@ export default function HomePage() {
 
   const [incompleteCount, setIncompleteCount] = useState(0);
 
+  // Lock prompt for guest / new users
+  const [showPiLoginPrompt, setShowPiLoginPrompt] = useState(false);
+
   // Mobile detection - more aggressive for Pi Browser WebView
   const [isMobile, setIsMobile] = useState(false);
 
@@ -30,6 +33,11 @@ export default function HomePage() {
     };
     checkIncomplete();
   }, []);
+
+  // Helper for locked guest actions - shows Pi login prompt then leads to role registration
+  const handleLockedGuestAction = () => {
+    setShowPiLoginPrompt(true);
+  };
 
   // === Reverted to original beautiful UI/UX (exact from bc8ef68) ===
   // Only minimal change: 2 columns on small screens so the 8 cards can be seen without being tiny
@@ -133,7 +141,16 @@ export default function HomePage() {
 
       {/* NÚT ĐĂNG NHẬP PI */}
       <div style={piButtonContainer}>
-        <button style={piButton} onClick={() => navigate('/dang-ky')}>
+        <button 
+          style={piButton} 
+          onClick={() => {
+            if (!role || role === 'guest') {
+              setShowPiLoginPrompt(true);
+            } else {
+              navigate('/dang-ky');
+            }
+          }}
+        >
           {piUsername ? `Đã kết nối: ${piUsername}` : '⭐ Đăng nhập với Pi Network'}
         </button>
       </div>
@@ -184,17 +201,17 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI MỚI (guest) - exact 8 HOME cards user wants */}
+        {/* NGƯỜI MỚI (guest) - exact 8 HOME cards user wants - all locked */}
         {(!role || role === 'guest') && (
           <>
-            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
-            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
-            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} />
+            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={handleLockedGuestAction} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={handleLockedGuestAction} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={handleLockedGuestAction} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={handleLockedGuestAction} />
+            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={handleLockedGuestAction} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={handleLockedGuestAction} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={handleLockedGuestAction} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={handleLockedGuestAction} />
           </>
         )}
       </div>
@@ -203,6 +220,84 @@ export default function HomePage() {
       <div style={warningStyle}>
         ⚠️ Chỉ Admin mới có quyền passphrase Pi
       </div>
+
+      {/* Pi Login Required Prompt Modal for Người mới (guest) - functional only, no change to existing cards/UI */}
+      {showPiLoginPrompt && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={() => setShowPiLoginPrompt(false)}
+        >
+          <div 
+            style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '320px',
+              width: '90%',
+              textAlign: 'center',
+              border: '2px solid #e0d4ff',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+            <h3 style={{ margin: '0 0 8px', color: '#4c1d95', fontSize: '18px', fontWeight: 700 }}>
+              Đăng nhập với Pi Network
+            </h3>
+            <p style={{ margin: '0 0 20px', color: '#64748b', fontSize: '14px', lineHeight: 1.4 }}>
+              Bạn cần đăng nhập với Pi Network và chọn vai trò để sử dụng tính năng này.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={() => {
+                  setShowPiLoginPrompt(false);
+                  navigate('/dang-ky');
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #4c1d95, #7c3aed)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '10px 20px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  flex: 1,
+                }}
+              >
+                ⭐ Đăng nhập với Pi
+              </button>
+              <button
+                onClick={() => setShowPiLoginPrompt(false)}
+                style={{
+                  background: 'white',
+                  color: '#4c1d95',
+                  border: '1px solid #e0d4ff',
+                  borderRadius: '9999px',
+                  padding: '10px 16px',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  flex: 1,
+                }}
+              >
+                Để sau
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
