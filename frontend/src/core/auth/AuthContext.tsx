@@ -33,14 +33,23 @@ const isAdminUsername = (username?: string): boolean => {
 };
 
 /**
- * Resolve role với ưu tiên:
- * 1. Nếu username là Admin (hardcode) → luôn là 'admin' (cao nhất)
- * 2. Ngược lại dùng role đã lưu (localStorage) hoặc role từ Pi service
+ * Resolve role với ưu tiên (dành cho dev + production):
+ * - devForceGuest (chỉ dùng khi test local): ép về trạng thái Người mới để test flow khóa thẻ
+ * - Admin hardcode
+ * - Role đã lưu
  */
 const resolveEffectiveRole = (loggedInUser: PiUser | null, savedRole: AppRole | null): AppRole | null => {
+  // 1. Dev helper: ép về guest để dễ test luồng "Người mới bị khóa thẻ"
+  if (localStorage.getItem('devForceGuest') === 'true') {
+    return null;
+  }
+
+  // 2. Admin hardcode (ưu tiên cao)
   if (loggedInUser?.username && isAdminUsername(loggedInUser.username)) {
     return 'admin';
   }
+
+  // 3. Role đã lưu hoặc từ service
   return savedRole || (loggedInUser?.role as AppRole) || null;
 };
 
@@ -119,6 +128,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     piService.logout();
     setUser(null);
     setRole(null);
+
+    // Xóa dev helper khi logout (giữ devForceGuest nếu user muốn test tiếp)
+    // localStorage.removeItem('devForceGuest'); // Bỏ comment nếu muốn auto clear
   };
 
   const refreshUser = async () => {
