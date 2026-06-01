@@ -2,6 +2,43 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { piService, type PiUser } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
 
+// ==================== ADMIN HARDCODE (Phương án 1 - Tối ưu cho giai đoạn hiện tại) ====================
+// Chỉ những Pi username trong danh sách này mới được tự động gán quyền Admin.
+// Khuyến nghị: Đặt trong .env dưới dạng VITE_ADMIN_USERNAMES=username1,username2
+const getAdminUsernames = (): string[] => {
+  const fromEnv = import.meta.env.VITE_ADMIN_USERNAMES as string | undefined;
+  const envList = fromEnv ? fromEnv.split(',').map(u => u.trim().toLowerCase()) : [];
+
+  // Hỗ trợ override trong development (rất hữu ích khi test)
+  const devOverride = localStorage.getItem('devAdminUsernames');
+  const devList = devOverride ? devOverride.split(',').map(u => u.trim().toLowerCase()) : [];
+
+  // Kết hợp + loại trùng
+  return Array.from(new Set([...envList, ...devList]));
+};
+
+const isAdminUsername = (username?: string): boolean => {
+  if (!username) return false;
+  const admins = getAdminUsernames();
+  const isAdmin = admins.includes(username.toLowerCase());
+  if (isAdmin) {
+    console.log(`[Auth] ✓ Auto-assigned ADMIN role for username: ${username}`);
+  }
+  return isAdmin;
+};
+
+/**
+ * Resolve role với ưu tiên:
+ * 1. Nếu username là Admin (hardcode) → luôn là 'admin' (cao nhất)
+ * 2. Ngược lại dùng role đã lưu (localStorage) hoặc role từ Pi service
+ */
+const resolveEffectiveRole = (loggedInUser: PiUser | null, savedRole: AppRole | null): AppRole | null => {
+  if (loggedInUser?.username && isAdminUsername(loggedInUser.username)) {
+    return 'admin';
+  }
+  return savedRole || (loggedInUser?.role as AppRole) || null;
+};
+
 interface AuthContextType {
   user: PiUser | null;
   isAuthenticated: boolean;
@@ -39,9 +76,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const currentUser = await piService.getUser();
       setUser(currentUser);
-      if (currentUser?.role) {
-        setRole(currentUser.role as AppRole);
-      }
+
+      const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
+      const effectiveRole = resolveEffectiveRole(currentUser, savedRole);
+      setRole(effectiveRole);
     } catch (error) {
       console.error("Failed to load user:", error);
       setUser(null);
@@ -56,7 +94,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const loggedInUser = await piService.authenticate();
       setUser(loggedInUser);
-      setRole((loggedInUser.role as AppRole) || null);
+
+      const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
+      const effectiveRole = resolveEffectiveRole(loggedInUser, savedRole);
+      setRole(effectiveRole);
+
+      // Nếu là admin do hardcode → cũng lưu lại để lần sau load nhanh
+      if (effectiveRole === 'admin') {
+        localStorage.setItem('selectedRole', 'admin');
+      }
     } catch (error) {
       console.error("Login failed:", error);
     } finally {
@@ -76,6 +122,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // === CẬP NHẬT VAI TRÒ (dùng cho RegisterRolePage) ===
   const updateRole = (newRole: AppRole) => {
+    // Bảo vệ: Không cho phép user thường tự set thành admin
+    if (newRole === 'admin' && user?.username && !isAdminUsername(user.username)) {
+      console.warn('[Auth] Cảnh báo: Chỉ tài khoản Admin được phép có quyền Admin.');
+      return;
+    }
+
     setRole(newRole);
 
     // Cập nhật vào user object nếu có
@@ -93,9 +145,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     loadUser();
 
-    // Khôi phục role từ localStorage nếu có
+    // Khôi phục role từ localStorage (sẽ bị override nếu là admin hardcode)
     const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
     if (savedRole) {
+      // Chỉ set tạm, loadUser() sẽ resolve đúng (ưu tiên admin hardcode)
       setRole(savedRole);
     }
   }, []);

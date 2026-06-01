@@ -1,13 +1,16 @@
 // src/utils/constants.ts
 
 // ==================== ROLES (Chuẩn hóa 6 vai trò) ====================
+// Lưu ý: 
+// - "guest" (Người mới) là trạng thái mặc định, KHÔNG cho chọn trong trang đăng ký.
+// - "admin" chỉ được gán tự động qua hardcode username (xem AuthContext).
 export type AppRole = 
-  | "guest"       // Người mới (chưa chọn vai trò)
+  | "guest"       // Người mới (chưa chọn vai trò) - trạng thái mặc định
   | "sender"      // Người gửi hàng
   | "driver"      // Tài xế
   | "warehouse"   // Kho trung chuyển
   | "receiver"    // Người nhận hàng
-  | "admin";      // Admin / Quản trị
+  | "admin";      // Admin / Quản trị (chỉ gán thủ công)
 
 export type RoleType = AppRole;
 
