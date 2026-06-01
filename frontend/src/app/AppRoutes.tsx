@@ -1,41 +1,62 @@
-// src/app/AppRoutes.tsx
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 
-// Import các trang bằng lazy
 const HomePage = lazy(() => import('../pages/HomePage'));
+const RegisterRolePage = lazy(() => import('../pages/RegisterRolePage'));
+const CreateShipmentPage = lazy(() => import('../pages/CreateShipmentPage'));
+const ShippingFeePage = lazy(() => import('../pages/ShippingFeePage'));
 const WarehousePage = lazy(() => import('../pages/WarehousePage'));
-const CreateShipmentPage = lazy(() => import('../pages/CreateShipmentPage.tsx'));
-const TrackingPage = lazy(() => import('../pages/TrackingPage'));
-const ReceivePackagePage = lazy(() => import('../pages/ReceivePackagePage.tsx'));
-const ShippingFeePage = lazy(() => import('../pages/ShippingFeePage.tsx'));
 const DriverPage = lazy(() => import('../pages/DriverPage'));
+const TrackingPage = lazy(() => import('../pages/TrackingPage'));
+const ReceivePackagePage = lazy(() => import('../pages/ReceivePackagePage'));
+
+// Các trang đã tồn tại nhưng chưa được route
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
-const AdminPage = lazy(() => import('../pages/AdminPage'));
-const RegisterRolePage = lazy(() => import('../pages/RegisterRolePage.tsx'));
-const ChatPage = lazy(() => import('../pages/ChatPage'));
+const OrderPage = lazy(() => import('../pages/OrderPage'));
+const LoginPage = lazy(() => import('../pages/LoginPage'));
+const IncompletePaymentsPage = lazy(() => import('../pages/IncompletePaymentsPage'));
+
+// Simple placeholder cho các route chưa có UI đầy đủ
+const PlaceholderPage = ({ title, desc }: { title: string; desc?: string }) => (
+  <div style={{ padding: 40, textAlign: 'center', minHeight: '60vh' }}>
+    <h2 style={{ color: '#4c1d95' }}>{title}</h2>
+    <p style={{ color: '#64748b', marginTop: 12 }}>{desc || 'Tính năng đang được hoàn thiện cho Pi Testnet.'}</p>
+    <p style={{ marginTop: 20, fontSize: 13, color: '#94a3b8' }}>GHN.PI • Pi Network</p>
+  </div>
+);
 
 export const AppRoutes = () => {
   return (
-    <Suspense fallback={<div className="p-10 text-center">Đang tải...</div>}>
+    <Suspense fallback={<div style={{padding: '50px', textAlign: 'center'}}>Đang tải...</div>}>
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="dang-ky" element={<RegisterRolePage />} />
+          <Route path="login" element={<LoginPage />} />
 
-          {/* Tạm thời bỏ ProtectedRoute để build pass */}
-          <Route path="admin" element={<AdminPage />} />
-          <Route path="kho-hub" element={<WarehousePage />} />
-          <Route path="tai-xe" element={<DriverPage />} />
+          {/* Core logistics flows */}
           <Route path="gui-hang" element={<CreateShipmentPage />} />
+          <Route path="tra-cuu-cuoc" element={<ShippingFeePage />} />
+          <Route path="warehouse" element={<WarehousePage />} />
+          <Route path="driver" element={<DriverPage />} />
+          <Route path="tracking" element={<TrackingPage />} />
+          <Route path="tracking/:maDon" element={<TrackingPage />} />
           <Route path="nhan-hang" element={<ReceivePackagePage />} />
 
-          {/* Các route công cộng */}
-          <Route path="tracking" element={<TrackingPage />} />
-          <Route path="tra-cuu-cuoc" element={<ShippingFeePage />} />
+          {/* BottomNav routes + các route hay được tham chiếu */}
+          <Route path="don-hang" element={<OrderPage />} />
+          <Route path="orders" element={<OrderPage />} />
           <Route path="ca-nhan" element={<ProfilePage />} />
-          <Route path="dang-ky" element={<RegisterRolePage />} />
-          <Route path="chat" element={<ChatPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+
+          {/* Advanced / Future pages (đã có code trong core) */}
+          <Route path="chat" element={<PlaceholderPage title="💬 Cộng đồng & Chat" desc="Tính năng chat cộng đồng sẽ sớm ra mắt trên Pi Testnet." />} />
+          <Route path="admin" element={<PlaceholderPage title="🛡️ Trang Quản trị" />} />
+
+          {/* Pi Network Compliance */}
+          <Route path="incomplete-payments" element={<IncompletePaymentsPage />} />
+          <Route path="payments/incomplete" element={<IncompletePaymentsPage />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

@@ -50,6 +50,8 @@ export const useCreateShipment = () => {
   const shippingFee = Math.round((form.loaiDon === 'hoatoc' ? form.trongLuong * 35000 : form.trongLuong * 22000) + 8000);
   const totalAmount = shippingFee;
 
+  // handleSubmit này chỉ dùng cho test nhanh. 
+  // Trang CreateShipmentPage sẽ override bằng logic thật (Pi Payment + AppController)
   const handleSubmit = async () => {
     setIsProcessing(true);
     try {
@@ -59,11 +61,8 @@ export const useCreateShipment = () => {
         codAmount: paymentMethod === 'cod' ? codAmount : '0', 
         totalAmount 
       };
-      console.log("Đang gửi đơn:", orderData);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert("Đơn hàng đã được tạo thành công! 🚀");
-    } catch (err) {
-      alert("Lỗi khi tạo đơn.");
+      console.log("[useCreateShipment] Test submit:", orderData);
+      await new Promise((resolve) => setTimeout(resolve, 800));
     } finally {
       setIsProcessing(false);
     }

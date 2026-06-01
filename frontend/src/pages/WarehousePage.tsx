@@ -1,39 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Html5QrcodeScanner } from 'html5-qrcode';
 import { useWarehouse } from '../hooks/useWarehouse';
+import { QRScanner } from '../components/QRScanner';
 
 export default function WarehousePage() {
   const navigate = useNavigate();
   const { 
     activeTab, setActiveTab, 
     orders, scanCode, setScanCode, 
-    handleScan, addMockOrder 
+    handleScan, addMockOrder, loading, updateOrderStatus
   } = useWarehouse();
-
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-
-  // Khởi tạo QR Scanner
-  useEffect(() => {
-    if (!scannerRef.current) {
-      scannerRef.current = new Html5QrcodeScanner(
-        "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        false
-      );
-      scannerRef.current.render(
-        (decodedText: string) => handleScan(decodedText),
-        (error: any) => console.warn(error)
-      );
-    }
-
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear();
-        scannerRef.current = null;
-      }
-    };
-  }, [handleScan]);
 
   return (
     <div style={pageContainer}>
@@ -68,8 +44,12 @@ export default function WarehousePage() {
           {activeTab === 'ton' && '📦 Tồn kho'}
         </h3>
 
-        {/* QR Scanner */}
-        <div id="qr-reader" style={{ marginBottom: '20px' }}></div>
+        {/* QR Scanner - Chỉ load khi cần (giảm bundle size) */}
+        {(activeTab === 'nhap' || activeTab === 'xuat') && (
+          <div style={{ marginBottom: '16px' }}>
+            <QRScanner onScanSuccess={handleScan} />
+          </div>
+        )}
 
         {/* Input manual */}
         <label style={labelStyle}>Mã đơn hàng</label>
@@ -87,13 +67,28 @@ export default function WarehousePage() {
           + Thêm đơn mẫu
         </button>
 
-        {/* Danh sách đơn hàng */}
-        <h4 style={{ margin: '20px 0 10px', color: '#4c1d95' }}>Danh sách đơn ({orders.length})</h4>
+        {/* Danh sách đơn hàng (data thật từ Firebase) */}
+        <h4 style={{ margin: '20px 0 10px', color: '#4c1d95' }}>
+          Danh sách đơn ({orders.length}) {loading && '(đang tải...)'}
+        </h4>
         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          {orders.length === 0 && !loading && (
+            <p style={{ color: '#64748b', fontSize: 14 }}>Chưa có đơn nào trong kho.</p>
+          )}
           {orders.map((order, index) => (
             <div key={index} style={orderItemStyle}>
-              <strong>{order.maDon}</strong> - {order.nguoiNhan}
-              <span style={{ color: '#22d3ee', fontSize: '13px' }}> {order.status}</span>
+              <div>
+                <strong>{order.maDon}</strong> - {order.nguoiNhan || 'N/A'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                <span style={{ color: '#22d3ee', fontSize: '13px' }}>{order.status || 'Chưa có trạng thái'}</span>
+                <button 
+                  onClick={() => updateOrderStatus(order.maDon, 'Đã xử lý tại kho')}
+                  style={{ fontSize: 11, padding: '2px 8px', background: '#4c1d95', color: 'white', border: 'none', borderRadius: 6 }}
+                >
+                  Xử lý
+                </button>
+              </div>
             </div>
           ))}
         </div>

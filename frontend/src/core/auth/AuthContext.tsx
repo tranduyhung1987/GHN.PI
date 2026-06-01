@@ -5,11 +5,12 @@ import type { AppRole } from '@/utils/constants';
 interface AuthContextType {
   user: PiUser | null;
   isAuthenticated: boolean;
-  isLoading: boolean;           // ← Giữ isLoading để rõ nghĩa
+  isLoading: boolean;
   role: AppRole | null;
   login: () => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateRole: (newRole: AppRole) => void;   // ← MỚI: Cho phép chọn vai trò sau login
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -73,8 +74,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await loadUser();
   };
 
+  // === CẬP NHẬT VAI TRÒ (dùng cho RegisterRolePage) ===
+  const updateRole = (newRole: AppRole) => {
+    setRole(newRole);
+
+    // Cập nhật vào user object nếu có
+    if (user) {
+      const updatedUser = { ...user, role: newRole };
+      setUser(updatedUser);
+    }
+
+    // Lưu vào localStorage để giữ sau khi reload (dùng cho cả Mock và Real)
+    localStorage.setItem('selectedRole', newRole);
+
+    console.log(`[Auth] Role updated to: ${newRole}`);
+  };
+
   useEffect(() => {
     loadUser();
+
+    // Khôi phục role từ localStorage nếu có
+    const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
+    if (savedRole) {
+      setRole(savedRole);
+    }
   }, []);
 
   const value: AuthContextType = {
@@ -85,6 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     refreshUser,
+    updateRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

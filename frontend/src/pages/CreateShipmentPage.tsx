@@ -1,56 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface DonHangForm {
-  loaiDon: 'hoatoc' | 'duongdai';
-  nguoiGui: string;
-  sdtGui: string;
-  diaChiGui: string;
-  nguoiNhan: string;
-  sdtNhan: string;
-  diaChiNhan: string;
-  trongLuong: number;
-  dai: number;
-  rong: number;
-  cao: number;
-  ghiChu: string;
-}
+import { useCreateShipment } from '../hooks/useCreateShipment';
+import { useAuth } from '../core/auth/AuthContext';
+import { useAppController } from '../hooks/useAppController';
+import { piService } from '../core/pi/piService';
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { createOrder } = useAppController();
+
+  const {
+    form,
+    setForm,
+    paymentMethod,
+    setPaymentMethod,
+    codAmount,
+    setCodAmount,
+    handleSubmit: baseHandleSubmit,
+    shippingFee,
+    isProcessing: hookProcessing,
+    totalAmount,
+    handleQuickFillSeller,
+    handleQuickFillBuyer,
+    handleQuickFillPi,
+  } = useCreateShipment();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [maDon, setMaDon] = useState('');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  const [form, setForm] = useState<DonHangForm>({
-    loaiDon: 'hoatoc',
-    nguoiGui: '',
-    sdtGui: '',
-    diaChiGui: '',
-    nguoiNhan: '',
-    sdtNhan: '',
-    diaChiNhan: '',
-    trongLuong: 1,
-    dai: 20,
-    rong: 15,
-    cao: 10,
-    ghiChu: ''
-  });
+  const piAmount = shippingFee;
 
-  const [paymentMethod, setPaymentMethod] = useState<'prepaid' | 'cod'>('prepaid');
-
-  const calculateFee = (): number => {
-    const weight = form.trongLuong;
-    const volWeight = (form.dai * form.rong * form.cao) / 5000;
-    const chargeWeight = Math.max(weight, volWeight);
-    const baseFee = form.loaiDon === 'hoatoc' ? chargeWeight * 35000 : chargeWeight * 22000;
-    return Math.round(baseFee + 8000);
-  };
-
-  const piAmount = calculateFee();
-
-  const handleSubmit = (e: React.FormEvent) => {
+  // Wrapper: Tạo đơn + Thanh toán Pi thật (nếu prepaid)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPaymentError(null);
 
     if (!form.nguoiGui || !form.sdtGui || !form.diaChiGui ||
         !form.nguoiNhan || !form.sdtNhan || !form.diaChiNhan) {
@@ -60,12 +46,61 @@ export default function CreateShipmentPage() {
 
     setIsProcessing(true);
 
-    setTimeout(() => {
+    try {
       const newMaDon = `GHN${Date.now().toString().slice(-8)}`;
       setMaDon(newMaDon);
+
+      const orderPayload = {
+        maDon: newMaDon,
+        ...form,
+        paymentMethod,
+        codAmount: paymentMethod === 'cod' ? codAmount : '0',
+        totalAmount: piAmount,
+        piUsername: user?.username || 'unknown',
+        createdAt: Date.now(),
+        status: paymentMethod === 'prepaid' ? 'pending_payment' : 'pending',
+      };
+
+      // 1. Gọi AppController (sẽ emit event → OrderEngine → SyncEngine)
+      await createOrder(orderPayload);
+
+      // 2. Nếu thanh toán trước → gọi Pi Payment thật
+      if (paymentMethod === 'prepaid') {
+        const paymentResult = await piService.createPayment?.({
+          identifier: newMaDon,
+          amount: piAmount,
+          memo: `GHN.PI - Thanh toán đơn ${newMaDon}`,
+          metadata: {
+            orderId: newMaDon,
+            type: 'shipment',
+            from: form.nguoiGui,
+            to: form.nguoiNhan,
+          },
+        });
+
+        if (!paymentResult?.success) {
+          setPaymentError(paymentResult?.error || 'Thanh toán Pi thất bại');
+          setIsProcessing(false);
+          return;
+        }
+
+        // Cập nhật order đã thanh toán
+        await createOrder({
+          ...orderPayload,
+          status: 'paid',
+          paymentTxId: paymentResult.transactionId,
+        });
+      }
+
+      // 3. Hiển thị thành công
       setIsProcessing(false);
       setShowSuccess(true);
-    }, 1500);
+
+    } catch (err: any) {
+      console.error('Create shipment error:', err);
+      setPaymentError(err?.message || 'Có lỗi xảy ra khi tạo đơn');
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -157,13 +192,33 @@ export default function CreateShipmentPage() {
           )}
         </div>
 
-        <button type="submit" disabled={isProcessing} style={submitButton}>
-          {isProcessing
-            ? 'Đang xử lý...'
+        {/* Hiển thị lỗi thanh toán nếu có */}
+        {paymentError && (
+          <div style={{ background: '#fee2e2', color: '#991b1b', padding: '12px 16px', borderRadius: '12px', fontSize: '14px' }}>
+            ❌ {paymentError}
+          </div>
+        )}
+
+        <button 
+          type="submit" 
+          disabled={isProcessing || hookProcessing} 
+          style={submitButton}
+        >
+          {(isProcessing || hookProcessing)
+            ? 'Đang xử lý & thanh toán Pi...'
             : paymentMethod === 'prepaid'
               ? `TẠO ĐƠN & THANH TOÁN ${piAmount.toLocaleString()} Pi`
               : `TẠO ĐƠN THU HỘ ${piAmount.toLocaleString()} Pi`}
         </button>
+
+        <p style={{ textAlign: 'center', fontSize: '12px', color: '#64748b', marginTop: '-8px' }}>
+          {piService.isAuthenticated?.() ? '✓ Đã kết nối Pi' : '⚠️ Chưa kết nối Pi (dùng Mock Payment)'}
+        </p>
+        {typeof window !== 'undefined' && !window.Pi && (
+          <p style={{ fontSize: '11px', color: '#f59e0b', textAlign: 'center', marginTop: 4 }}>
+            Thanh toán Pi thật chỉ hoạt động khi mở trong <strong>Pi Browser</strong>
+          </p>
+        )}
       </form>
 
       {/* Success Modal */}
@@ -174,17 +229,29 @@ export default function CreateShipmentPage() {
             <p><strong>Mã đơn hàng:</strong> <span style={{ color: '#22d3ee', fontSize: '18px' }}>{maDon}</span></p>
             <p style={{ marginTop: '8px' }}>
               {paymentMethod === 'prepaid'
-                ? 'Đã thanh toán trước bằng Pi.'
-                : 'Thu hộ (COD Pi) - Người nhận thanh toán khi nhận hàng.'}
+                ? '✅ Đã thanh toán trước bằng Pi.'
+                : '📦 Thu hộ (COD Pi) - Người nhận thanh toán khi nhận hàng.'}
             </p>
-            <p style={{ marginTop: '12px', color: '#94a3b8' }}>Đơn hàng đã được ghi nhận và chờ tài xế nhận.</p>
+            <p style={{ marginTop: '12px', color: '#94a3b8' }}>Đơn hàng đã được ghi nhận. Hệ thống sẽ thông báo cho tài xế gần nhất.</p>
 
-            <button onClick={() => { setShowSuccess(false); navigate('/don-hang'); }} style={modalButton}>
-              Xem danh sách đơn hàng
+            <button 
+              onClick={() => { 
+                setShowSuccess(false); 
+                navigate('/tracking'); 
+              }} 
+              style={modalButton}
+            >
+              Theo dõi đơn hàng
             </button>
 
-            <button onClick={() => { setShowSuccess(false); navigate('/tracking'); }} style={{ ...modalButton, background: '#64748b', marginTop: '10px' }}>
-              Theo dõi đơn hàng ngay
+            <button 
+              onClick={() => { 
+                setShowSuccess(false); 
+                navigate('/'); 
+              }} 
+              style={{ ...modalButton, background: '#64748b', marginTop: '10px' }}
+            >
+              Về trang chủ
             </button>
           </div>
         </div>

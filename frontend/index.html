@@ -62,6 +62,42 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Ultra early error catcher - runs before React loads -->
+    <script>
+      (function() {
+        var shown = false;
+        function showHardError(msg) {
+          if (shown) return;
+          shown = true;
+          try {
+            var root = document.getElementById('root');
+            if (root) {
+              root.innerHTML = 
+                '<div style="padding:40px;text-align:center;font-family:system-ui;background:#fee2e2;color:#991b1b;min-height:100vh">' +
+                '<h2>Ứng dụng gặp lỗi nghiêm trọng</h2>' +
+                '<p style="margin:16px 0;font-size:15px;">' + (msg || 'Unknown error') + '</p>' +
+                '<button onclick="location.reload()" style="padding:14px 28px;background:#4c1d95;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">TẢI LẠI TRANG</button>' +
+                '<p style="margin-top:30px;font-size:13px;color:#7f1d1d;">Nếu vẫn lỗi, hãy thử mở bằng trình duyệt ẩn danh hoặc báo lại chi tiết lỗi cho mình.</p>' +
+                '</div>';
+            }
+          } catch(e) {}
+        }
+
+        // Catch synchronous errors during script loading
+        window.addEventListener('error', function(e) {
+          console.error('[Early Error]', e.error || e.message);
+          showHardError(e.error ? (e.error.message || e.error.toString()) : e.message);
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          console.error('[Early Unhandled Rejection]', e.reason);
+          var msg = e.reason && e.reason.message ? e.reason.message : (e.reason ? e.reason.toString() : 'Unhandled error');
+          showHardError(msg);
+        });
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
