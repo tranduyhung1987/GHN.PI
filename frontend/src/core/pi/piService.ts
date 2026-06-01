@@ -7,15 +7,16 @@ import { RealPiService } from "./RealPiService";
 const isPiBrowser = (): boolean => {
   if (typeof window === 'undefined') return false;
 
+  // Tạm thời chỉ cho phép Real Pi khi ở Pi Browser thật
   const hostname = window.location.hostname;
-  const userAgent = navigator.userAgent;
+  const userAgent = navigator.userAgent.toLowerCase();
 
-  return (
-    typeof window.Pi !== 'undefined' &&
-    (userAgent.includes('PiBrowser') || 
-     hostname.includes('minepi.com') || 
-     hostname.includes('pi.network'))
-  );
+  const isPiEnv = 
+    hostname.includes('minepi.com') || 
+    hostname.includes('pi.network') ||
+    userAgent.includes('pibrowser');
+
+  return typeof window.Pi !== 'undefined' && isPiEnv;
 };
 
 const createPiService = (): PiAdapter => {
