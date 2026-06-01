@@ -39,7 +39,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
     );
   }
 
-  // Người đã có vai trò → 4 tab
+  // Người đã có vai trò → 4 tab (đã đồng bộ với AppRoutes)
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -53,10 +53,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
       <button onClick={() => goTo('/tracking')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/tracking') ? '#4c1d95' : '#666' }}>
         🔍<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Theo dõi</span>
       </button>
-      <button onClick={() => goTo('/orders')} style={{ flex: 1, background: 'none', border: 'none', color: '#666' }}>
+      <button onClick={() => goTo('/orders')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/orders') || isActive('/don-hang') ? '#4c1d95' : '#666' }}>
         📦<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Đơn hàng</span>
       </button>
-      <button onClick={() => goTo('/ca-nhan')} style={{ flex: 1, background: 'none', border: 'none', color: '#666' }}>
+      <button onClick={() => goTo('/ca-nhan')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/ca-nhan') || isActive('/profile') ? '#4c1d95' : '#666' }}>
         👤<br /><span style={{ fontSize: '11px', fontWeight: 600 }}>Cá nhân</span>
       </button>
     </div>

@@ -1,5 +1,5 @@
 // src/core/pi/MockPiService.ts
-import { PiAdapter, PiUser } from "./PiAdapter";
+import { PiAdapter, PiPayment, PiPaymentResult, PiUser } from "./PiAdapter";
 
 export class MockPiService implements PiAdapter {
   private _currentUser: PiUser | null = null;
@@ -17,17 +17,51 @@ export class MockPiService implements PiAdapter {
   }
 
   async authenticate(): Promise<PiUser> {
+    // Dùng username từ localStorage nếu có (hữu ích khi dev)
+    const saved = localStorage.getItem('mockPiUsername');
+    const username = saved || `pi_user_${Math.floor(Math.random() * 10000)}`;
+
     const mockUser: PiUser = {
-      username: "test_user_123",
-      uid: "mock-uid-123456",
-      role: "driver",
+      uid: `mock-uid-${Date.now()}`,
+      username,
+      name: username,
+      role: (localStorage.getItem('mockPiRole') as any) || undefined,
     };
 
     this._currentUser = mockUser;
+    localStorage.setItem('mockPiUsername', username);
+
+    console.log('%c[Mock Pi] Authenticated as', 'color: orange', mockUser);
     return mockUser;
   }
 
   logout(): void {
     this._currentUser = null;
+    localStorage.removeItem('mockPiUsername');
+    console.log('%c[Mock Pi] Logged out', 'color: orange');
+  }
+
+  async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
+    console.log('%c[Mock Pi] Simulating Pi Payment...', 'color:#f59e0b', payment);
+
+    // Giả lập độ trễ mạng + user confirm
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // 95% success rate trong mock
+    const success = Math.random() > 0.05;
+
+    if (success) {
+      const txid = `MOCK-TX-${Date.now()}`;
+      console.log('%c[Mock Pi] Payment SUCCESS', 'color:#22c55e', txid);
+      return {
+        success: true,
+        transactionId: txid,
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Mock payment failed (simulated)',
+      };
+    }
   }
 }

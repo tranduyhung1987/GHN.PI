@@ -1,36 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAllOrders } from '../services/firebase/orderService';
 
 export default function DriverPage() {
   const navigate = useNavigate();
+
   const [filter, setFilter] = useState<'all' | 'pending' | 'shipping' | 'completed'>('pending');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dữ liệu mẫu để hiển thị UI (bạn có thể xóa sau)
-  const sampleOrders = [
-    { maDon: 'GHN784521', customer: 'Nguyễn Văn A', address: '123 Nguyễn Trãi, Q1', fee: '45.000 Pi', status: 'pending', loai: 'Hỏa Tốc' },
-    { maDon: 'GHN965874', customer: 'Trần Thị B', address: '456 Lê Lợi, Q1', fee: '32.000 Pi', status: 'shipping', loai: 'Đường Dài' },
-    { maDon: 'GHN312456', customer: 'Lê Văn C', address: '789 Trần Hưng Đạo, Q5', fee: '58.000 Pi', status: 'completed', loai: 'Hỏa Tốc' },
-  ];
+  const loadDriverOrders = async () => {
+    setLoading(true);
+    try {
+      const allOrders = await getAllOrders(100);
+      setOrders(allOrders);
+    } catch {
+      const local = localStorage.getItem('ghn_pi_orders');
+      if (local) setOrders(JSON.parse(local));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredOrders = filter === 'all' 
-    ? sampleOrders 
-    : sampleOrders.filter(o => o.status === filter);
+  useEffect(() => {
+    loadDriverOrders();
+  }, []);
+
+  const mapStatus = (status: string) => {
+    if (!status) return 'pending';
+    if (['created', 'paid'].includes(status)) return 'pending';
+    if (['picked_up', 'in_transit'].includes(status)) return 'shipping';
+    if (status === 'delivered') return 'completed';
+    return status;
+  };
+
+  const filteredOrders = filter === 'all'
+    ? orders
+    : orders.filter(o => mapStatus(o.status || o.trangThai) === filter);
 
   return (
     <div style={pageContainer}>
-      {/* HEADER */}
       <div style={headerStyle}>
         <button onClick={() => navigate('/')} style={backBtn}>⬅ Về trang chủ</button>
         <h2 style={{ color: '#4c1d95', margin: 0 }}>Đơn hàng Tài Xế</h2>
         <div style={{ width: 80 }}></div>
       </div>
 
-      {/* FILTER TABS */}
       <div style={filterContainer}>
         {(['pending', 'shipping', 'completed', 'all'] as const).map(f => (
-          <button 
-            key={f} 
+          <button
+            key={f}
             onClick={() => setFilter(f)}
             style={filter === f ? activeFilterBtn : filterBtn}
           >
@@ -39,53 +58,46 @@ export default function DriverPage() {
         ))}
       </div>
 
-      {/* DANH SÁCH ĐƠN HÀNG (UI) */}
       <div style={{ padding: '0 16px' }}>
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order, index) => (
-            <div key={index} style={orderCard} onClick={() => setSelectedOrder(order)}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ color: '#4c1d95', fontSize: 17 }}>{order.maDon}</strong>
-                <span style={getStatusStyle(order.status)}>{order.status}</span>
+        {loading ? (
+          <p style={{ textAlign: 'center', padding: 40 }}>Đang tải đơn hàng...</p>
+        ) : filteredOrders.length > 0 ? (
+          filteredOrders.map((order: any, index: number) => {
+            const displayStatus = order.status || order.trangThai || 'pending';
+            const mapped = mapStatus(displayStatus);
+
+            return (
+              <div
+                key={index}
+                style={orderCard}
+                onClick={() => navigate(`/tracking/${order.maDon}`)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <strong style={{ color: '#4c1d95', fontSize: 17 }}>{order.maDon}</strong>
+                  <span style={getStatusStyle(mapped)}>{mapped}</span>
+                </div>
+                <p style={{ margin: '8px 0 4px', color: '#334155' }}>
+                  👤 {order.nguoiNhan || order.customer || 'N/A'}
+                </p>
+                <p style={{ fontSize: 13, color: '#64748b' }}>
+                  📍 {order.diaChiNhan || order.address || 'N/A'}
+                </p>
               </div>
-              <p style={{ margin: '10px 0 6px', color: '#334155' }}>👤 {order.customer}</p>
-              <p style={{ fontSize: 13, color: '#64748b' }}>📍 {order.address}</p>
-              <p style={{ fontWeight: 700, color: '#7c3aed', marginTop: 6 }}>{order.fee}</p>
-              <p style={{ fontSize: 13, color: '#64748b' }}>🚚 {order.loai}</p>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p style={{ textAlign: 'center', color: '#64748b', marginTop: 40 }}>Không có đơn hàng</p>
         )}
       </div>
 
-      {/* MODAL CHI TIẾT (CHỈ UI) */}
-      {selectedOrder && (
-        <div style={modalOverlay} onClick={() => setSelectedOrder(null)}>
-          <div style={modalContent} onClick={e => e.stopPropagation()}>
-            <h3 style={{ color: '#4c1d95', marginBottom: 16 }}>Chi tiết đơn hàng</h3>
-            
-            <div style={{ textAlign: 'left', marginBottom: 24, lineHeight: 1.8 }}>
-              <p><strong>Mã đơn:</strong> {selectedOrder.maDon}</p>
-              <p><strong>Khách hàng:</strong> {selectedOrder.customer}</p>
-              <p><strong>Địa chỉ:</strong> {selectedOrder.address}</p>
-              <p><strong>Loại:</strong> {selectedOrder.loai}</p>
-              <p><strong>Phí:</strong> {selectedOrder.fee}</p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button style={purpleBtn}>🚀 Nhận đơn (Bắt đầu giao)</button>
-              <button style={greenBtn}>✅ Hoàn thành đơn hàng</button>
-              <button onClick={() => setSelectedOrder(null)} style={closeBtn}>Đóng</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <p style={{ textAlign: 'center', fontSize: 12, color: '#64748b', marginTop: 16 }}>
+        Nhấn vào đơn để xem &amp; cập nhật chi tiết tại trang Tracking
+      </p>
     </div>
   );
 }
 
-/* ===================== STYLES (GIỮ NGUYÊN ĐẸP) ===================== */
+/* Styles */
 const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f8fafc', paddingBottom: 90 };
 const headerStyle: React.CSSProperties = { padding: '20px 16px', background: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
 const backBtn: React.CSSProperties = { padding: '8px 14px', background: '#f3e8ff', color: '#4c1d95', border: 'none', borderRadius: 999, fontWeight: 600 };
@@ -99,9 +111,3 @@ const getStatusStyle = (status: string): React.CSSProperties => ({
   background: status === 'pending' ? '#fef3c7' : status === 'shipping' ? '#dcfce7' : '#e0e7ff',
   color: status === 'pending' ? '#d97706' : status === 'shipping' ? '#16a34a' : '#4338ca'
 });
-
-const modalOverlay: React.CSSProperties = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
-const modalContent: React.CSSProperties = { background: 'white', padding: 28, borderRadius: 24, width: '90%', maxWidth: 360 };
-const purpleBtn: React.CSSProperties = { padding: 14, background: '#4c1d95', color: 'white', border: 'none', borderRadius: 999, fontWeight: 700 };
-const greenBtn: React.CSSProperties = { ...purpleBtn, background: '#16a34a' };
-const closeBtn: React.CSSProperties = { padding: 14, background: '#f3e8ff', color: '#4c1d95', border: 'none', borderRadius: 999, fontWeight: 700 };

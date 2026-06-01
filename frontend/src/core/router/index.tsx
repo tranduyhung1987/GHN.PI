@@ -12,11 +12,11 @@ import WorkflowDashboardPage from "@/pages/WorkflowDashboardPage";
 import DistributedRuntimePage from "@/pages/DistributedRuntimePage";
 import SystemDashboardPage from "@/pages/SystemDashboardPage";
 
-// TRANG MỚI
+// Các trang đã đổi tên / đã có UI đẹp
 import WarehousePage from "@/pages/WarehousePage";
 import DriverPage from "@/pages/DriverPage";
 import TrackingPage from "@/pages/TrackingPage";
-import CreateShipmentPage from "@/pages/CreateShipmentPage.tsx";
+import CreateShipmentPage from "@/pages/CreateShipmentPage";
 import ShippingFeePage from "@/pages/ShippingFeePage";
 import ReceivePackagePage from "@/pages/ReceivePackagePage";
 
@@ -32,24 +32,24 @@ export default function AppRouter() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
 
-        {/* CÁC TRANG ĐÃ CÓ */}
+        {/* TRANG NÂNG CAO */}
         <Route path="/map" element={<MapPage />} />
         <Route path="/journey" element={<OrderJourneyPage />} />
         <Route path="/event-replay" element={<EventReplayPage />} />
         <Route path="/cqrs" element={<CQRSDashboardPage />} />
         <Route path="/workflow" element={<WorkflowDashboardPage />} />
         <Route path="/distributed" element={<DistributedRuntimePage />} />
-        <Route path="/system" element={<SystemDashboardPage />} />        
-        
-        {/* TRANG MỚI (ĐÃ CÓ UI) */}
+        <Route path="/system" element={<SystemDashboardPage />} />
+
+        {/* TRANG CHÍNH (ĐÃ ĐỔI TÊN) */}
         <Route path="/gui-hang" element={<CreateShipmentPage />} />
         <Route path="/tra-cuu-cuoc" element={<ShippingFeePage />} />
         <Route path="/nhan-hang" element={<ReceivePackagePage />} />
         <Route path="/driver" element={<DriverPage />} />
         <Route path="/tracking" element={<TrackingPage />} />
-        <Route path="/tracking" element={<TrackingPage />} />
         <Route path="/warehouse" element={<WarehousePage />} />
 
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

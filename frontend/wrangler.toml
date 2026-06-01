@@ -1,0 +1,14 @@
+name = "ghn-pi"
+compatibility_date = "2025-06-01"
+
+[build]
+command = "npm run build"
+cwd = "."
+watch_dir = "src"
+
+[build.upload]
+format = "static"
+dir = "dist"
+
+# For Cloudflare Pages, we mainly use the dashboard or Git integration.
+# This file is useful for local testing with `wrangler pages dev dist`
