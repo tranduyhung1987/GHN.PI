@@ -77,14 +77,16 @@ try {
       </ErrorBoundary>
     </StrictMode>
   );
-} catch (err) {
+} catch (err: unknown) {
   console.error('[Critical] Failed to mount React root:', err);
   const rootEl = document.getElementById('root');
+  const errorMessage = err instanceof Error ? err.message : 'Unknown critical error';
+
   if (rootEl) {
     rootEl.innerHTML = `
       <div style="padding:40px;text-align:center;font-family:system-ui;background:#fee2e2;color:#991b1b;">
         <h2>Ứng dụng gặp lỗi nghiêm trọng khi khởi động</h2>
-        <p>${err?.message || 'Unknown critical error'}</p>
+        <p>${errorMessage}</p>
         <button onclick="location.reload()" style="padding:12px 24px;background:#4c1d95;color:white;border:none;border-radius:8px;margin-top:16px;">
           Tải lại trang
         </button>
