@@ -98,7 +98,11 @@ export default function HomePage() {
           <>
             <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí ship" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
             <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
           </>
         )}
@@ -113,13 +117,17 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI MỚI (guest) - Chưa chọn vai trò */}
+        {/* NGƯỜI MỚI (guest) - Hiển thị đầy đủ 8 thẻ như ban đầu */}
         {(!role || role === 'guest') && (
           <>
             <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí ship" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
+            <Card title="TÀI XẾ" icon="🏍️" desc="Đơn hàng tài xế" onClick={() => navigate('/driver')} />
             <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={() => navigate('/tracking')} />
-            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò để sử dụng đầy đủ" onClick={() => navigate('/dang-ky')} />
+            <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={() => navigate('/dang-ky')} />
           </>
         )}
       </div>
