@@ -31,57 +31,57 @@ export default function HomePage() {
     checkIncomplete();
   }, []);
 
-  // === Mobile-first ultra-compact styles for Pi Browser phone viewport (show all 8 guest cards) ===
+  // === Balanced mobile-first styles for Pi Browser (visible + usable 8 cards, decent button & warning) ===
   const mobile = isMobile;
 
   const pageContainer: React.CSSProperties = { 
-    padding: mobile ? '3px' : '8px', 
+    padding: mobile ? '6px' : '12px', 
     background: '#f3e8ff', 
     minHeight: '100dvh', 
     boxSizing: 'border-box' 
   };
   const headerContainer: React.CSSProperties = { 
     textAlign: 'center', 
-    marginBottom: mobile ? '3px' : '6px' 
+    marginBottom: mobile ? '4px' : '8px' 
   };
   const logoStyle: React.CSSProperties = { 
-    fontSize: mobile ? '18px' : '24px', 
+    fontSize: mobile ? '20px' : '26px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: 0 
   };
   const subtitleStyle: React.CSSProperties = { 
     color: '#64748b', 
-    fontSize: mobile ? '8px' : '10px', 
+    fontSize: mobile ? '9px' : '11px', 
     margin: '0' 
   };
   const piButtonContainer: React.CSSProperties = { 
-    margin: mobile ? '0 auto 2px' : '0 auto 4px', 
-    maxWidth: '260px' 
+    margin: mobile ? '0 auto 4px' : '0 auto 8px', 
+    maxWidth: '280px' 
   };
   const piButton: React.CSSProperties = { 
-    padding: mobile ? '5px 8px' : '8px 12px', 
+    padding: mobile ? '9px 14px' : '10px 16px', 
     background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
     color: 'white', 
     border: 'none', 
     borderRadius: '9999px', 
     fontWeight: 700, 
-    fontSize: mobile ? '11px' : '13px', 
+    fontSize: mobile ? '13px' : '14px', 
     width: '100%', 
     cursor: 'pointer' 
   };
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
-    gridTemplateColumns: mobile ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)', 
-    gap: mobile ? '3px' : '5px' 
+    gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : 'repeat(2, 1fr)', 
+    gap: mobile ? '4px' : '6px' 
   };
   const warningStyle: React.CSSProperties = { 
-    marginTop: mobile ? '2px' : '4px', 
-    padding: mobile ? '2px 3px' : '3px 4px', 
+    marginTop: mobile ? '4px' : '6px', 
+    padding: mobile ? '4px 6px' : '5px 7px', 
     background: '#fef2f2', 
     color: '#991b1b', 
-    borderRadius: '3px', 
-    fontSize: mobile ? '7.5px' : '9px', 
+    borderRadius: '5px', 
+    fontSize: mobile ? '9px' : '10px', 
     textAlign: 'center', 
     border: '1px solid #f5a3a3' 
   };
@@ -93,38 +93,38 @@ export default function HomePage() {
         <div style={logoStyle}>🚚 GHN.PI</div>
         <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
 
-        {/* Pi Environment Indicator - rất hữu ích khi test trên Pi Browser */}
+        {/* Pi Environment Indicator - smaller on Pi Browser phone */}
         <div style={{
-          marginTop: 8,
-          fontSize: 12,
-          padding: '2px 10px',
+          marginTop: mobile ? 4 : 8,
+          fontSize: mobile ? 10 : 12,
+          padding: mobile ? '1px 8px' : '2px 10px',
           borderRadius: 999,
           display: 'inline-block',
           background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
           color: (typeof window !== 'undefined' && window.Pi) ? '#166534' : '#92400e',
         }}>
           {typeof window !== 'undefined' && window.Pi 
-            ? '✓ Chạy trong Pi Browser (Real Pi SDK)' 
-            : '⚠️ Môi trường Development (dùng Mock Pi)'}
+            ? '✓ Pi Browser (Real SDK)' 
+            : '⚠️ Development (Mock Pi)'}
         </div>
 
-        {/* Incomplete Payment Warning (Pi Network requirement) */}
+        {/* Incomplete Payment Warning (Pi Network requirement) - compact on mobile */}
         {incompleteCount > 0 && (
           <div 
             onClick={() => navigate('/incomplete-payments')}
             style={{
-              marginTop: 10,
+              marginTop: mobile ? 6 : 10,
               background: '#fee2e2',
               color: '#991b1b',
-              padding: '10px 14px',
-              borderRadius: 12,
-              fontSize: 13,
+              padding: mobile ? '6px 10px' : '10px 14px',
+              borderRadius: 10,
+              fontSize: mobile ? 11 : 13,
               fontWeight: 600,
               cursor: 'pointer',
               border: '1px solid #fca5a5',
             }}
           >
-            ⚠️ Có {incompleteCount} giao dịch Pi chưa hoàn tất. <u>Nhấn để xem & xử lý</u>
+            ⚠️ {incompleteCount} giao dịch Pi chưa hoàn tất. <u>Xem & xử lý</u>
           </div>
         )}
       </div>
@@ -205,7 +205,7 @@ export default function HomePage() {
   );
 }
 
-// Ultra-compact Card for Pi Browser 4-col grid on tiny phone viewport (all 8 guest cards visible)
+// Readable compact Card for Pi Browser phone (2-col grid, visible main Home tabs)
 const Card = ({ 
   title, icon, desc, onClick 
 }: { 
@@ -213,34 +213,33 @@ const Card = ({
 }) => {
   const cardStyle: React.CSSProperties = {
     background: 'white',
-    padding: '4px 2px 3px',
-    borderRadius: '6px',
+    padding: '6px 4px',
+    borderRadius: '8px',
     textAlign: 'center',
-    boxShadow: '0 0.5px 1.5px rgba(0,0,0,0.06)',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
     border: '1px solid #e0d4ff',
     cursor: 'pointer',
+    minHeight: '64px', // decent tap target on phone
   };
   const iconStyle: React.CSSProperties = { 
-    fontSize: '15px', 
-    marginBottom: '0px', 
+    fontSize: '20px', 
+    marginBottom: '2px', 
     display: 'block',
     lineHeight: 1
   };
   const cardTitle: React.CSSProperties = { 
-    fontSize: '8.5px', 
+    fontSize: '10px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: '0',
-    lineHeight: '1.1',
-    whiteSpace: 'nowrap' as const,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis'
+    lineHeight: '1.2'
+    // allow wrap for long Vietnamese labels like "TRA CỨU CƯỚC", "ĐĂNG KÝ VAI TRÒ"
   };
   const cardDesc: React.CSSProperties = { 
-    fontSize: '7px', 
+    fontSize: '8px', 
     color: '#64748b', 
     margin: 0,
-    lineHeight: '1.05',
+    lineHeight: '1.15',
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis'
