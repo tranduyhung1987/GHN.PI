@@ -31,58 +31,59 @@ export default function HomePage() {
     checkIncomplete();
   }, []);
 
-  // === True dual: Exact original beautiful desktop (from bc8ef68) + extreme compact for Pi Browser phone to show 8 cards ===
+  // === Return to original beautiful UI/UX (bc8ef68) as much as possible ===
   const mobile = isMobile;
 
-  // Desktop = original beautiful premium look user wants on Chrome
+  // Desktop: exact original beautiful sizes
+  // Mobile (Pi Browser): only header & spacing reduced to make the 8 HOME cards visible; cards themselves stay decent
   const pageContainer: React.CSSProperties = { 
-    padding: mobile ? '4px' : '20px', 
+    padding: mobile ? '6px' : '20px', 
     background: '#f3e8ff', 
     minHeight: '100dvh', 
     boxSizing: 'border-box' 
   };
   const headerContainer: React.CSSProperties = { 
     textAlign: 'center', 
-    marginBottom: mobile ? '2px' : '30px' 
+    marginBottom: mobile ? '3px' : '30px' 
   };
   const logoStyle: React.CSSProperties = { 
-    fontSize: mobile ? '16px' : '42px', 
+    fontSize: mobile ? '18px' : '42px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: 0 
   };
   const subtitleStyle: React.CSSProperties = { 
     color: '#64748b', 
-    fontSize: mobile ? '8px' : '15px', 
+    fontSize: mobile ? '9px' : '15px', 
     margin: mobile ? '0' : '4px 0 0 0' 
   };
   const piButtonContainer: React.CSSProperties = { 
-    margin: mobile ? '0 auto 2px' : '0 auto 30px', 
-    maxWidth: mobile ? '220px' : '340px' 
+    margin: mobile ? '0 auto 3px' : '0 auto 30px', 
+    maxWidth: mobile ? '240px' : '340px' 
   };
   const piButton: React.CSSProperties = { 
-    padding: mobile ? '8px 12px' : '18px 40px', 
+    padding: mobile ? '9px 14px' : '18px 40px', 
     background: 'linear-gradient(135deg, #4c1d95, #7c3aed)', 
     color: 'white', 
     border: 'none', 
     borderRadius: '9999px', 
     fontWeight: 700, 
-    fontSize: mobile ? '12px' : '17px', 
+    fontSize: mobile ? '13px' : '17px', 
     width: '100%', 
     cursor: 'pointer' 
   };
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
     gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : '1fr 1fr', 
-    gap: mobile ? '3px' : '16px' 
+    gap: mobile ? '4px' : '16px' 
   };
   const warningStyle: React.CSSProperties = { 
-    marginTop: mobile ? '3px' : '30px', 
-    padding: mobile ? '3px 4px' : '16px', 
+    marginTop: mobile ? '4px' : '30px', 
+    padding: mobile ? '4px 5px' : '16px', 
     background: '#fef2f2', 
     color: '#991b1b', 
-    borderRadius: mobile ? '4px' : '16px', 
-    fontSize: mobile ? '8px' : '13px', 
+    borderRadius: mobile ? '5px' : '16px', 
+    fontSize: mobile ? '9px' : '13px', 
     textAlign: 'center', 
     border: '1px solid #f5a3a3' 
   };
@@ -94,11 +95,11 @@ export default function HomePage() {
         <div style={logoStyle}>🚚 GHN.PI</div>
         <p style={subtitleStyle}>Giao hàng nhanh • Thanh toán bằng Pi</p>
 
-        {/* Pi Environment Indicator - almost hidden on Pi Browser to save space for 8 cards */}
+        {/* Pi Environment Indicator - original size on desktop, minimal on Pi */}
         <div style={{
           marginTop: mobile ? 2 : 8,
-          fontSize: mobile ? 8 : 12,
-          padding: mobile ? '0px 6px' : '2px 10px',
+          fontSize: mobile ? 9 : 12,
+          padding: mobile ? '1px 6px' : '2px 10px',
           borderRadius: 999,
           display: 'inline-block',
           background: (typeof window !== 'undefined' && window.Pi) ? '#dcfce7' : '#fef3c7',
@@ -106,26 +107,26 @@ export default function HomePage() {
         }}>
           {typeof window !== 'undefined' && window.Pi 
             ? '✓ Pi Browser' 
-            : '⚠️ Dev (Mock)'}
+            : '⚠️ Development (Mock Pi)'}
         </div>
 
-        {/* Incomplete Payment Warning - minimal on Pi Browser */}
+        {/* Incomplete Payment Warning - original on desktop, minimal on Pi */}
         {incompleteCount > 0 && (
           <div 
             onClick={() => navigate('/incomplete-payments')}
             style={{
-              marginTop: mobile ? 2 : 10,
+              marginTop: mobile ? 3 : 10,
               background: '#fee2e2',
               color: '#991b1b',
-              padding: mobile ? '3px 6px' : '10px 14px',
-              borderRadius: mobile ? 4 : 10,
-              fontSize: mobile ? 9 : 13,
+              padding: mobile ? '4px 8px' : '10px 14px',
+              borderRadius: mobile ? 6 : 10,
+              fontSize: mobile ? 10 : 13,
               fontWeight: 600,
               cursor: 'pointer',
               border: '1px solid #fca5a5',
             }}
           >
-            ⚠️ {incompleteCount} Pi chưa hoàn tất
+            ⚠️ {incompleteCount} giao dịch Pi chưa hoàn tất
           </div>
         )}
       </div>
@@ -183,9 +184,14 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI MỚI (guest) - Hiển thị đầy đủ 8 thẻ như ban đầu */}
+        {/* NGƯỜI MỚI (guest) - 8 thẻ HOME chính (original spirit) */}
         {(!role || role === 'guest') && (
           <>
+            {mobile && (
+              <div style={{ gridColumn: '1 / -1', fontSize: '10px', fontWeight: 600, color: '#4c1d95', marginBottom: '2px', textAlign: 'center' }}>
+                8 chức năng chính • Người mới
+              </div>
+            )}
             <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} mobile={mobile} />
             <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} mobile={mobile} />
             <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} mobile={mobile} />
@@ -206,26 +212,25 @@ export default function HomePage() {
   );
 }
 
-// Original beautiful desktop Card (exact from bc8ef68) + extreme compact for Pi Browser to finally show 8 HOME cards
+// Card: Original beautiful on desktop + decent readable on Pi Browser (not microscopic)
 const Card = ({ 
   title, icon, desc, onClick, mobile = false 
 }: { 
   title: string; icon: string; desc: string; onClick: () => void;
   mobile?: boolean;
 }) => {
-  // Desktop = exact original beautiful premium look (big cards, 36px icons, 15px titles)
   const cardStyle: React.CSSProperties = mobile ? {
-    // Extreme compact for tiny Pi Browser phone viewport — 8 cards must be visible
+    // Decent compact for Pi Browser phone - 8 cards visible, still recognizable
     background: 'white',
-    padding: '4px 2px',
-    borderRadius: '6px',
+    padding: '7px 5px',
+    borderRadius: '10px',
     textAlign: 'center',
-    boxShadow: '0 0.5px 1px rgba(0,0,0,0.04)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
     border: '1px solid #e0d4ff',
     cursor: 'pointer',
-    minHeight: '48px',
+    minHeight: '56px',
   } : {
-    // Original beautiful
+    // Exact original beautiful (bc8ef68)
     background: 'white',
     padding: '20px 12px',
     borderRadius: '20px',
@@ -236,23 +241,23 @@ const Card = ({
   };
 
   const iconStyle: React.CSSProperties = { 
-    fontSize: mobile ? '14px' : '36px', 
-    marginBottom: mobile ? '0px' : '8px', 
+    fontSize: mobile ? '20px' : '36px', 
+    marginBottom: mobile ? '2px' : '8px', 
     display: 'block',
     lineHeight: 1
   };
   const cardTitle: React.CSSProperties = { 
-    fontSize: mobile ? '9px' : '15px', 
+    fontSize: mobile ? '10px' : '15px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: mobile ? '0' : '0 0 4px 0',
-    lineHeight: '1.1'
+    lineHeight: '1.15'
   };
   const cardDesc: React.CSSProperties = mobile ? {
-    fontSize: '7px', 
+    fontSize: '8px', 
     color: '#64748b', 
     margin: 0,
-    lineHeight: '1.0',
+    lineHeight: '1.1',
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis'
