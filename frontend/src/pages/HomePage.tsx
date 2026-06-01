@@ -73,7 +73,7 @@ export default function HomePage() {
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
     gridTemplateColumns: mobile ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)', 
-    gap: mobile ? '2px' : '4px' 
+    gap: mobile ? '3px' : '5px' 
   };
   const warningStyle: React.CSSProperties = { 
     marginTop: mobile ? '2px' : '4px', 
@@ -213,7 +213,7 @@ const Card = ({
 }) => {
   const cardStyle: React.CSSProperties = {
     background: 'white',
-    padding: '3px 1px 2px',
+    padding: '4px 2px 3px',
     borderRadius: '6px',
     textAlign: 'center',
     boxShadow: '0 0.5px 1.5px rgba(0,0,0,0.06)',
@@ -221,26 +221,26 @@ const Card = ({
     cursor: 'pointer',
   };
   const iconStyle: React.CSSProperties = { 
-    fontSize: '14px', 
+    fontSize: '15px', 
     marginBottom: '0px', 
     display: 'block',
     lineHeight: 1
   };
   const cardTitle: React.CSSProperties = { 
-    fontSize: '8px', 
+    fontSize: '8.5px', 
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: '0',
-    lineHeight: '1.05',
+    lineHeight: '1.1',
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis'
   };
   const cardDesc: React.CSSProperties = { 
-    fontSize: '6.5px', 
+    fontSize: '7px', 
     color: '#64748b', 
     margin: 0,
-    lineHeight: '1.0',
+    lineHeight: '1.05',
     whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis'
