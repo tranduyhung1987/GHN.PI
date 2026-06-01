@@ -1,4 +1,5 @@
 // src/main.tsx
+// Updated with ErrorBoundary for Pi Browser stability
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
