@@ -323,7 +323,26 @@ export default function CreateShipmentPage() {
 
         {/* Người nhận */}
         <div>
-          <label style={labelStyle}>Người nhận</label>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <label style={labelStyle}>Người nhận</label>
+            {/* DANH BẠ NGƯỜI NHẬN - đặt ngay đầu, góc phải, ngang bằng label */}
+            <button
+              type="button"
+              onClick={() => setShowAddressBook(true)}
+              style={{
+                padding: '3px 8px',
+                fontSize: '11px',
+                background: '#f0f0f0',
+                color: '#4c1d95',
+                border: '1px solid #c4b5fd',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              📖 Danh bạ ({addressBook.length})
+            </button>
+          </div>
           <input type="text" placeholder="Họ tên người nhận" value={form.nguoiNhan} onChange={(e) => setForm({ ...form, nguoiNhan: e.target.value })} style={inputStyle} />
           <input type="tel" placeholder="Số điện thoại" value={form.sdtNhan} onChange={(e) => setForm({ ...form, sdtNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
           <input type="text" placeholder="Địa chỉ nhận hàng" value={form.diaChiNhan} onChange={(e) => setForm({ ...form, diaChiNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
@@ -354,25 +373,6 @@ export default function CreateShipmentPage() {
           }}
         >
           📋 Dùng thông tin người gửi (giao cho chính mình / người thân)
-        </button>
-
-        {/* DANH BẠ NGƯỜI NHẬN - Tìm nhanh, chọn nhanh */}
-        <button
-          type="button"
-          onClick={() => setShowAddressBook(true)}
-          style={{
-            alignSelf: 'flex-start',
-            padding: '6px 12px',
-            fontSize: '13px',
-            background: '#f0f0f0',
-            color: '#4c1d95',
-            border: '1px solid #c4b5fd',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            marginBottom: '8px',
-          }}
-        >
-          📖 Danh bạ người nhận ({addressBook.length})
         </button>
 
         {/* Thông tin kiện hàng */}
