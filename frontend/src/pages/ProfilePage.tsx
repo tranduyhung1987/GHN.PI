@@ -38,7 +38,7 @@ export default function ProfilePage() {
         <h2 style={{ marginTop: '16px', color: '#4c1d95', fontSize: '22px' }}>Cá Nhân</h2>
         <p style={{ color: '#64748b', marginTop: '4px' }}>ID: {userId}</p>
         <p style={{ color: '#4c1d95', fontWeight: 600, marginTop: '4px' }}>
-          Chủ cửa hàng • Shop
+          {role ? (role === 'sender' ? 'Người gửi hàng' : role === 'driver' ? 'Tài xế' : role === 'warehouse' ? 'Kho trung chuyển' : role === 'receiver' ? 'Người nhận hàng' : role === 'admin' ? 'Admin' : 'Người dùng') : 'Người mới (chưa chọn vai trò)'}
         </p>
       </div>
 
