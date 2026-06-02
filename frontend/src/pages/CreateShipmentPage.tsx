@@ -135,7 +135,7 @@ export default function CreateShipmentPage() {
         <h1 style={titleStyle}>GỬI HÀNG</h1>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px', maxWidth: '360px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         
         {/* Loại đơn */}
         <div>
@@ -217,9 +217,9 @@ export default function CreateShipmentPage() {
             <label style={smallLabel}>Trọng lượng (kg)</label>
             <input type="number" min="0.1" step="0.1" value={form.trongLuong} onChange={(e) => setForm({ ...form, trongLuong: parseFloat(e.target.value) || 1 })} style={inputStyle} />
           </div>
-          <div>
+          <div style={{ width: '100%', boxSizing: 'border-box' }}>
             <label style={smallLabel}>Kích thước (cm) - Dài x Rộng x Cao (dùng tính thể tích nếu cần)</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', boxSizing: 'border-box' }}>
               <input type="number" min="1" placeholder="Dài" value={form.dai} onChange={(e) => setForm({ ...form, dai: parseFloat(e.target.value) || 0 })} style={inputStyle} />
               <input type="number" min="1" placeholder="Rộng" value={form.rong} onChange={(e) => setForm({ ...form, rong: parseFloat(e.target.value) || 0 })} style={inputStyle} />
               <input type="number" min="1" placeholder="Cao" value={form.cao} onChange={(e) => setForm({ ...form, cao: parseFloat(e.target.value) || 0 })} style={inputStyle} />
@@ -323,14 +323,15 @@ export default function CreateShipmentPage() {
 }
 
 /* ===================== STYLES (GIỮ NGUYÊN) ===================== */
-const pageContainer = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 14px 100px', boxSizing: 'border-box' as const };
+const pageContainer = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 20px 100px', boxSizing: 'border-box' as const };
 const headerStyle = { display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' };
 const titleStyle = { fontSize: '26px', fontWeight: '700', color: '#4c1d95', margin: 0 };
 const labelStyle = { display: 'block', marginBottom: '8px', fontWeight: '600', color: '#4c1d95' };
 const smallLabel = { display: 'block', marginBottom: '5px', color: '#6b21a8', fontSize: '13.5px' };
 const inputStyle = {
   width: '100%', padding: '14px 16px', backgroundColor: '#ede9fe',
-  border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95', fontSize: '15.5px'
+  border: '1px solid #c4b5fd', borderRadius: '12px', color: '#4c1d95', fontSize: '15.5px',
+  boxSizing: 'border-box' as const
 };
 const activeToggle = { flex: 1, padding: '13px', borderRadius: '9999px', background: '#22d3ee', color: '#0f172a', fontWeight: '700' };
 const inactiveToggle = { flex: 1, padding: '13px', borderRadius: '9999px', background: '#e0e7ff', color: '#4c1d95', border: '1px solid #c4b5fd', fontWeight: '600' };
