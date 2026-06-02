@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTracking } from '../hooks/useTracking';
 import { useAppController } from '../hooks/useAppController';
 import { useAuth } from '../core/auth/AuthContext';
 import PullToRefresh from '../components/PullToRefresh';
 import { journeyStore } from '../core/journey/journeyStore';
+import { routeAnimationEngine } from '../core/map/routeAnimationEngine';
 
 // Expanded for real GHN-like flow (from CreateShipment + engines)
 const STATUS_FLOW = ['created', 'paid', 'confirmed', 'picked_up', 'in_transit', 'at_warehouse', 'out_for_delivery', 'delivered'];
@@ -36,6 +37,11 @@ export default function TrackingPage() {
   const [updating, setUpdating] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed' | 'issues'>('all');
+
+  // Support distinct entry for driver cards: BẢN ĐỒ vs TRACKING
+  const location = useLocation();
+  const urlView = new URLSearchParams(location.search).get('view');
+  const [driverView, setDriverView] = useState<'list' | 'map'>(urlView === 'map' ? 'map' : 'list');
 
   // Role-aware filter for realistic "my orders" tracking (sender sees own shipments, etc.)
   const getFilteredOrders = () => {
@@ -101,6 +107,43 @@ export default function TrackingPage() {
   const orders = getOrdersWithJourney(); // with journey attached
   const filteredOrders = getFilteredOrders();
 
+  // For driver BẢN ĐỒ mode: seed the animation engine with current deliveries as targets (mock positions)
+  useEffect(() => {
+    if (role === 'driver' && driverView === 'map') {
+      try {
+        const ordersForMap = filteredOrders.slice(0, 4); // limit for demo on phone
+        routeAnimationEngine.clear?.();
+
+        // Seed driver current position (centerish)
+        routeAnimationEngine.updateTarget?.('current_driver', 0.45, 0.5);
+
+        ordersForMap.forEach((o: any, idx: number) => {
+          // Mock positions normalized 0-1 for the visual map box
+          const x = 0.15 + ((idx % 3) * 0.28);
+          const y = 0.2 + (Math.floor(idx / 2) * 0.35);
+          routeAnimationEngine.updateTarget?.(`order_${o.maDon}`, y, x);
+        });
+      } catch (e) {
+        console.warn('[Tracking] map seed error', e);
+      }
+    }
+  }, [role, driverView, filteredOrders.length]);
+
+  // Tick the animation for live map when in map view (driver)
+  const [mapTick, setMapTick] = useState(0);
+  useEffect(() => {
+    let iv: any;
+    if (role === 'driver' && driverView === 'map') {
+      iv = setInterval(() => {
+        try {
+          routeAnimationEngine.tick?.();
+          setMapTick(t => t + 1); // force re-render markers
+        } catch {}
+      }, 120);
+    }
+    return () => iv && clearInterval(iv);
+  }, [role, driverView]);
+
   const isDetail = !!maDon;
   const currentOrder = isDetail ? filteredOrders.find((o: any) => o.maDon === maDon) || allOrders.find((o: any) => o.maDon === maDon) : null;
   const displayOrders = isDetail ? (currentOrder ? [currentOrder] : []) : filteredOrders;
@@ -126,12 +169,16 @@ export default function TrackingPage() {
 
     setUpdating(true);
     try {
-      const payload = {
+      const payload: any = {
         status: newStatus,
         updatedAt: Date.now(),
         // preserve other data (including maDon from spread)
         ...currentOrder,
       };
+      // Tag the driver who performs the delivery completion (so Lịch sử giao for driver is distinct/personal)
+      if ((role === 'driver' || role === 'admin') && (newStatus === 'delivered' || newStatus === 'completed')) {
+        payload.driverUsername = user?.username || currentOrder.driverUsername || '';
+      }
 
       await updateTracking(payload);
 
@@ -164,7 +211,7 @@ export default function TrackingPage() {
       </div>
 
       <h1 style={titleStyle}>
-        {isDetail ? `📦 Đơn ${maDon}` : '🔎 TRA CỨU ĐƠN HÀNG'}
+        {isDetail ? `📦 Đơn ${maDon}` : (role === 'driver' && driverView === 'map' ? '🗺️ BẢN ĐỒ TUYẾN ĐƯỜNG' : '🔎 TRA CỨU ĐƠN HÀNG')}
       </h1>
 
       {/* Nút quay lại danh sách khi ở chế độ chi tiết */}
@@ -174,8 +221,42 @@ export default function TrackingPage() {
         </button>
       )}
 
+      {/* Driver-only mode switcher: makes BẢN ĐỒ vs TRACKING cards distinct (logic only, styles match existing filter tabs) */}
+      {!isDetail && role === 'driver' && (
+        <div style={{ display: 'flex', gap: 6, padding: '0 16px 8px', boxSizing: 'border-box' as const }}>
+          <button
+            onClick={() => setDriverView('list')}
+            style={{
+              padding: '4px 10px',
+              fontSize: 12,
+              borderRadius: 999,
+              border: driverView === 'list' ? '1px solid #22d3ee' : '1px solid #e0e7ff',
+              background: driverView === 'list' ? '#e0f2fe' : 'white',
+              color: '#4c1d95',
+              cursor: 'pointer',
+            }}
+          >
+            📋 Danh sách Tracking
+          </button>
+          <button
+            onClick={() => setDriverView('map')}
+            style={{
+              padding: '4px 10px',
+              fontSize: 12,
+              borderRadius: 999,
+              border: driverView === 'map' ? '1px solid #22d3ee' : '1px solid #e0e7ff',
+              background: driverView === 'map' ? '#e0f2fe' : 'white',
+              color: '#4c1d95',
+              cursor: 'pointer',
+            }}
+          >
+            🗺️ Bản đồ tuyến đường
+          </button>
+        </div>
+      )}
+
       {/* Functional search + status filters (added for full GHN-like tracking, logic only) */}
-      {!isDetail && (
+      {!isDetail && driverView !== 'map' && (
         <div style={{ marginBottom: 12, width: '100%', padding: '0 16px', boxSizing: 'border-box' as const }}>
           <input
             type="text"
@@ -212,6 +293,61 @@ export default function TrackingPage() {
         </div>
       )}
 
+      {/* Driver BẢN ĐỒ view - distinct from TRACKING list. Visual simulation using existing map engine + app-matched styles (logic + container only) */}
+      {!isDetail && role === 'driver' && driverView === 'map' && (
+        <div style={{ margin: '0 16px 16px', background: 'white', borderRadius: 16, padding: 12, border: '1px solid #e0e7ff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontWeight: 600, color: '#4c1d95', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>🗺️ Bản đồ tuyến đường (mô phỏng)</span>
+            <button onClick={() => {
+              // functional: move driver toward first order
+              const first = filteredOrders[0];
+              if (first) routeAnimationEngine.updateTarget?.('current_driver', 0.3 + Math.random()*0.4, 0.3 + Math.random()*0.4);
+            }} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 999, border: '1px solid #c4b5fd', background: '#f8fafc', color: '#4c1d95' }}>Mô phỏng di chuyển</button>
+          </div>
+
+          <div style={{ height: 220, background: '#f1f5f9', position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1px solid #e0e7ff' }}>
+            {/* Fake map bg grid */}
+            <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, #e0e7ff 0, #e0e7ff 1px, transparent 1px, transparent 22px), repeating-linear-gradient(90deg, #e0e7ff 0, #e0e7ff 1px, transparent 1px, transparent 22px)' }} />
+
+            {/* Driver marker (animated via engine + mapTick) */}
+            {(() => {
+              try {
+                const ds = routeAnimationEngine.getDrivers?.() || [];
+                return ds.map((d: any) => {
+                  const x = ((d?.current?.lng ?? 0.5) % 1) * 100;
+                  const y = ((d?.current?.lat ?? 0.5) % 1) * 100;
+                  const isDriver = d.driverId === 'current_driver';
+                  return (
+                    <div key={d.driverId} style={{
+                      position: 'absolute',
+                      left: `${Math.max(5, Math.min(90, x))}%`,
+                      top: `${Math.max(5, Math.min(85, y))}%`,
+                      transform: 'translate(-50%, -50%)',
+                      background: isDriver ? '#4c1d95' : '#22c55e',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: 8,
+                      fontSize: 10,
+                      whiteSpace: 'nowrap',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      transition: 'all 0.1s linear'
+                    }}>
+                      {isDriver ? '🚚 Tôi' : '📍 ' + (d.driverId || '').replace('order_','').slice(0,8)}
+                    </div>
+                  );
+                });
+              } catch { return null; }
+            })()}
+          </div>
+
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: 6 }}>
+            Nhấn "Mô phỏng di chuyển" để xem tài xế di chuyển giữa các điểm giao. Kết nối với đơn thực tế (demo).
+          </div>
+        </div>
+      )}
+
+      {/* Hide detailed list cards when driver is in pure map view (but overview + switcher always available) */}
+      {!(role === 'driver' && driverView === 'map') && (
       <PullToRefresh onRefresh={loadOrders}>
       <div style={cardStyle}>
         {loading ? (
@@ -336,6 +472,7 @@ export default function TrackingPage() {
         )}
       </div>
       </PullToRefresh>
+      )}
     </div>
   );
 }

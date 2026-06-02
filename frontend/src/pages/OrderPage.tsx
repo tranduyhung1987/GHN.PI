@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
 import { useTracking } from '../hooks/useTracking';
@@ -69,16 +69,45 @@ const OrdersPage: React.FC = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState<string | null>(null);
 
-  // Filter to current sender's orders (piUsername or nguoiGui match). For dev/guest show all.
+  const isDriverHistory = role === 'driver' || role === 'admin';
+
+  // For driver Lịch sử giao, default to completed tab when role known
+  useEffect(() => {
+    if (isDriverHistory && activeTab === 'all') {
+      setActiveTab('completed');
+    }
+  }, [isDriverHistory]);
+
+  // Role-aware filter:
+  // - sender/receiver: their shipments (existing logic)
+  // - driver: "Lịch sử giao" = completed deliveries they handled (tagged driverUsername when they deliver)
   const myOrders = useMemo(() => {
     const uname = (user?.username || '').toLowerCase().trim();
-    if (!uname) return allOrders; // dev / no login show all
+
+    if (isDriverHistory) {
+      // Driver history: prefer completed, and if tagged with driverUsername match "mine"
+      return allOrders.filter((o: any) => {
+        const s = (o.status || o.trangThai || '').toLowerCase();
+        const isDone = ['delivered', 'completed'].some(k => s.includes(k));
+        if (!isDone) return false;
+
+        const d = (o.driverUsername || '').toLowerCase();
+        // If tagged, show only mine. If not tagged (old data or demo), still show completed for testnet usability
+        if (d) {
+          return d === uname || d.includes(uname) || !uname;
+        }
+        return true; // untagged completed shown to driver for demo/history
+      });
+    }
+
+    // Sender / default (existing)
+    if (!uname) return allOrders;
     return allOrders.filter((o: any) => {
       const p = (o.piUsername || '').toLowerCase();
       const g = (o.nguoiGui || '').toLowerCase();
       return p === uname || g.includes(uname) || p.includes(uname);
     });
-  }, [allOrders, user?.username]);
+  }, [allOrders, user?.username, role]);
 
   // Apply tab + search
   const filteredOrders = useMemo(() => {
@@ -120,22 +149,41 @@ const OrdersPage: React.FC = () => {
     return list;
   }, [myOrders, activeTab, search]);
 
-  // Stats for sender
+  // Stats - different for driver history vs sender
   const stats = useMemo(() => {
     const total = myOrders.length;
+
+    if (isDriverHistory) {
+      // Driver "Lịch sử giao" stats
+      const codCollected = myOrders.reduce((sum: number, o: any) => {
+        const c = parseFloat(String(o.codAmount || 0)) || 0;
+        return sum + c;
+      }, 0);
+      const deliveredToday = myOrders.filter((o: any) => {
+        const t = (o.updatedAt || o.createdAt || 0) as number;
+        const dayAgo = Date.now() - 24*60*60*1000;
+        const s = (o.status || o.trangThai || '').toLowerCase();
+        return t > dayAgo && ['delivered','completed'].some(k => s.includes(k));
+      }).length;
+      return { total, totalFee: 0, pendingCount: 0, codCollected: Math.round(codCollected), deliveredToday, isDriver: true };
+    }
+
+    // Sender stats
     const totalFee = myOrders.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
     const pendingCount = myOrders.filter((o: any) => {
       const s = (o.status || '').toLowerCase();
       return ['pending_payment', 'pending', 'created', 'paid'].some(k => s.includes(k));
     }).length;
-    return { total, totalFee, pendingCount };
-  }, [myOrders]);
+    return { total, totalFee, pendingCount, codCollected: 0, deliveredToday: 0, isDriver: false };
+  }, [myOrders, isDriverHistory]);
 
-  const pageTitle = role === 'sender' 
-    ? 'ĐƠN HÀNG CỦA TÔI (Người gửi)' 
-    : role === 'receiver' 
-      ? 'ĐƠN HÀNG CỦA TÔI (Liên quan nhận)' 
-      : 'ĐƠN HÀNG CỦA TÔI';
+  const pageTitle = isDriverHistory 
+    ? 'LỊCH SỬ GIAO (Tài xế)' 
+    : role === 'sender' 
+      ? 'ĐƠN HÀNG CỦA TÔI (Người gửi)' 
+      : role === 'receiver' 
+        ? 'ĐƠN HÀNG CỦA TÔI (Liên quan nhận)' 
+        : 'ĐƠN HÀNG CỦA TÔI';
 
   // Copy mã đơn (functional)
   const copyMaDon = async (maDon: string) => {
@@ -226,7 +274,9 @@ const OrdersPage: React.FC = () => {
         <div>
           <h2 style={title}>{pageTitle}</h2>
           <p style={{ color: '#64748b', fontSize: 13, margin: '4px 0 0' }}>
-            Quản lý tất cả đơn bạn đã tạo • Dữ liệu từ local + Firebase
+            {isDriverHistory 
+              ? 'Các đơn bạn đã giao hoàn tất • Lịch sử cá nhân của tài xế' 
+              : 'Quản lý tất cả đơn bạn đã tạo • Dữ liệu từ local + Firebase'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -235,27 +285,42 @@ const OrdersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats (full real summary) */}
+      {/* Stats (role aware: driver history vs sender) */}
       <div style={statsRow}>
         <div style={statCard}>
           <div style={statNum}>{stats.total}</div>
-          <div style={statLabel}>Tổng đơn</div>
+          <div style={statLabel}>{isDriverHistory ? 'Đã giao' : 'Tổng đơn'}</div>
         </div>
-        <div style={statCard}>
-          <div style={statNum}>{stats.pendingCount}</div>
-          <div style={statLabel}>Chờ xử lý</div>
-        </div>
-        <div style={statCard}>
-          <div style={{...statNum, fontSize: 18}}>{stats.totalFee.toLocaleString()}</div>
-          <div style={statLabel}>Tổng cước (Pi)</div>
-        </div>
+        {isDriverHistory ? (
+          <>
+            <div style={statCard}>
+              <div style={statNum}>{(stats as any).deliveredToday || 0}</div>
+              <div style={statLabel}>Hôm nay</div>
+            </div>
+            <div style={statCard}>
+              <div style={{...statNum, fontSize: 18}}>{((stats as any).codCollected || 0).toLocaleString()}</div>
+              <div style={statLabel}>COD đã thu (đ)</div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={statCard}>
+              <div style={statNum}>{stats.pendingCount}</div>
+              <div style={statLabel}>Chờ xử lý</div>
+            </div>
+            <div style={statCard}>
+              <div style={{...statNum, fontSize: 18}}>{stats.totalFee.toLocaleString()}</div>
+              <div style={statLabel}>Tổng cước (Pi)</div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Search (functional realtime) */}
       <div style={{ marginBottom: 12 }}>
         <input
           type="text"
-          placeholder="Tìm mã đơn, tên/SĐT/địa chỉ người nhận..."
+          placeholder={isDriverHistory ? "Tìm mã đơn, người nhận đã giao, SĐT, địa chỉ..." : "Tìm mã đơn, tên/SĐT/địa chỉ người nhận..."}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={searchInput}
@@ -284,12 +349,16 @@ const OrdersPage: React.FC = () => {
           <div style={emptyState}>
             {search || activeTab !== 'all' 
               ? 'Không có đơn khớp bộ lọc/tìm kiếm.' 
-              : 'Bạn chưa có đơn hàng nào.'}
-            <div style={{ marginTop: 16 }}>
-              <button onClick={() => navigate('/gui-hang')} style={createBtn}>
-                📦 Tạo đơn gửi hàng mới
-              </button>
-            </div>
+              : isDriverHistory 
+                ? 'Chưa có lịch sử giao hàng. Hoàn tất một số đơn ở trang Đơn hàng của tài xế.' 
+                : 'Bạn chưa có đơn hàng nào.'}
+            {!isDriverHistory && (
+              <div style={{ marginTop: 16 }}>
+                <button onClick={() => navigate('/gui-hang')} style={createBtn}>
+                  📦 Tạo đơn gửi hàng mới
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div style={listContainer}>
@@ -356,7 +425,7 @@ const OrdersPage: React.FC = () => {
                     <div style={actionRow}>
                       <button onClick={() => openDetail(order)} style={actionBtn}>Chi tiết</button>
                       <button onClick={() => navigate(`/tracking/${order.maDon}`)} style={actionBtn}>Theo dõi</button>
-                      {isCancellable(status) && (
+                      {!isDriverHistory && isCancellable(status) && (
                         <button 
                           onClick={() => handleCancelOrder(order.maDon)} 
                           disabled={isCancelling === order.maDon}
@@ -366,7 +435,12 @@ const OrdersPage: React.FC = () => {
                         </button>
                       )}
                       <button onClick={() => copyMaDon(order.maDon)} style={actionBtn}>Copy</button>
-                      <button onClick={() => handleCreateSimilar(order)} style={actionBtn}>Tạo lại</button>
+                      {!isDriverHistory && (
+                        <button onClick={() => handleCreateSimilar(order)} style={actionBtn}>Tạo lại</button>
+                      )}
+                      {isDriverHistory && order.driverUsername && (
+                        <span style={{ fontSize: 10, color: '#166534', alignSelf: 'center' }}>✓ Giao bởi bạn</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -434,9 +508,9 @@ const OrdersPage: React.FC = () => {
               Cập nhật: {selectedOrder.updatedAt ? new Date(selectedOrder.updatedAt).toLocaleString() : '—'}
             </div>
 
-            {/* Quick actions inside modal */}
+            {/* Quick actions inside modal - driver history hides sender actions */}
             <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {isCancellable(selectedOrder.status) && (
+              {!isDriverHistory && isCancellable(selectedOrder.status) && (
                 <button 
                   onClick={() => handleCancelOrder(selectedOrder.maDon)} 
                   style={{ ...smallAction, background: '#fee2e2', color: '#991b1b' }}
@@ -445,12 +519,19 @@ const OrdersPage: React.FC = () => {
                   {isCancelling === selectedOrder.maDon ? 'Đang hủy...' : '🚫 Hủy đơn này'}
                 </button>
               )}
-              <button onClick={() => handleCreateSimilar(selectedOrder)} style={smallAction}>
-                📋 Tạo đơn tương tự
-              </button>
+              {!isDriverHistory && (
+                <button onClick={() => handleCreateSimilar(selectedOrder)} style={smallAction}>
+                  📋 Tạo đơn tương tự
+                </button>
+              )}
               <button onClick={() => copyMaDon(selectedOrder.maDon)} style={smallAction}>
                 📋 Copy mã đơn
               </button>
+              {isDriverHistory && (
+                <span style={{ fontSize: 12, color: '#166534', alignSelf: 'center' }}>
+                  Lịch sử giao - xem chi tiết hành trình tại "Theo dõi"
+                </span>
+              )}
             </div>
 
             <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8' }}>
@@ -460,12 +541,14 @@ const OrdersPage: React.FC = () => {
         )}
       </Modal>
 
-      {/* Bottom quick create */}
-      <div style={{ textAlign: 'center', marginTop: 24 }}>
-        <button onClick={() => navigate('/gui-hang')} style={createBtnBig}>
-          + TẠO ĐƠN GỬI HÀNG MỚI
-        </button>
-      </div>
+      {/* Bottom quick create - only for sender, not for driver history */}
+      {!isDriverHistory && (
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <button onClick={() => navigate('/gui-hang')} style={createBtnBig}>
+            + TẠO ĐƠN GỬI HÀNG MỚI
+          </button>
+        </div>
+      )}
     </div>
   );
 };

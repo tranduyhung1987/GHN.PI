@@ -3,13 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
 import type { AppRole } from '../utils/constants';
+import { REGISTRABLE_ROLES, ROLE_INFO, getRoleLabel } from '../utils/constants';
 
-const ROLES: { key: AppRole; label: string; icon: string; desc: string }[] = [
-  { key: 'sender',    label: 'Người gửi hàng',     icon: '📦', desc: 'Tạo đơn gửi hàng & thanh toán Pi' },
-  { key: 'driver',    label: 'Tài xế',             icon: '🏍️', desc: 'Nhận đơn & giao hàng' },
-  { key: 'warehouse', label: 'Kho trung chuyển',   icon: '🏬', desc: 'Quản lý nhập - xuất kho, trung chuyển' },
-  { key: 'receiver',  label: 'Người nhận hàng',    icon: '📥', desc: 'Nhận hàng & xác nhận giao hàng' },
-];
+// Sử dụng single source from constants.ts (không duplicate data)
+const roleOptions = REGISTRABLE_ROLES.map((key) => ROLE_INFO[key]);
 
 const RegisterRolePage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,63 +17,96 @@ const RegisterRolePage: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<AppRole | null>(role);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [justSaved, setJustSaved] = useState(false);
 
-  // Đồng bộ state khi user/role thay đổi từ context
+  // Tối ưu: Tự động nhận diện đã đăng nhập Pi từ context (không cần bấm nút lại nếu đã login trước đó)
   useEffect(() => {
     if (user?.username) {
       setIsPiConnected(true);
       setPiUsername(user.username);
+      setError(''); // clear lỗi cũ
     }
     if (role) {
       setSelectedRole(role);
     }
   }, [user?.username, role]);
 
-  // Auto navigate to Home after successful role selection (more reliable than timeout)
+  // Auto navigate sau khi lưu thành công (hiển thị trạng thái success trước)
   useEffect(() => {
-    if (selectedRole && role === selectedRole && isPiConnected) {
+    if (justSaved && selectedRole && role === selectedRole) {
       const timer = setTimeout(() => {
         navigate('/');
-      }, 300);
+      }, 450);
       return () => clearTimeout(timer);
     }
-  }, [role, selectedRole, isPiConnected, navigate]);
+  }, [justSaved, role, selectedRole, navigate]);
 
-  // Tự động khôi phục role đã chọn trước đó
+  // Khôi phục draft role từ local (nếu context chưa có)
   useEffect(() => {
-    const saved = localStorage.getItem('selectedRole') as AppRole | null;
-    if (saved && !selectedRole) {
-      setSelectedRole(saved);
+    if (!selectedRole) {
+      const saved = localStorage.getItem('selectedRole') as AppRole | null;
+      if (saved && REGISTRABLE_ROLES.includes(saved)) {
+        setSelectedRole(saved);
+      }
     }
-  }, []);
+  }, [selectedRole]);
+
+  const clearError = () => setError('');
 
   const handlePiConnect = async () => {
+    clearError();
     try {
       setIsConnecting(true);
       await login();
-
-      // Sau login thành công
-      setIsPiConnected(true);
-      if (user?.username) setPiUsername(user.username);
+      // Sau khi login, useEffect trên sẽ tự sync isPiConnected + username từ context user
     } catch (error: any) {
       console.error(error);
-      alert('Kết nối Pi thất bại: ' + (error?.message || 'Hãy mở trong Pi Browser'));
+      setError('Kết nối Pi thất bại: ' + (error?.message || 'Hãy mở trong Pi Browser (sdk.minepi.com)'));
     } finally {
       setIsConnecting(false);
     }
   };
 
   const handleSelectRole = (roleKey: AppRole) => {
+    clearError();
     setSelectedRole(roleKey);
+    setJustSaved(false);
+  };
+
+  // Seed tối thiểu profile để các form (Gửi hàng, Tra cứu cước...) tự điền tên từ Pi, tránh gõ tay lần đầu
+  const seedProfileForRole = (chosen: AppRole, uname: string, displayName?: string) => {
+    const name = displayName || uname || 'Người dùng Pi';
+    if (chosen === 'sender') {
+      const existing = localStorage.getItem('mySenderInfo');
+      if (!existing) {
+        localStorage.setItem('mySenderInfo', JSON.stringify({
+          nguoiGui: name,
+          sdtGui: '',
+          diaChiGui: '',
+        }));
+      }
+    } else if (chosen === 'receiver') {
+      const existing = localStorage.getItem('lastReceiverInfo');
+      if (!existing) {
+        localStorage.setItem('lastReceiverInfo', JSON.stringify({
+          nguoiNhan: name,
+          sdtNhan: '',
+          diaChiNhan: '',
+        }));
+      }
+    }
+    // driver/warehouse: có thể mở rộng sau nếu cần profile riêng
   };
 
   const handleConfirmRole = async () => {
+    clearError();
     if (!selectedRole) {
-      alert('Vui lòng chọn một vai trò');
+      setError('Vui lòng chọn một vai trò trong 4 lựa chọn bên dưới');
       return;
     }
     if (!isPiConnected) {
-      alert('Bạn cần kết nối Pi trước');
+      setError('Bạn cần kết nối / xác thực với Pi Network trước khi chọn vai trò');
       return;
     }
 
@@ -84,22 +114,35 @@ const RegisterRolePage: React.FC = () => {
     try {
       updateRole(selectedRole);
 
-      // Lưu thêm username để các trang khác dễ dùng
+      // Lưu username tiện dụng
       if (piUsername) {
         localStorage.setItem('piUsername', piUsername);
       }
 
-      // Navigation is now handled by the useEffect above (more reliable)
+      // Seed profile info (tối ưu UX cho form sau này)
+      seedProfileForRole(selectedRole, piUsername, user?.name);
+
+      setJustSaved(true);
+      // Navigation sẽ do useEffect xử lý sau khi context cập nhật + delay nhỏ để user thấy trạng thái success
+    } catch (e: any) {
+      setError('Lưu vai trò thất bại. Thử lại nhé.');
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleKeepCurrentRole = () => {
+    clearError();
+    navigate('/');
+  };
+
   const handleLogout = () => {
+    clearError();
     logout();
     setIsPiConnected(false);
     setPiUsername('');
     setSelectedRole(null);
+    setJustSaved(false);
     localStorage.removeItem('selectedRole');
   };
 
@@ -133,16 +176,26 @@ const RegisterRolePage: React.FC = () => {
             <button onClick={handleLogout} style={logoutSmallBtn}>Đăng xuất</button>
           </div>
         )}
+
+        {/* Inline error (thay alert, không đổi style card) */}
+        {error && (
+          <div style={{ marginTop: 10, fontSize: 12, color: '#dc2626', background: '#fef2f2', padding: '6px 10px', borderRadius: 8 }}>
+            ⚠️ {error}
+          </div>
+        )}
       </div>
 
       {/* === BƯỚC 2: CHỌN VAI TRÒ === */}
       <div style={card}>
         <div style={{ marginBottom: 12, fontWeight: 600, color: '#4c1d95' }}>
           Bước 2: Chọn vai trò của bạn
+          {role && role !== 'guest' && (
+            <span style={{ fontSize: 12, fontWeight: 400, color: '#64748b' }}> — đang thay đổi từ: {getRoleLabel(role)}</span>
+          )}
         </div>
 
         <div style={roleGrid}>
-          {ROLES.map((r) => (
+          {roleOptions.map((r) => (
             <div
               key={r.key}
               onClick={() => isPiConnected && handleSelectRole(r.key)}
@@ -160,23 +213,33 @@ const RegisterRolePage: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {/* Giữ nguyên (nếu đang đổi vai trò) - functional button, reuse style nhỏ */}
+        {role && role !== 'guest' && selectedRole !== role && (
+          <button
+            onClick={handleKeepCurrentRole}
+            style={{ ...logoutSmallBtn, marginTop: 12, color: '#4c1d95', textDecoration: 'none', fontSize: 13 }}
+          >
+            ← Giữ nguyên vai trò hiện tại ({getRoleLabel(role)})
+          </button>
+        )}
       </div>
 
-      {/* Nút xác nhận */}
+      {/* Nút xác nhận (có trạng thái success) */}
       <button
         onClick={handleConfirmRole}
-        disabled={!isPiConnected || !selectedRole || isSaving}
+        disabled={!isPiConnected || !selectedRole || isSaving || justSaved}
         style={{
           ...confirmButton,
-          background: (!isPiConnected || !selectedRole) ? '#cbd5e1' : 'linear-gradient(90deg, #22d3ee, #67e8f9)',
-          color: (!isPiConnected || !selectedRole) ? '#64748b' : '#0f172a',
+          background: justSaved ? '#86efac' : ((!isPiConnected || !selectedRole) ? '#cbd5e1' : 'linear-gradient(90deg, #22d3ee, #67e8f9)'),
+          color: justSaved ? '#166534' : ((!isPiConnected || !selectedRole) ? '#64748b' : '#0f172a'),
         }}
       >
-        {isSaving ? 'Đang lưu vai trò...' : 'XÁC NHẬN VAI TRÒ & VÀO APP'}
+        {justSaved ? '✅ ĐÃ LƯU VAI TRÒ — ĐANG VÀO APP...' : (isSaving ? 'Đang lưu vai trò...' : 'XÁC NHẬN VAI TRÒ & VÀO APP')}
       </button>
 
       <p style={{ textAlign: 'center', fontSize: 12, color: '#64748b', marginTop: 16 }}>
-        Vai trò có thể đổi sau trong mục Cá nhân
+        Vai trò có thể đổi sau trong mục Cá nhân • Dành cho 4 vai trò hoạt động (Admin gán riêng)
       </p>
     </div>
   );

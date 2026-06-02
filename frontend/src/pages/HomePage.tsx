@@ -2,11 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
 import { getIncompletePayments } from '../services/firebase/incompletePaymentService';
+import { useTracking } from '../hooks/useTracking';
+import { useAppController } from '../hooks/useAppController';
+import Modal from '../components/Modal';
+import { journeyStore } from '../core/journey/journeyStore';
+import { REGISTRABLE_ROLES, ROLE_INFO, getRoleLabel } from '../utils/constants';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const piUsername = user?.username || '';
+
+  const { orders: allOrders, loadOrders } = useTracking();
+  const { updateTracking } = useAppController();
 
   const [incompleteCount, setIncompleteCount] = useState(0);
 
@@ -16,12 +24,85 @@ export default function HomePage() {
   // Mobile detection - more aggressive for Pi Browser WebView
   const [isMobile, setIsMobile] = useState(false);
 
+  // QR Scanner for driver - state for best UX modal (quick confirm orders from home)
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrManualCode, setQrManualCode] = useState('');
+  const [qrResult, setQrResult] = useState<any>(null);
+  const [isQRScanning, setIsQRScanning] = useState(false);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // QR helpers for driver - best practice: support manual + simulated camera + list quick scan + real update
+  const driverActiveOrders = React.useMemo(() => {
+    if (role !== 'driver' && role !== 'admin') return [];
+    return (allOrders || []).filter((o: any) => {
+      const s = (o.trangThai || o.status || '').toLowerCase();
+      return ['created', 'confirmed', 'paid', 'picked_up', 'in_transit'].some(k => s.includes(k));
+    });
+  }, [allOrders, role]);
+
+  const handleQRScan = async (code: string) => {
+    if (!code.trim()) return;
+    setIsQRScanning(true);
+    setQrResult(null);
+
+    try {
+      const maDon = code.trim().toUpperCase();
+      const found = (allOrders || []).find((o: any) => (o.maDon || '').toUpperCase() === maDon);
+
+      if (!found) {
+        setQrResult({ error: `Không tìm thấy đơn ${maDon}. Kiểm tra lại mã.` });
+        return;
+      }
+
+      // Update order status (pickup confirmation typical for QR scan in delivery)
+      const now = Date.now();
+      const nextStatus = 'picked_up'; // or based on current, but for confirm pickup
+
+      // 1. local
+      const key = 'ghn_pi_orders';
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      const updatedList = list.map((o: any) => o.maDon === maDon ? { ...o, status: nextStatus, trangThai: nextStatus, updatedAt: now, qrConfirmedAt: now } : o);
+      localStorage.setItem(key, JSON.stringify(updatedList));
+
+      // 2. engine + journey
+      await updateTracking({ ...found, maDon, status: nextStatus, trangThai: nextStatus, updatedAt: now });
+      journeyStore.addStep(maDon, 'QR_CONFIRMED_PICKUP');
+
+      // 3. refresh local data in Home
+      loadOrders?.();
+
+      setQrResult({ success: true, order: { ...found, status: nextStatus, maDon } });
+
+      // Optional: reload if hook supports, but since may be cached
+    } catch (e) {
+      setQrResult({ error: 'Lỗi khi xác nhận QR. Thử lại.' });
+    } finally {
+      setIsQRScanning(false);
+    }
+  };
+
+  const simulateCameraScan = () => {
+    // Best UX: if manual code, use it; else pick first available driver order for demo
+    const code = qrManualCode.trim() || (driverActiveOrders[0]?.maDon || '');
+    if (code) {
+      handleQRScan(code);
+    } else {
+      setQrResult({ error: 'Không có đơn để quét. Nhập mã thủ công.' });
+    }
+  };
+
+  const closeQRModal = () => {
+    setShowQRModal(false);
+    setQrManualCode('');
+    setQrResult(null);
+    setIsQRScanning(false);
+  };
 
   // Kiểm tra Incomplete Payments (yêu cầu của Pi Network)
   useEffect(() => {
@@ -150,7 +231,9 @@ export default function HomePage() {
         {role === 'driver' && (
           <>
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📦" desc="Các đơn cần giao ngay" onClick={() => navigate('/driver')} />
-            <Card title="BẢN ĐỒ" icon="🗺️" desc="Xem tuyến đường" onClick={() => navigate('/tracking')} />
+            {/* QUÉT QR moved to top-right, first row, horizontally aligned with ĐƠN HÀNG CỦA TÔI for easy access by driver (grid 2-col auto places it right) */}
+            <Card title="QUÉT QR" icon="📷" desc="Xác nhận đơn hàng" onClick={() => setShowQRModal(true)} />
+            <Card title="BẢN ĐỒ" icon="🗺️" desc="Xem tuyến đường" onClick={() => navigate('/tracking?view=map')} />
             <Card title="LỊCH SỬ GIAO" icon="📋" desc="Đơn đã hoàn thành" onClick={() => navigate('/orders')} />
             <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
           </>
@@ -297,6 +380,121 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* QR Scanner Modal for Driver - best design: prominent on home, rich functional scanner without breaking visual rules */}
+      {showQRModal && role === 'driver' && (
+        <Modal
+          isOpen={showQRModal}
+          onClose={closeQRModal}
+          title="📷 QUÉT QR XÁC NHẬN ĐƠN"
+          cancelText="Đóng"
+        >
+          <div style={{ fontSize: 14 }}>
+            {/* Simulated Camera View - CSS animation, matches app cyan/purple theme */}
+            <div style={{
+              height: 160,
+              background: '#0f172a',
+              borderRadius: 12,
+              position: 'relative',
+              overflow: 'hidden',
+              marginBottom: 12,
+              border: '2px solid #22d3ee'
+            }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(transparent, transparent 8px, rgba(34,211,238,0.15) 8px, rgba(34,211,238,0.15) 10px)' }} />
+              {/* Scanner line animation - keyframe defined inline for this modal */}
+              <style>{`@keyframes qrScanLine { 0%{top:15%} 50%{top:75%} 100%{top:15%} }`}</style>
+              <div style={{
+                position: 'absolute',
+                left: 10,
+                right: 10,
+                height: 4,
+                background: 'linear-gradient(transparent, #22d3ee, transparent)',
+                animation: 'qrScanLine 1.8s linear infinite',
+                top: '15%',
+                boxShadow: '0 0 8px #22d3ee'
+              }} />
+              <div style={{ position: 'absolute', bottom: 8, left: 8, color: '#67e8f9', fontSize: 11, fontWeight: 600 }}>
+                CAMERA ĐANG QUÉT • Pi Browser
+              </div>
+            </div>
+
+            {/* Manual input - essential for testnet / no camera */}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ fontSize: 12, color: '#64748b' }}>Nhập mã đơn (QR thủ công)</label>
+              <input
+                value={qrManualCode}
+                onChange={(e) => setQrManualCode(e.target.value)}
+                placeholder="VD: GHN123456"
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid #c4b5fd', background: '#f8f7ff', fontSize: 15, boxSizing: 'border-box' as const, marginTop: 4 }}
+              />
+            </div>
+
+            {/* Quick list of scannable orders (best UX - tap to scan like real GHN driver app) */}
+            {driverActiveOrders.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Đơn sẵn sàng quét:</div>
+                {driverActiveOrders.slice(0, 3).map((o: any) => (
+                  <button
+                    key={o.maDon}
+                    onClick={() => handleQRScan(o.maDon)}
+                    disabled={isQRScanning}
+                    style={{ width: '100%', textAlign: 'left', padding: '8px 10px', marginBottom: 4, background: '#f0fdfa', border: '1px solid #86efac', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}
+                  >
+                    {o.maDon} • {o.nguoiNhan || 'KH'} → Quét xác nhận
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={simulateCameraScan}
+                disabled={isQRScanning || (!qrManualCode.trim() && driverActiveOrders.length === 0)}
+                style={{ flex: 1, padding: '12px', background: 'linear-gradient(90deg, #22d3ee, #67e8f9)', color: '#0f172a', border: 'none', borderRadius: 999, fontWeight: 700, fontSize: 14 }}
+              >
+                {isQRScanning ? 'Đang quét...' : '📷 QUÉT / XÁC NHẬN'}
+              </button>
+              <button
+                onClick={() => {
+                  // Attempt real camera (Pi Browser may support)
+                  if (navigator.mediaDevices) {
+                    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                      alert('Camera thật đã kích hoạt (demo). Trong môi trường thật sẽ decode QR từ video. Dùng nút trên hoặc danh sách để xác nhận.');
+                      // In full impl: attach to video, use jsQR or BarcodeDetector on frames
+                      stream.getTracks().forEach(t => t.stop());
+                    }).catch(() => alert('Không truy cập được camera. Dùng nhập mã thủ công hoặc danh sách bên trên.'));
+                  }
+                }}
+                style={{ padding: '12px 16px', background: 'white', color: '#4c1d95', border: '1px solid #c4b5fd', borderRadius: 999, fontSize: 13 }}
+              >
+                Camera thật
+              </button>
+            </div>
+
+            {/* Result */}
+            {qrResult && (
+              <div style={{ marginTop: 12, padding: 10, borderRadius: 10, background: qrResult.error ? '#fef2f2' : '#f0fdf4', border: qrResult.error ? '1px solid #fca5a5' : '1px solid #86efac' }}>
+                {qrResult.error ? (
+                  <div style={{ color: '#991b1b' }}>❌ {qrResult.error}</div>
+                ) : (
+                  <div style={{ color: '#166534' }}>
+                    ✅ Đã xác nhận đơn <strong>{qrResult.order.maDon}</strong> bằng QR!<br />
+                    Trạng thái: {qrResult.order.status || 'picked_up'} • Cập nhật hành trình.
+                    <div style={{ marginTop: 8 }}>
+                      <button onClick={() => { closeQRModal(); navigate('/driver'); }} style={{ fontSize: 12, padding: '4px 10px', background: '#4c1d95', color: 'white', border: 'none', borderRadius: 999 }}>Đến Đơn hàng của tôi</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <p style={{ fontSize: 11, color: '#64748b', marginTop: 10, textAlign: 'center' }}>
+              Quét QR gói hàng hoặc mã khách để xác nhận lấy/giao. Dữ liệu sync realtime.
+            </p>
+          </div>
+        </Modal>
+      )}
+
       {/* Dev Tools - Top Right (only visible in development) */}
       {import.meta.env.DEV && (
         <div
@@ -379,12 +577,9 @@ export default function HomePage() {
             title="Dev tool: Chuyển nhanh giữa các vai trò để test giao diện"
           >
             <option value="">-- Chọn vai trò --</option>
-            <option value="guest">Người mới</option>
-            <option value="sender">Người gửi</option>
-            <option value="driver">Tài xế</option>
-            <option value="warehouse">Kho trung chuyển</option>
-            <option value="receiver">Người nhận</option>
-            <option value="admin">Admin</option>
+            {(['guest', ...REGISTRABLE_ROLES, 'admin'] as const).map((k) => (
+              <option key={k} value={k}>{ROLE_INFO[k]?.label || k}</option>
+            ))}
           </select>
         </div>
       )}

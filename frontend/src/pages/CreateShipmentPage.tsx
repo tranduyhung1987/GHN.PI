@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateShipment } from '../hooks/useCreateShipment';
 import { useAuth } from '../core/auth/AuthContext';
+import { getRoleLabel } from '../utils/constants';
 import { useAppController } from '../hooks/useAppController';
 import { piService } from '../core/pi/piService';
 
@@ -42,7 +43,7 @@ export default function CreateShipmentPage() {
 
   // === Role guard (functional only - non-sender/admin still see form but warned + submit disabled) ===
   const canUseForm = !role || role === 'sender' || role === 'admin';
-  const roleLabel = role === 'sender' ? 'Người gửi hàng' : role === 'admin' ? 'Admin' : (role || 'Người mới');
+  const roleLabel = getRoleLabel(role);
 
   // Recipient type moved out for cleanliness
   interface Recipient {

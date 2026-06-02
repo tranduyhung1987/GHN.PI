@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
+import { getRoleLabel } from '../utils/constants';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ export default function ProfilePage() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ color: '#64748b', fontSize: '12px', margin: 0 }}>ID: {userId}</p>
           <p style={{ color: '#4c1d95', fontWeight: 600, fontSize: '15px', margin: '2px 0 0', lineHeight: 1.2 }}>
-            {role ? (role === 'sender' ? 'Người gửi hàng' : role === 'driver' ? 'Tài xế' : role === 'warehouse' ? 'Kho trung chuyển' : role === 'receiver' ? 'Người nhận hàng' : role === 'admin' ? 'Admin' : 'Người dùng') : 'Người mới (chưa chọn vai trò)'}
+            {getRoleLabel(role)}
           </p>
           <p style={{ color: '#64748b', fontSize: '11px', margin: '2px 0 0' }}>
             ⭐ {userStats.avgRating} ({userStats.totalOrders} giao dịch) • Thành viên từ {userStats.memberSince}
