@@ -56,7 +56,6 @@ export default function TrackingPage() {
       {/* Header */}
       <div style={roleBar}>
         <span>🔎 {isDetail ? 'CHI TIẾT ĐƠN HÀNG' : 'TRACKING'}</span>
-        <button onClick={() => navigate('/ca-nhan')} style={changeRoleBtn}>Đổi vai trò</button>
       </div>
 
       <h1 style={titleStyle}>
@@ -171,7 +170,6 @@ export default function TrackingPage() {
 /* ==================== STYLES ==================== */
 const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f8f7ff', padding: '16px 14px 100px' };
 const roleBar: React.CSSProperties = { background: '#4c1d95', color: 'white', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', borderRadius: '12px', marginBottom: 12 };
-const changeRoleBtn: React.CSSProperties = { background: 'rgba(255,255,255,0.25)', border: 'none', color: 'white', borderRadius: 99, padding: '4px 10px', fontSize: 12 };
 const titleStyle: React.CSSProperties = { fontSize: 22, color: '#4c1d95', textAlign: 'center', margin: '12px 0 16px' };
 
 const cardStyle: React.CSSProperties = { background: 'white', padding: 16, borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' };

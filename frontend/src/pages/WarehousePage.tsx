@@ -15,7 +15,6 @@ export default function WarehousePage() {
     <div style={pageContainer}>
       <div style={roleBar}>
         <span>📦 Kho Hub</span>
-        <button onClick={() => navigate('/ca-nhan')} style={changeRoleBtn}>Đổi vai trò</button>
       </div>
 
       <h1 style={titleStyle}>📦 QUẢN LÝ KHO HUB</h1>
@@ -100,7 +99,6 @@ export default function WarehousePage() {
 /* ==================== STYLES (thống nhất với GuiHangPage) ==================== */
 const pageContainer: React.CSSProperties = { minHeight: '100vh', background: '#f8f7ff', padding: '20px' };
 const roleBar: React.CSSProperties = { background: '#4c1d95', color: 'white', padding: '12px', display: 'flex', justifyContent: 'space-between', borderRadius: '12px' };
-const changeRoleBtn: React.CSSProperties = { background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', borderRadius: '99px', padding: '4px 12px' };
 const titleStyle: React.CSSProperties = { fontSize: '22px', color: '#4c1d95', textAlign: 'center', margin: '20px 0' };
 
 const tabContainer: React.CSSProperties = { display: 'flex', gap: '8px', marginBottom: '20px' };

@@ -199,7 +199,7 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI MỚI (guest) - exact 8 HOME cards user wants - all locked */}
+        {/* NGƯỜI MỚI (guest) - locked cards (no direct role registration card here) */}
         {(!role || role === 'guest') && (
           <>
             <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={handleLockedGuestAction} />
@@ -209,7 +209,6 @@ export default function HomePage() {
             <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={handleLockedGuestAction} />
             <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={handleLockedGuestAction} />
             <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={handleLockedGuestAction} />
-            <Card title="ĐĂNG KÝ VAI TRÒ" icon="👋" desc="Chọn vai trò của bạn" onClick={handleLockedGuestAction} />
           </>
         )}
       </div>
