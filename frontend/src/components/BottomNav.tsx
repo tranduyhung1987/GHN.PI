@@ -20,7 +20,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
   const isActive = (path: string) => 
     currentPage ? currentPage === path : location.pathname === path;
 
-  // Người mới chưa có vai trò → 2 tab (chỉ Cá nhân có chức năng đăng ký/đổi vai trò)
+  // Người mới chưa có vai trò → 2 tab (có tab Đăng ký vai trò trực tiếp cho người mới)
   if (!role || role === 'guest') {
     return (
       <div style={{
@@ -33,9 +33,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
           <div style={{ fontSize: '22px' }}>🏠</div>
           <span style={{ fontSize: '13px', fontWeight: 600 }}>Trang chủ</span>
         </button>
-        <button onClick={() => goTo('/ca-nhan')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/ca-nhan') || isActive('/profile') ? '#4c1d95' : '#666', minHeight: '52px' }}>
-          <div style={{ fontSize: '22px' }}>👤</div>
-          <span style={{ fontSize: '13px', fontWeight: 600 }}>Cá nhân</span>
+        <button onClick={() => goTo('/dang-ky')} style={{ flex: 1, background: 'none', border: 'none', color: isActive('/dang-ky') ? '#4c1d95' : '#666', minHeight: '52px' }}>
+          <div style={{ fontSize: '22px' }}>📝</div>
+          <span style={{ fontSize: '13px', fontWeight: 600 }}>Đăng ký vai trò</span>
         </button>
       </div>
     );
