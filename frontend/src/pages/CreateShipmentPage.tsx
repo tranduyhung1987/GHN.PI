@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateShipment } from '../hooks/useCreateShipment';
 import { useAuth } from '../core/auth/AuthContext';
@@ -31,6 +31,17 @@ export default function CreateShipmentPage() {
   const [maDon, setMaDon] = useState('');
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  // Prefill thông tin người gửi từ user Pi (thực tế GHN app)
+  useEffect(() => {
+    if (user?.username && !form.nguoiGui) {
+      setForm(prev => ({
+        ...prev,
+        nguoiGui: user.name || user.username,
+        sdtGui: prev.sdtGui || '09xxxxxxxx', // có thể lấy từ profile sau
+      }));
+    }
+  }, [user]);
+
   const piAmount = shippingFee;
 
   // Wrapper: Tạo đơn + Thanh toán Pi thật (nếu prepaid)
@@ -38,9 +49,24 @@ export default function CreateShipmentPage() {
     e.preventDefault();
     setPaymentError(null);
 
+    // Validation thực tế hơn (số điện thoại VN, cân nặng >0, COD nếu chọn)
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
     if (!form.nguoiGui || !form.sdtGui || !form.diaChiGui ||
-        !form.nguoiNhan || !form.sdtNhan || !form.diaChiNhan) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
+        !form.nguoiNhan || !form.sdtNhan || !form.diaChiNhan ||
+        !form.moTaHang) {
+      alert("Vui lòng điền đầy đủ thông tin bắt buộc (bao gồm mô tả hàng)!");
+      return;
+    }
+    if (!phoneRegex.test(form.sdtGui) || !phoneRegex.test(form.sdtNhan)) {
+      alert("Số điện thoại không hợp lệ (phải là 10 số VN bắt đầu bằng 03,05,07,08,09)!");
+      return;
+    }
+    if (form.trongLuong <= 0 || form.dai <= 0 || form.rong <= 0 || form.cao <= 0) {
+      alert("Trọng lượng và kích thước phải lớn hơn 0!");
+      return;
+    }
+    if (paymentMethod === 'cod' && (!codAmount || parseFloat(codAmount) <= 0)) {
+      alert("Vui lòng nhập số tiền thu hộ (COD) > 0!");
       return;
     }
 
@@ -139,6 +165,23 @@ export default function CreateShipmentPage() {
               📦 Thu hộ (COD Pi)
             </button>
           </div>
+          {/* Input số tiền thu hộ - chỉ hiện khi COD (thực tế GHN) */}
+          {paymentMethod === 'cod' && (
+            <div style={{ marginTop: '8px' }}>
+              <label style={smallLabel}>Số tiền thu hộ (Pi) - giá trị hàng hóa người nhận sẽ thanh toán</label>
+              <input 
+                type="number" 
+                placeholder="Nhập số tiền thu hộ (ví dụ: 150000)" 
+                value={codAmount} 
+                onChange={(e) => setCodAmount(e.target.value)} 
+                style={inputStyle} 
+                min="1000" 
+              />
+              <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                (Cước phí vận chuyển sẽ do người gửi chịu hoặc thỏa thuận)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Người gửi */}
@@ -160,17 +203,30 @@ export default function CreateShipmentPage() {
         {/* Thông tin kiện hàng */}
         <div>
           <label style={labelStyle}>Thông tin kiện hàng</label>
+          <div style={{ marginBottom: '8px' }}>
+            <label style={smallLabel}>Mô tả hàng hóa (bắt buộc - thực tế GHN cần để tra cứu, khiếu nại, phân loại)</label>
+            <input 
+              type="text" 
+              placeholder="Ví dụ: Quần áo, điện thoại, tài liệu..." 
+              value={form.moTaHang} 
+              onChange={(e) => setForm({ ...form, moTaHang: e.target.value })} 
+              style={inputStyle} 
+            />
+          </div>
           <div style={{ marginBottom: '12px' }}>
             <label style={smallLabel}>Trọng lượng (kg)</label>
-            <input type="number" value={form.trongLuong} onChange={(e) => setForm({ ...form, trongLuong: parseFloat(e.target.value) || 1 })} style={inputStyle} />
+            <input type="number" min="0.1" step="0.1" value={form.trongLuong} onChange={(e) => setForm({ ...form, trongLuong: parseFloat(e.target.value) || 1 })} style={inputStyle} />
           </div>
           <div>
-            <label style={smallLabel}>Kích thước (cm)</label>
+            <label style={smallLabel}>Kích thước (cm) - Dài x Rộng x Cao (dùng tính thể tích nếu cần)</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-              <input type="number" placeholder="Dài" value={form.dai} onChange={(e) => setForm({ ...form, dai: parseFloat(e.target.value) || 0 })} style={inputStyle} />
-              <input type="number" placeholder="Rộng" value={form.rong} onChange={(e) => setForm({ ...form, rong: parseFloat(e.target.value) || 0 })} style={inputStyle} />
-              <input type="number" placeholder="Cao" value={form.cao} onChange={(e) => setForm({ ...form, cao: parseFloat(e.target.value) || 0 })} style={inputStyle} />
+              <input type="number" min="1" placeholder="Dài" value={form.dai} onChange={(e) => setForm({ ...form, dai: parseFloat(e.target.value) || 0 })} style={inputStyle} />
+              <input type="number" min="1" placeholder="Rộng" value={form.rong} onChange={(e) => setForm({ ...form, rong: parseFloat(e.target.value) || 0 })} style={inputStyle} />
+              <input type="number" min="1" placeholder="Cao" value={form.cao} onChange={(e) => setForm({ ...form, cao: parseFloat(e.target.value) || 0 })} style={inputStyle} />
             </div>
+            <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+              Thực tế GHN dùng cân nặng thực hoặc thể tích (tùy loại hàng)
+            </p>
           </div>
         </div>
 
@@ -179,15 +235,21 @@ export default function CreateShipmentPage() {
           <input type="text" placeholder="Ghi chú cho tài xế..." value={form.ghiChu} onChange={(e) => setForm({ ...form, ghiChu: e.target.value })} style={inputStyle} />
         </div>
 
-        {/* Ước tính cước */}
+        {/* Ước tính cước (thực tế GHN: dựa cân nặng, loại dịch vụ, khoảng cách - ở đây dùng công thức đơn giản) */}
         <div style={feeBoxStyle}>
-          <p style={{ color: '#6b21a8', marginBottom: '6px' }}>Ước tính cước vận chuyển</p>
+          <p style={{ color: '#6b21a8', marginBottom: '6px' }}>Ước tính cước vận chuyển (người gửi chịu)</p>
           <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#22d3ee' }}>
             {piAmount.toLocaleString()} <span style={{ fontSize: '18px' }}>Pi</span>
           </p>
           {paymentMethod === 'cod' && (
-            <p style={{ color: '#10b981', fontSize: '15px', marginTop: '8px' }}>
-              💰 Người nhận sẽ thanh toán khi nhận hàng
+            <div style={{ marginTop: '8px', fontSize: '14px', color: '#10b981' }}>
+              <p>📦 Thu hộ: {parseFloat(codAmount || '0').toLocaleString()} Pi (người nhận thanh toán khi nhận)</p>
+              <p style={{ fontSize: '12px', color: '#64748b' }}>Cước phí vận chuyển do người gửi chịu (thực tế GHN có thể trừ vào COD hoặc thu riêng)</p>
+            </div>
+          )}
+          {paymentMethod === 'prepaid' && (
+            <p style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>
+              Thanh toán trước bằng Pi (đã bao gồm cước)
             </p>
           )}
         </div>
@@ -208,7 +270,7 @@ export default function CreateShipmentPage() {
             ? 'Đang xử lý & thanh toán Pi...'
             : paymentMethod === 'prepaid'
               ? `TẠO ĐƠN & THANH TOÁN ${piAmount.toLocaleString()} Pi`
-              : `TẠO ĐƠN THU HỘ ${piAmount.toLocaleString()} Pi`}
+              : `TẠO ĐƠN THU HỘ ${parseFloat(codAmount || '0').toLocaleString()} Pi`}
         </button>
 
         <p style={{ textAlign: 'center', fontSize: '12px', color: '#64748b', marginTop: '-8px' }}>
@@ -229,8 +291,8 @@ export default function CreateShipmentPage() {
             <p><strong>Mã đơn hàng:</strong> <span style={{ color: '#22d3ee', fontSize: '18px' }}>{maDon}</span></p>
             <p style={{ marginTop: '8px' }}>
               {paymentMethod === 'prepaid'
-                ? '✅ Đã thanh toán trước bằng Pi.'
-                : '📦 Thu hộ (COD Pi) - Người nhận thanh toán khi nhận hàng.'}
+                ? '✅ Đã thanh toán trước bằng Pi (cước vận chuyển).'
+                : `📦 Thu hộ (COD Pi) - Người nhận sẽ thanh toán ${parseFloat(codAmount || '0').toLocaleString()} Pi khi nhận hàng (cước do người gửi chịu).`}
             </p>
             <p style={{ marginTop: '12px', color: '#94a3b8' }}>Đơn hàng đã được ghi nhận. Hệ thống sẽ thông báo cho tài xế gần nhất.</p>
 

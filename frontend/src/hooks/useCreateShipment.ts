@@ -13,7 +13,8 @@ export const useCreateShipment = () => {
     dai: 30,
     rong: 20,
     cao: 10,
-    ghiChu: '',    
+    ghiChu: '',
+    moTaHang: '',  // Mô tả hàng hóa - thực tế GHN cần để tra cứu, khiếu nại
   });
   
   const [paymentMethod, setPaymentMethod] = useState<'prepaid' | 'cod'>('prepaid');
@@ -46,8 +47,12 @@ export const useCreateShipment = () => {
     }));
   };
 
-  // Logic tính toán phí
-  const shippingFee = Math.round((form.loaiDon === 'hoatoc' ? form.trongLuong * 35000 : form.trongLuong * 22000) + 8000);
+  // Logic tính toán phí (thực tế GHN phức tạp hơn: zone, loại hàng, COD fee, etc. - ở đây đơn giản hóa)
+  // Thêm yếu tố thể tích nếu dims lớn (volume weight)
+  const volumeWeight = (form.dai * form.rong * form.cao) / 6000; // common divisor
+  const effectiveWeight = Math.max(form.trongLuong, volumeWeight);
+  const baseFee = form.loaiDon === 'hoatoc' ? effectiveWeight * 35000 : effectiveWeight * 22000;
+  const shippingFee = Math.round(baseFee + 8000);
   const totalAmount = shippingFee;
 
   // handleSubmit này chỉ dùng cho test nhanh. 
@@ -59,7 +64,8 @@ export const useCreateShipment = () => {
         ...form, 
         paymentMethod, 
         codAmount: paymentMethod === 'cod' ? codAmount : '0', 
-        totalAmount 
+        totalAmount,
+        moTaHang: form.moTaHang || 'Không mô tả' 
       };
       console.log("[useCreateShipment] Test submit:", orderData);
       await new Promise((resolve) => setTimeout(resolve, 800));
@@ -81,6 +87,7 @@ export const useCreateShipment = () => {
     totalAmount, 
     handleQuickFillSeller,
     handleQuickFillBuyer,
-    handleQuickFillPi   // ← mới thêm
+    handleQuickFillPi,
+    // moTaHang is inside form now
   };
 };
