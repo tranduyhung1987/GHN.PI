@@ -175,17 +175,15 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI NHẬN HÀNG (receiver) - specific design */}
+        {/* NGƯỜI NHẬN HÀNG (receiver) - 6 cards focused (clean & practical) */}
         {role === 'receiver' && (
           <>
             <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã nhận" onClick={() => navigate('/orders')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
+            <Card title="THEO DÕI ĐƠN" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
             <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-            <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-            <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi" onClick={() => navigate('/gui-hang')} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
             <Card title="HỖ TRỢ" icon="💬" desc="Chat hỗ trợ" onClick={() => navigate('/chat')} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
           </>
         )}
 

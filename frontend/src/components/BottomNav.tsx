@@ -69,6 +69,15 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
     </div>
   );
 
+  const renderReceiverNav = () => (
+    <div style={navContainer}>
+      <Tab icon="🏠" label="Trang chủ" path="/" isActive={isActive('/')} goTo={goTo} />
+      <Tab icon="📥" label="Nhận hàng" path="/nhan-hang" isActive={isActive('/nhan-hang')} goTo={goTo} />
+      <Tab icon="📋" label="Đơn hàng" path="/orders" isActive={isActive('/orders') || isActive('/don-hang')} goTo={goTo} />
+      <Tab icon="👤" label="Cá nhân" path="/ca-nhan" isActive={isActive('/ca-nhan') || isActive('/profile')} goTo={goTo} />
+    </div>
+  );
+
   const renderAdminNav = () => (
     <div style={navContainer}>
       <Tab icon="🏠" label="Trang chủ" path="/" isActive={isActive('/')} goTo={goTo} />
@@ -101,7 +110,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
       navContent = renderShopNav(); // Focused for Người gửi: Trang chủ + Gửi hàng + Đơn hàng + Cá nhân
       break;
     case 'receiver':
-      navContent = renderShopNav(); // For now same as sender; can customize later for Người nhận
+      navContent = renderReceiverNav(); // Focused for Người nhận: Trang chủ + Nhận hàng + Đơn hàng + Cá nhân
       break;
     case 'admin':
       navContent = renderAdminNav();
