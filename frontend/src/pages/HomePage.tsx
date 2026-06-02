@@ -171,7 +171,7 @@ export default function HomePage() {
             <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
             <Card title="THEO DÕI ĐƠN" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
             <Card title="HỖ TRỢ" icon="💬" desc="Chat hỗ trợ" onClick={() => navigate('/chat')} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
+            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
           </>
         )}
 
