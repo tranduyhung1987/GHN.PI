@@ -31,16 +31,69 @@ export default function CreateShipmentPage() {
   const [maDon, setMaDon] = useState('');
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
-  // Prefill thông tin người gửi từ user Pi (thực tế GHN app)
+  // === TỐT NHẤT: Auto-prefill sender + last used receiver (tránh gõ tay) ===
   useEffect(() => {
-    if (user?.username && !form.nguoiGui) {
-      setForm(prev => ({
-        ...prev,
-        nguoiGui: user.name || user.username,
-        sdtGui: prev.sdtGui || '09xxxxxxxx', // có thể lấy từ profile sau
-      }));
+    if (!user?.username) return;
+
+    // 1. Load "My Sender Info" từ localStorage (lưu profile người gửi)
+    const mySender = localStorage.getItem('mySenderInfo');
+    let senderInfo = mySender ? JSON.parse(mySender) : {};
+
+    // 2. Ưu tiên từ Pi user hiện tại
+    const fromPi = {
+      nguoiGui: user.name || user.username,
+      sdtGui: senderInfo.sdtGui || '09xxxxxxxx', // TODO: lấy từ profile thật sau
+      diaChiGui: senderInfo.diaChiGui || '',
+    };
+
+    // 3. Load last receiver (người nhận thường dùng)
+    const lastReceiver = localStorage.getItem('lastReceiverInfo');
+    let receiverInfo = lastReceiver ? JSON.parse(lastReceiver) : {};
+
+    // Chỉ set nếu form còn trống (tránh ghi đè khi user đã sửa)
+    setForm(prev => ({
+      ...prev,
+      nguoiGui: prev.nguoiGui || fromPi.nguoiGui,
+      sdtGui: prev.sdtGui || fromPi.sdtGui,
+      diaChiGui: prev.diaChiGui || fromPi.diaChiGui,
+      nguoiNhan: prev.nguoiNhan || receiverInfo.nguoiNhan || '',
+      sdtNhan: prev.sdtNhan || receiverInfo.sdtNhan || '',
+      diaChiNhan: prev.diaChiNhan || receiverInfo.diaChiNhan || '',
+    }));
+  }, [user?.username]);
+
+  // Tự động lưu thông tin người gửi mỗi khi thay đổi (để lần sau mở form là có sẵn)
+  useEffect(() => {
+    if (form.nguoiGui || form.sdtGui || form.diaChiGui) {
+      const mySender = {
+        nguoiGui: form.nguoiGui,
+        sdtGui: form.sdtGui,
+        diaChiGui: form.diaChiGui,
+      };
+      localStorage.setItem('mySenderInfo', JSON.stringify(mySender));
     }
-  }, [user]);
+  }, [form.nguoiGui, form.sdtGui, form.diaChiGui]);
+
+  // Lưu thông tin khi submit thành công (để lần sau tự điền)
+  const saveLastUsedInfo = () => {
+    // Lưu sender của người dùng (my profile)
+    const mySender = {
+      nguoiGui: form.nguoiGui,
+      sdtGui: form.sdtGui,
+      diaChiGui: form.diaChiGui,
+    };
+    localStorage.setItem('mySenderInfo', JSON.stringify(mySender));
+
+    // Lưu người nhận lần cuối (frequent receiver)
+    if (form.nguoiNhan || form.sdtNhan || form.diaChiNhan) {
+      const lastReceiver = {
+        nguoiNhan: form.nguoiNhan,
+        sdtNhan: form.sdtNhan,
+        diaChiNhan: form.diaChiNhan,
+      };
+      localStorage.setItem('lastReceiverInfo', JSON.stringify(lastReceiver));
+    }
+  };
 
   const piAmount = shippingFee;
 
@@ -120,6 +173,7 @@ export default function CreateShipmentPage() {
 
       // 3. Hiển thị thành công
       setIsProcessing(false);
+      saveLastUsedInfo();  // Lưu để lần sau tự điền
       setShowSuccess(true);
 
     } catch (err: any) {
@@ -199,6 +253,33 @@ export default function CreateShipmentPage() {
           <input type="tel" placeholder="Số điện thoại" value={form.sdtNhan} onChange={(e) => setForm({ ...form, sdtNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
           <input type="text" placeholder="Địa chỉ nhận hàng" value={form.diaChiNhan} onChange={(e) => setForm({ ...form, diaChiNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
         </div>
+
+        {/* Quick action cho người nhận - rất thực tế trong app GHN */}
+        <button
+          type="button"
+          onClick={() => {
+            setForm(prev => ({
+              ...prev,
+              nguoiNhan: prev.nguoiGui,
+              sdtNhan: prev.sdtGui,
+              diaChiNhan: prev.diaChiGui,
+            }));
+          }}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '6px 12px',
+            fontSize: '13px',
+            background: '#e0d4ff',
+            color: '#4c1d95',
+            border: '1px solid #c4b5fd',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            marginTop: '-8px',
+            marginBottom: '8px',
+          }}
+        >
+          📋 Dùng thông tin người gửi (giao cho chính mình / người thân)
+        </button>
 
         {/* Thông tin kiện hàng */}
         <div>

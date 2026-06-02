@@ -3,8 +3,8 @@ import { useState } from 'react';
 export const useCreateShipment = () => {
   const [form, setForm] = useState({
     loaiDon: 'hoatoc' as 'hoatoc' | 'duongdai',
-    nguoiGui: 'Thanh Pi User',
-    sdtGui: '0912345678',
+    nguoiGui: '',
+    sdtGui: '',
     diaChiGui: '',
     nguoiNhan: '',
     sdtNhan: '',
