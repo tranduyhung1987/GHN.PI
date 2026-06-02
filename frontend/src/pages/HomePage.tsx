@@ -83,7 +83,10 @@ export default function HomePage() {
   const cardsGrid: React.CSSProperties = { 
     display: 'grid', 
     gridTemplateColumns: mobile ? 'repeat(2, 1fr)' : '1fr 1fr', 
-    gap: '16px' 
+    gap: '16px',
+    width: '100%',
+    boxSizing: 'border-box',
+    overflow: 'hidden'
   };
   const warningStyle: React.CSSProperties = { 
     marginTop: '30px', 
@@ -407,6 +410,9 @@ const Card = ({
     boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
     border: '2px solid #e0d4ff',
     cursor: 'pointer',
+    width: '100%',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   };
   const iconStyle: React.CSSProperties = { 
     fontSize: '36px', 
@@ -419,12 +425,16 @@ const Card = ({
     fontWeight: 700, 
     color: '#4c1d95', 
     margin: '0 0 4px 0',
-    lineHeight: '1.2'
+    lineHeight: '1.2',
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
   };
   const cardDesc: React.CSSProperties = { 
     fontSize: '12px', 
     color: '#64748b', 
-    margin: 0
+    margin: 0,
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
   };
   return (
     <div style={cardStyle} onClick={onClick}>
