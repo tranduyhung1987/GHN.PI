@@ -163,17 +163,15 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI GỬI HÀNG (sender) - specific design */}
+        {/* NGƯỜI GỬI HÀNG (sender) - 6 cards focused (clean & practical) */}
         {role === 'sender' && (
           <>
             <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} />
             <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
-            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-            <Card title="TÀI XẾ" icon="🏍️" desc="Liên hệ tài xế" onClick={() => navigate('/driver')} />
-            <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
-            <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
+            <Card title="THEO DÕI ĐƠN" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
             <Card title="HỖ TRỢ" icon="💬" desc="Chat hỗ trợ" onClick={() => navigate('/chat')} />
+            <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
           </>
         )}
 

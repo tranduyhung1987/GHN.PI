@@ -98,8 +98,10 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
       navContent = renderWarehouseNav();
       break;
     case 'sender':
+      navContent = renderShopNav(); // Focused for Người gửi: Trang chủ + Gửi hàng + Đơn hàng + Cá nhân
+      break;
     case 'receiver':
-      navContent = renderShopNav(); // Sender và Receiver dùng nav giống nhau (gửi + nhận hàng)
+      navContent = renderShopNav(); // For now same as sender; can customize later for Người nhận
       break;
     case 'admin':
       navContent = renderAdminNav();
