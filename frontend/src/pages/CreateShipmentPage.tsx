@@ -31,6 +31,13 @@ export default function CreateShipmentPage() {
   const [maDon, setMaDon] = useState('');
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  interface Recipient {
+    id: string;
+    nguoiNhan: string;
+    sdtNhan: string;
+    diaChiNhan: string;
+  }
+
   // === TỐT NHẤT: Auto-prefill sender + last used receiver (tránh gõ tay) ===
   useEffect(() => {
     if (!user?.username) return;
@@ -73,6 +80,69 @@ export default function CreateShipmentPage() {
       localStorage.setItem('mySenderInfo', JSON.stringify(mySender));
     }
   }, [form.nguoiGui, form.sdtGui, form.diaChiGui]);
+
+  // === DANH BẠ NGƯỜI NHẬN HÀNG ===
+  const [addressBook, setAddressBook] = useState<Recipient[]>([]);
+  const [showAddressBook, setShowAddressBook] = useState(false);
+  const [addressBookSearch, setAddressBookSearch] = useState('');
+
+  // Load danh bạ từ localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('recipientAddressBook');
+    if (saved) {
+      setAddressBook(JSON.parse(saved));
+    }
+  }, []);
+
+  const saveAddressBook = (newBook: Recipient[]) => {
+    setAddressBook(newBook);
+    localStorage.setItem('recipientAddressBook', JSON.stringify(newBook));
+  };
+
+  // Tự động thêm người nhận vào danh bạ khi tạo đơn thành công
+  const addToAddressBook = (recipient: { nguoiNhan?: string; sdtNhan?: string; diaChiNhan?: string }) => {
+    if (!recipient.nguoiNhan && !recipient.sdtNhan) return;
+    const exists = addressBook.some(r => 
+      (r.sdtNhan && r.sdtNhan === recipient.sdtNhan) || 
+      (r.nguoiNhan === recipient.nguoiNhan && r.diaChiNhan === recipient.diaChiNhan)
+    );
+    if (exists) return;
+
+    const newEntry: Recipient = {
+      id: Date.now().toString(36),
+      nguoiNhan: recipient.nguoiNhan || '',
+      sdtNhan: recipient.sdtNhan || '',
+      diaChiNhan: recipient.diaChiNhan || '',
+    };
+    const updated = [newEntry, ...addressBook];
+    saveAddressBook(updated);
+  };
+
+  const removeFromAddressBook = (id: string) => {
+    const updated = addressBook.filter(r => r.id !== id);
+    saveAddressBook(updated);
+  };
+
+  const selectFromAddressBook = (recipient: Recipient) => {
+    setForm(prev => ({
+      ...prev,
+      nguoiNhan: recipient.nguoiNhan || '',
+      sdtNhan: recipient.sdtNhan || '',
+      diaChiNhan: recipient.diaChiNhan || '',
+    }));
+    setShowAddressBook(false);
+    setAddressBookSearch('');
+  };
+
+  const filteredAddressBook = addressBook.filter((r: Recipient) => {
+    const search = addressBookSearch.toLowerCase().trim();
+    if (!search) return true;
+    return (
+      (r.nguoiNhan || '').toLowerCase().includes(search) ||
+      (r.sdtNhan || '').toLowerCase().includes(search) ||
+      (r.diaChiNhan || '').toLowerCase().includes(search)
+    );
+  });
 
   // Lưu thông tin khi submit thành công (để lần sau tự điền)
   const saveLastUsedInfo = () => {
@@ -174,6 +244,11 @@ export default function CreateShipmentPage() {
       // 3. Hiển thị thành công
       setIsProcessing(false);
       saveLastUsedInfo();  // Lưu để lần sau tự điền
+      addToAddressBook({ 
+        nguoiNhan: form.nguoiNhan, 
+        sdtNhan: form.sdtNhan, 
+        diaChiNhan: form.diaChiNhan 
+      });
       setShowSuccess(true);
 
     } catch (err: any) {
@@ -275,10 +350,29 @@ export default function CreateShipmentPage() {
             borderRadius: '8px',
             cursor: 'pointer',
             marginTop: '-8px',
-            marginBottom: '8px',
+            marginBottom: '4px',
           }}
         >
           📋 Dùng thông tin người gửi (giao cho chính mình / người thân)
+        </button>
+
+        {/* DANH BẠ NGƯỜI NHẬN - Tìm nhanh, chọn nhanh */}
+        <button
+          type="button"
+          onClick={() => setShowAddressBook(true)}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '6px 12px',
+            fontSize: '13px',
+            background: '#f0f0f0',
+            color: '#4c1d95',
+            border: '1px solid #c4b5fd',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            marginBottom: '8px',
+          }}
+        >
+          📖 Danh bạ người nhận ({addressBook.length})
         </button>
 
         {/* Thông tin kiện hàng */}
@@ -395,6 +489,80 @@ export default function CreateShipmentPage() {
               style={{ ...modalButton, background: '#64748b', marginTop: '10px' }}
             >
               Về trang chủ
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* DANH BẠ NGƯỜI NHẬN MODAL - Tìm nhanh, chọn nhanh */}
+      {showAddressBook && (
+        <div 
+          style={modalOverlay}
+          onClick={() => {
+            setShowAddressBook(false);
+            setAddressBookSearch('');
+          }}
+        >
+          <div 
+            style={{...modalContent, maxHeight: '70vh', overflowY: 'auto', textAlign: 'left'}}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 12px', color: '#22d3ee' }}>📖 Danh bạ người nhận</h3>
+            
+            <input
+              type="text"
+              placeholder="Tìm theo tên hoặc số điện thoại..."
+              value={addressBookSearch}
+              onChange={(e) => setAddressBookSearch(e.target.value)}
+              style={{ ...inputStyle, marginBottom: '12px', background: '#fff', color: '#000' }}
+            />
+
+            {filteredAddressBook.length > 0 ? (
+              filteredAddressBook.map((rec) => (
+                <div 
+                  key={rec.id}
+                  onClick={() => selectFromAddressBook(rec)}
+                  style={{
+                    padding: '10px 12px',
+                    borderBottom: '1px solid #e0d4ff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: '#fff'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#4c1d95' }}>{rec.nguoiNhan}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>
+                      {rec.sdtNhan} • {rec.diaChiNhan?.substring(0, 40)}{rec.diaChiNhan?.length > 40 ? '...' : ''}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFromAddressBook(rec.id);
+                    }}
+                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '18px', cursor: 'pointer' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p style={{ color: '#64748b', fontSize: '13px' }}>
+                {addressBook.length === 0 ? 'Chưa có người nhận nào trong danh bạ.' : 'Không tìm thấy kết quả.'}
+              </p>
+            )}
+
+            <button
+              onClick={() => {
+                setShowAddressBook(false);
+                setAddressBookSearch('');
+              }}
+              style={{ ...modalButton, marginTop: '16px', background: '#64748b' }}
+            >
+              Đóng
             </button>
           </div>
         </div>
