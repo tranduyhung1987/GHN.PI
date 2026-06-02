@@ -7,7 +7,7 @@ import { piService } from '../core/pi/piService';
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { createOrder } = useAppController();
 
   const {
@@ -17,13 +17,12 @@ export default function CreateShipmentPage() {
     setPaymentMethod,
     codAmount,
     setCodAmount,
-    handleSubmit: baseHandleSubmit,
     shippingFee,
+    effectiveWeight,
+    volumeWeight,
     isProcessing: hookProcessing,
     totalAmount,
-    handleQuickFillSeller,
-    handleQuickFillBuyer,
-    handleQuickFillPi,
+    resetForm,
   } = useCreateShipment();
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -31,12 +30,65 @@ export default function CreateShipmentPage() {
   const [maDon, setMaDon] = useState('');
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  // Inline validation errors (functional, replaces alert - no visual redesign)
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearError = (key: string) => {
+    setErrors(prev => {
+      const { [key]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  // === Role guard (functional only - non-sender/admin still see form but warned + submit disabled) ===
+  const canUseForm = !role || role === 'sender' || role === 'admin';
+  const roleLabel = role === 'sender' ? 'Người gửi hàng' : role === 'admin' ? 'Admin' : (role || 'Người mới');
+
+  // Recipient type moved out for cleanliness
   interface Recipient {
     id: string;
     nguoiNhan: string;
     sdtNhan: string;
     diaChiNhan: string;
   }
+
+  // Sender edit modal (functional editor for mySenderInfo profile)
+  const [showSenderEdit, setShowSenderEdit] = useState(false);
+  const [senderEdit, setSenderEdit] = useState({ nguoiGui: '', sdtGui: '', diaChiGui: '' });
+
+  const openSenderEdit = () => {
+    setSenderEdit({
+      nguoiGui: form.nguoiGui || '',
+      sdtGui: form.sdtGui || '',
+      diaChiGui: form.diaChiGui || '',
+    });
+    setShowSenderEdit(true);
+  };
+
+  const saveSenderEdit = () => {
+    // Update form + persist immediately
+    setForm(prev => ({
+      ...prev,
+      nguoiGui: senderEdit.nguoiGui,
+      sdtGui: senderEdit.sdtGui,
+      diaChiGui: senderEdit.diaChiGui,
+    }));
+    const mySender = {
+      nguoiGui: senderEdit.nguoiGui,
+      sdtGui: senderEdit.sdtGui,
+      diaChiGui: senderEdit.diaChiGui,
+    };
+    localStorage.setItem('mySenderInfo', JSON.stringify(mySender));
+    setShowSenderEdit(false);
+    // Clear related errors
+    clearError('nguoiGui');
+    clearError('sdtGui');
+    clearError('diaChiGui');
+  };
+
+  // === DANH BẠ enhancements: edit support ===
+  const [editingRecipient, setEditingRecipient] = useState<Recipient | null>(null);
+  const [editRecData, setEditRecData] = useState({ nguoiNhan: '', sdtNhan: '', diaChiNhan: '' });
 
   // === TỐT NHẤT: Auto-prefill sender + last used receiver (tránh gõ tay) ===
   useEffect(() => {
@@ -118,11 +170,6 @@ export default function CreateShipmentPage() {
     saveAddressBook(updated);
   };
 
-  const removeFromAddressBook = (id: string) => {
-    const updated = addressBook.filter(r => r.id !== id);
-    saveAddressBook(updated);
-  };
-
   const selectFromAddressBook = (recipient: Recipient) => {
     setForm(prev => ({
       ...prev,
@@ -143,6 +190,73 @@ export default function CreateShipmentPage() {
       (r.diaChiNhan || '').toLowerCase().includes(search)
     );
   });
+
+  // === NEW: Manual save current receiver to danh bạ (without submitting order) ===
+  const saveCurrentToAddressBook = () => {
+    addToAddressBook({ 
+      nguoiNhan: form.nguoiNhan, 
+      sdtNhan: form.sdtNhan, 
+      diaChiNhan: form.diaChiNhan 
+    });
+    // Small functional feedback without new UI elements
+    setTimeout(() => {
+      // Re-open modal so user sees it added (if was open)
+      if (!showAddressBook) {
+        setShowAddressBook(true);
+      }
+    }, 120);
+  };
+
+  // Edit support for danh bạ
+  const startEditRecipient = (rec: Recipient) => {
+    setEditingRecipient(rec);
+    setEditRecData({
+      nguoiNhan: rec.nguoiNhan || '',
+      sdtNhan: rec.sdtNhan || '',
+      diaChiNhan: rec.diaChiNhan || '',
+    });
+    setAddressBookSearch(''); // clean search while editing
+  };
+
+  const cancelEditRecipient = () => {
+    setEditingRecipient(null);
+    setEditRecData({ nguoiNhan: '', sdtNhan: '', diaChiNhan: '' });
+  };
+
+  const saveEditRecipient = () => {
+    if (!editingRecipient) return;
+    const updated = addressBook.map(r =>
+      r.id === editingRecipient.id
+        ? {
+            ...r,
+            nguoiNhan: editRecData.nguoiNhan || '',
+            sdtNhan: editRecData.sdtNhan || '',
+            diaChiNhan: editRecData.diaChiNhan || '',
+          }
+        : r
+    );
+    saveAddressBook(updated);
+    cancelEditRecipient();
+    // If the edited one is currently in form, update form too
+    if (
+      form.nguoiNhan === editingRecipient.nguoiNhan &&
+      form.sdtNhan === editingRecipient.sdtNhan
+    ) {
+      setForm(prev => ({
+        ...prev,
+        nguoiNhan: editRecData.nguoiNhan || '',
+        sdtNhan: editRecData.sdtNhan || '',
+        diaChiNhan: editRecData.diaChiNhan || '',
+      }));
+    }
+  };
+
+  const removeFromAddressBook = (id: string) => {
+    if (!window.confirm('Xóa người nhận này khỏi danh bạ?')) return;
+    const updated = addressBook.filter(r => r.id !== id);
+    saveAddressBook(updated);
+    if (editingRecipient?.id === id) cancelEditRecipient();
+  };
 
   // Lưu thông tin khi submit thành công (để lần sau tự điền)
   const saveLastUsedInfo = () => {
@@ -167,30 +281,56 @@ export default function CreateShipmentPage() {
 
   const piAmount = shippingFee;
 
+  // COD validity (for disable + hint)
+  const codValue = parseFloat(codAmount || '0');
+  const isCodValid = paymentMethod !== 'cod' || codValue > 0;
+
+  // Full validation (no alerts - set inline errors)
+  const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!form.nguoiGui || !form.sdtGui || !form.diaChiGui) {
+      if (!form.nguoiGui) newErrors.nguoiGui = 'Vui lòng nhập họ tên người gửi';
+      if (!form.sdtGui) newErrors.sdtGui = 'Vui lòng nhập SĐT người gửi';
+      if (!form.diaChiGui) newErrors.diaChiGui = 'Vui lòng nhập địa chỉ người gửi';
+    }
+    if (!form.nguoiNhan || !form.sdtNhan || !form.diaChiNhan) {
+      if (!form.nguoiNhan) newErrors.nguoiNhan = 'Vui lòng nhập họ tên người nhận';
+      if (!form.sdtNhan) newErrors.sdtNhan = 'Vui lòng nhập SĐT người nhận';
+      if (!form.diaChiNhan) newErrors.diaChiNhan = 'Vui lòng nhập địa chỉ nhận';
+    }
+    if (!form.moTaHang) {
+      newErrors.moTaHang = 'Mô tả hàng hóa là bắt buộc (GHN cần để tra cứu/khiếu nại)';
+    }
+    if (!phoneRegex.test(form.sdtGui || '')) {
+      newErrors.sdtGui = 'SĐT không hợp lệ (10 số VN: 03/05/07/08/09...)';
+    }
+    if (!phoneRegex.test(form.sdtNhan || '')) {
+      newErrors.sdtNhan = 'SĐT không hợp lệ (10 số VN: 03/05/07/08/09...)';
+    }
+    if (form.trongLuong <= 0 || form.dai <= 0 || form.rong <= 0 || form.cao <= 0) {
+      if (form.trongLuong <= 0) newErrors.trongLuong = 'Trọng lượng > 0';
+      if (form.dai <= 0) newErrors.dai = 'Dài > 0';
+      if (form.rong <= 0) newErrors.rong = 'Rộng > 0';
+      if (form.cao <= 0) newErrors.cao = 'Cao > 0';
+    }
+    if (paymentMethod === 'cod' && !isCodValid) {
+      newErrors.codAmount = 'Số tiền thu hộ (COD) phải > 0';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Wrapper: Tạo đơn + Thanh toán Pi thật (nếu prepaid)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPaymentError(null);
 
-    // Validation thực tế hơn (số điện thoại VN, cân nặng >0, COD nếu chọn)
-    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
-    if (!form.nguoiGui || !form.sdtGui || !form.diaChiGui ||
-        !form.nguoiNhan || !form.sdtNhan || !form.diaChiNhan ||
-        !form.moTaHang) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc (bao gồm mô tả hàng)!");
-      return;
-    }
-    if (!phoneRegex.test(form.sdtGui) || !phoneRegex.test(form.sdtNhan)) {
-      alert("Số điện thoại không hợp lệ (phải là 10 số VN bắt đầu bằng 03,05,07,08,09)!");
-      return;
-    }
-    if (form.trongLuong <= 0 || form.dai <= 0 || form.rong <= 0 || form.cao <= 0) {
-      alert("Trọng lượng và kích thước phải lớn hơn 0!");
-      return;
-    }
-    if (paymentMethod === 'cod' && (!codAmount || parseFloat(codAmount) <= 0)) {
-      alert("Vui lòng nhập số tiền thu hộ (COD) > 0!");
-      return;
+    if (!validateForm()) {
+      return; // errors shown inline
     }
 
     setIsProcessing(true);
@@ -241,9 +381,9 @@ export default function CreateShipmentPage() {
         });
       }
 
-      // 3. Hiển thị thành công
+      // 3. Hiển thị thành công + reset form
       setIsProcessing(false);
-      saveLastUsedInfo();  // Lưu để lần sau tự điền
+      saveLastUsedInfo();
       addToAddressBook({ 
         nguoiNhan: form.nguoiNhan, 
         sdtNhan: form.sdtNhan, 
@@ -260,9 +400,41 @@ export default function CreateShipmentPage() {
 
   return (
     <div style={pageContainer}>
-      <div style={headerStyle}>
+      {/* Header with functional back (title stays centered, no visual redesign of title size/font) */}
+      <div style={{ ...headerStyle, position: 'relative' as const, justifyContent: 'center' as const }}>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          style={{
+            position: 'absolute' as const,
+            left: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: '1px solid #c4b5fd',
+            color: '#4c1d95',
+            fontSize: '15px',
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            cursor: 'pointer',
+          }}
+          aria-label="Quay lại"
+        >
+          ←
+        </button>
         <h1 style={titleStyle}>GỬI HÀNG</h1>
       </div>
+
+      {/* Role guard banner (functional only - appears for non-sender when testing dev switcher) */}
+      {!canUseForm && (
+        <div style={{ maxWidth: '360px', margin: '0 auto 12px', padding: '10px 14px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', fontSize: '13px', color: '#991b1b', textAlign: 'center' as const }}>
+          ⚠️ Bạn đang ở vai trò <strong>{roleLabel}</strong>. Trang này chủ yếu dành cho <strong>Người gửi hàng</strong> (Admin vẫn dùng được). Submit sẽ bị khóa.
+          <div style={{ marginTop: 6 }}>
+            <button type="button" onClick={() => navigate('/')} style={{ fontSize: '12px', padding: '4px 10px', borderRadius: 9999, border: 'none', background: '#4c1d95', color: 'white', cursor: 'pointer' }}>Về trang chủ</button>
+            <button type="button" onClick={() => navigate('/dang-ky')} style={{ fontSize: '12px', padding: '4px 10px', borderRadius: 9999, border: '1px solid #c4b5fd', background: 'white', color: '#4c1d95', marginLeft: 6, cursor: 'pointer' }}>Đổi vai trò</button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px', maxWidth: '360px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         
@@ -302,10 +474,11 @@ export default function CreateShipmentPage() {
                 type="number" 
                 placeholder="Nhập số tiền thu hộ (ví dụ: 150000)" 
                 value={codAmount} 
-                onChange={(e) => setCodAmount(e.target.value)} 
+                onChange={(e) => { setCodAmount(e.target.value); clearError('codAmount'); }} 
                 style={inputStyle} 
                 min="1000" 
               />
+              {errors.codAmount && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.codAmount}</p>}
               <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
                 (Cước phí vận chuyển sẽ do người gửi chịu hoặc thỏa thuận)
               </p>
@@ -313,22 +486,13 @@ export default function CreateShipmentPage() {
           )}
         </div>
 
-        {/* Người gửi */}
-        <div>
-          <label style={labelStyle}>Người gửi</label>
-          <input type="text" placeholder="Họ tên người gửi" value={form.nguoiGui} onChange={(e) => setForm({ ...form, nguoiGui: e.target.value })} style={inputStyle} />
-          <input type="tel" placeholder="Số điện thoại" value={form.sdtGui} onChange={(e) => setForm({ ...form, sdtGui: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
-          <input type="text" placeholder="Địa chỉ người gửi" value={form.diaChiGui} onChange={(e) => setForm({ ...form, diaChiGui: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
-        </div>
-
-        {/* Người nhận */}
+        {/* Người gửi - with functional edit profile button (reuses danh bạ button style) */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <label style={labelStyle}>Người nhận</label>
-            {/* DANH BẠ NGƯỜI NHẬN - đặt ngay đầu, góc phải, ngang bằng label */}
+            <label style={labelStyle}>Người gửi</label>
             <button
               type="button"
-              onClick={() => setShowAddressBook(true)}
+              onClick={openSenderEdit}
               style={{
                 padding: '3px 8px',
                 fontSize: '11px',
@@ -340,12 +504,99 @@ export default function CreateShipmentPage() {
                 whiteSpace: 'nowrap',
               }}
             >
-              📖 Danh bạ ({addressBook.length})
+              ✏️ Sửa hồ sơ
             </button>
           </div>
-          <input type="text" placeholder="Họ tên người nhận" value={form.nguoiNhan} onChange={(e) => setForm({ ...form, nguoiNhan: e.target.value })} style={inputStyle} />
-          <input type="tel" placeholder="Số điện thoại" value={form.sdtNhan} onChange={(e) => setForm({ ...form, sdtNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
-          <input type="text" placeholder="Địa chỉ nhận hàng" value={form.diaChiNhan} onChange={(e) => setForm({ ...form, diaChiNhan: e.target.value })} style={{ ...inputStyle, marginTop: '8px' }} />
+          <input 
+            type="text" 
+            placeholder="Họ tên người gửi" 
+            value={form.nguoiGui} 
+            onChange={(e) => { setForm({ ...form, nguoiGui: e.target.value }); clearError('nguoiGui'); }} 
+            style={inputStyle} 
+          />
+          {errors.nguoiGui && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.nguoiGui}</p>}
+          <input 
+            type="tel" 
+            placeholder="Số điện thoại" 
+            value={form.sdtGui} 
+            onChange={(e) => { setForm({ ...form, sdtGui: e.target.value }); clearError('sdtGui'); }} 
+            style={{ ...inputStyle, marginTop: '8px' }} 
+          />
+          {errors.sdtGui && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.sdtGui}</p>}
+          <input 
+            type="text" 
+            placeholder="Địa chỉ người gửi" 
+            value={form.diaChiGui} 
+            onChange={(e) => { setForm({ ...form, diaChiGui: e.target.value }); clearError('diaChiGui'); }} 
+            style={{ ...inputStyle, marginTop: '8px' }} 
+          />
+          {errors.diaChiGui && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.diaChiGui}</p>}
+        </div>
+
+        {/* Người nhận - Danh bạ button (original position) + NEW functional "Lưu hiện tại" */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <label style={labelStyle}>Người nhận</label>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={saveCurrentToAddressBook}
+                style={{
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  background: '#e0d4ff',
+                  color: '#4c1d95',
+                  border: '1px solid #c4b5fd',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                💾 Lưu vào danh bạ
+              </button>
+              {/* DANH BẠ NGƯỜI NHẬN - đặt ngay đầu, góc phải, ngang bằng label */}
+              <button
+                type="button"
+                onClick={() => setShowAddressBook(true)}
+                style={{
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  background: '#f0f0f0',
+                  color: '#4c1d95',
+                  border: '1px solid #c4b5fd',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                📖 Danh bạ ({addressBook.length})
+              </button>
+            </div>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Họ tên người nhận" 
+            value={form.nguoiNhan} 
+            onChange={(e) => { setForm({ ...form, nguoiNhan: e.target.value }); clearError('nguoiNhan'); }} 
+            style={inputStyle} 
+          />
+          {errors.nguoiNhan && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.nguoiNhan}</p>}
+          <input 
+            type="tel" 
+            placeholder="Số điện thoại" 
+            value={form.sdtNhan} 
+            onChange={(e) => { setForm({ ...form, sdtNhan: e.target.value }); clearError('sdtNhan'); }} 
+            style={{ ...inputStyle, marginTop: '8px' }} 
+          />
+          {errors.sdtNhan && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.sdtNhan}</p>}
+          <input 
+            type="text" 
+            placeholder="Địa chỉ nhận hàng" 
+            value={form.diaChiNhan} 
+            onChange={(e) => { setForm({ ...form, diaChiNhan: e.target.value }); clearError('diaChiNhan'); }} 
+            style={{ ...inputStyle, marginTop: '8px' }} 
+          />
+          {errors.diaChiNhan && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.diaChiNhan}</p>}
         </div>
 
         {/* Quick action cho người nhận - rất thực tế trong app GHN */}
@@ -358,6 +609,9 @@ export default function CreateShipmentPage() {
               sdtNhan: prev.sdtGui,
               diaChiNhan: prev.diaChiGui,
             }));
+            clearError('nguoiNhan');
+            clearError('sdtNhan');
+            clearError('diaChiNhan');
           }}
           style={{
             alignSelf: 'flex-start',
@@ -384,21 +638,57 @@ export default function CreateShipmentPage() {
               type="text" 
               placeholder="Ví dụ: Quần áo, điện thoại, tài liệu..." 
               value={form.moTaHang} 
-              onChange={(e) => setForm({ ...form, moTaHang: e.target.value })} 
+              onChange={(e) => { setForm({ ...form, moTaHang: e.target.value }); clearError('moTaHang'); }} 
               style={inputStyle} 
             />
+            {errors.moTaHang && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.moTaHang}</p>}
           </div>
           <div style={{ marginBottom: '12px' }}>
             <label style={smallLabel}>Trọng lượng (kg)</label>
-            <input type="number" min="0.1" step="0.1" value={form.trongLuong} onChange={(e) => setForm({ ...form, trongLuong: parseFloat(e.target.value) || 1 })} style={inputStyle} />
+            <input 
+              type="number" 
+              min="0" 
+              step="0.1" 
+              value={form.trongLuong || ''} 
+              placeholder="Nhập trọng lượng thực tế (kg)" 
+              onChange={(e) => { setForm({ ...form, trongLuong: parseFloat(e.target.value) || 0 }); clearError('trongLuong'); }} 
+              style={inputStyle} 
+            />
+            {errors.trongLuong && <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>{errors.trongLuong}</p>}
           </div>
           <div style={{ width: '100%', boxSizing: 'border-box' }}>
             <label style={smallLabel}>Kích thước (cm) - Dài x Rộng x Cao (dùng tính thể tích nếu cần)</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', boxSizing: 'border-box' }}>
-              <input type="number" min="1" placeholder="Dài" value={form.dai} onChange={(e) => setForm({ ...form, dai: parseFloat(e.target.value) || 0 })} style={inputStyle} />
-              <input type="number" min="1" placeholder="Rộng" value={form.rong} onChange={(e) => setForm({ ...form, rong: parseFloat(e.target.value) || 0 })} style={inputStyle} />
-              <input type="number" min="1" placeholder="Cao" value={form.cao} onChange={(e) => setForm({ ...form, cao: parseFloat(e.target.value) || 0 })} style={inputStyle} />
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Dài (cm)" 
+                value={form.dai || ''} 
+                onChange={(e) => { setForm({ ...form, dai: parseFloat(e.target.value) || 0 }); clearError('dai'); }} 
+                style={inputStyle} 
+              />
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Rộng (cm)" 
+                value={form.rong || ''} 
+                onChange={(e) => { setForm({ ...form, rong: parseFloat(e.target.value) || 0 }); clearError('rong'); }} 
+                style={inputStyle} 
+              />
+              <input 
+                type="number" 
+                min="0" 
+                placeholder="Cao (cm)" 
+                value={form.cao || ''} 
+                onChange={(e) => { setForm({ ...form, cao: parseFloat(e.target.value) || 0 }); clearError('cao'); }} 
+                style={inputStyle} 
+              />
             </div>
+            { (errors.dai || errors.rong || errors.cao) && (
+              <p style={{ color: '#dc2626', fontSize: '12px', margin: '2px 0 0', paddingLeft: 4 }}>
+                {errors.dai || errors.rong || errors.cao}
+              </p>
+            )}
             <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
               Thực tế GHN dùng cân nặng thực hoặc thể tích (tùy loại hàng)
             </p>
@@ -415,6 +705,10 @@ export default function CreateShipmentPage() {
           <p style={{ color: '#6b21a8', marginBottom: '6px' }}>Ước tính cước vận chuyển (người gửi chịu)</p>
           <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#22d3ee' }}>
             {piAmount.toLocaleString()} <span style={{ fontSize: '18px' }}>Pi</span>
+          </p>
+          {/* NEW: functional breakdown (no style change, just added info text) */}
+          <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+            Cân nặng tính cước: {effectiveWeight.toFixed(2)} kg (max trọng lượng / thể tích {volumeWeight.toFixed(2)})
           </p>
           {paymentMethod === 'cod' && (
             <div style={{ marginTop: '8px', fontSize: '14px', color: '#10b981' }}>
@@ -438,7 +732,7 @@ export default function CreateShipmentPage() {
 
         <button 
           type="submit" 
-          disabled={isProcessing || hookProcessing} 
+          disabled={isProcessing || hookProcessing || !isCodValid || !canUseForm} 
           style={submitButton}
         >
           {(isProcessing || hookProcessing)
@@ -447,6 +741,16 @@ export default function CreateShipmentPage() {
               ? `TẠO ĐƠN & THANH TOÁN ${piAmount.toLocaleString()} Pi`
               : `TẠO ĐƠN THU HỘ ${parseFloat(codAmount || '0').toLocaleString()} Pi`}
         </button>
+        {!isCodValid && paymentMethod === 'cod' && (
+          <p style={{ color: '#dc2626', fontSize: '12px', textAlign: 'center', marginTop: '-6px' }}>
+            Vui lòng nhập số tiền thu hộ &gt; 0 để tạo đơn COD
+          </p>
+        )}
+        {!canUseForm && (
+          <p style={{ color: '#991b1b', fontSize: '12px', textAlign: 'center', marginTop: '-4px' }}>
+            Chỉ Người gửi / Admin mới tạo đơn được (dùng dev switcher hoặc Đổi vai trò)
+          </p>
+        )}
 
         <p style={{ textAlign: 'center', fontSize: '12px', color: '#64748b', marginTop: '-8px' }}>
           {piService.isAuthenticated?.() ? '✓ Đã kết nối Pi' : '⚠️ Chưa kết nối Pi (dùng Mock Payment)'}
@@ -474,6 +778,8 @@ export default function CreateShipmentPage() {
             <button 
               onClick={() => { 
                 setShowSuccess(false); 
+                if (resetForm) resetForm();
+                setErrors({});
                 navigate('/tracking'); 
               }} 
               style={modalButton}
@@ -484,6 +790,8 @@ export default function CreateShipmentPage() {
             <button 
               onClick={() => { 
                 setShowSuccess(false); 
+                if (resetForm) resetForm();
+                setErrors({});
                 navigate('/'); 
               }} 
               style={{ ...modalButton, background: '#64748b', marginTop: '10px' }}
@@ -501,6 +809,7 @@ export default function CreateShipmentPage() {
           onClick={() => {
             setShowAddressBook(false);
             setAddressBookSearch('');
+            cancelEditRecipient();
           }}
         >
           <div 
@@ -517,19 +826,36 @@ export default function CreateShipmentPage() {
               style={{ ...inputStyle, marginBottom: '12px', background: '#fff', color: '#000' }}
             />
 
+            {/* Edit form when editing (functional, reuses inputStyle) */}
+            {editingRecipient && (
+              <div style={{ marginBottom: '12px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #c4b5fd' }}>
+                <div style={{ fontSize: '12px', color: '#4c1d95', marginBottom: '6px', fontWeight: 600 }}>✏️ Đang sửa: {editingRecipient.nguoiNhan}</div>
+                <input type="text" placeholder="Tên" value={editRecData.nguoiNhan} onChange={(e) => setEditRecData({ ...editRecData, nguoiNhan: e.target.value })} style={{ ...inputStyle, marginBottom: '6px', background: '#fff', color: '#000' }} />
+                <input type="tel" placeholder="SĐT" value={editRecData.sdtNhan} onChange={(e) => setEditRecData({ ...editRecData, sdtNhan: e.target.value })} style={{ ...inputStyle, marginBottom: '6px', background: '#fff', color: '#000' }} />
+                <input type="text" placeholder="Địa chỉ" value={editRecData.diaChiNhan} onChange={(e) => setEditRecData({ ...editRecData, diaChiNhan: e.target.value })} style={{ ...inputStyle, marginBottom: '8px', background: '#fff', color: '#000' }} />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="button" onClick={saveEditRecipient} style={{ flex: 1, padding: '8px', background: '#22d3ee', color: '#0f172a', border: 'none', borderRadius: '9999px', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>Lưu sửa</button>
+                  <button type="button" onClick={cancelEditRecipient} style={{ flex: 1, padding: '8px', background: '#64748b', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>Hủy</button>
+                </div>
+              </div>
+            )}
+
             {filteredAddressBook.length > 0 ? (
               filteredAddressBook.map((rec) => (
                 <div 
                   key={rec.id}
-                  onClick={() => selectFromAddressBook(rec)}
+                  onClick={() => {
+                    if (!editingRecipient) selectFromAddressBook(rec);
+                  }}
                   style={{
                     padding: '10px 12px',
                     borderBottom: '1px solid #e0d4ff',
-                    cursor: 'pointer',
+                    cursor: editingRecipient ? 'default' : 'pointer',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: '#fff'
+                    background: '#fff',
+                    opacity: editingRecipient && editingRecipient.id !== rec.id ? 0.6 : 1,
                   }}
                 >
                   <div>
@@ -538,15 +864,28 @@ export default function CreateShipmentPage() {
                       {rec.sdtNhan} • {rec.diaChiNhan?.substring(0, 40)}{rec.diaChiNhan?.length > 40 ? '...' : ''}
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFromAddressBook(rec.id);
-                    }}
-                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '18px', cursor: 'pointer' }}
-                  >
-                    ×
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startEditRecipient(rec);
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#4c1d95', fontSize: '16px', cursor: 'pointer', padding: '2px' }}
+                      title="Sửa"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFromAddressBook(rec.id);
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '18px', cursor: 'pointer' }}
+                      title="Xóa"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -559,10 +898,46 @@ export default function CreateShipmentPage() {
               onClick={() => {
                 setShowAddressBook(false);
                 setAddressBookSearch('');
+                cancelEditRecipient();
               }}
               style={{ ...modalButton, marginTop: '16px', background: '#64748b' }}
             >
               Đóng
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SENDER PROFILE EDIT MODAL (functional, reuses modalOverlay + inputStyle + modalButton) */}
+      {showSenderEdit && (
+        <div 
+          style={modalOverlay}
+          onClick={() => setShowSenderEdit(false)}
+        >
+          <div 
+            style={{...modalContent, maxHeight: '70vh', overflowY: 'auto', textAlign: 'left'}}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 12px', color: '#22d3ee' }}>✏️ Sửa hồ sơ người gửi</h3>
+            <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '10px' }}>Thông tin này sẽ tự điền lần sau và lưu vào máy của bạn.</p>
+
+            <label style={{ ...smallLabel, color: '#c4b5fd' }}>Họ tên người gửi</label>
+            <input type="text" value={senderEdit.nguoiGui} onChange={(e) => setSenderEdit({ ...senderEdit, nguoiGui: e.target.value })} style={{ ...inputStyle, marginBottom: '10px', background: '#fff', color: '#000' }} />
+
+            <label style={{ ...smallLabel, color: '#c4b5fd' }}>Số điện thoại</label>
+            <input type="tel" value={senderEdit.sdtGui} onChange={(e) => setSenderEdit({ ...senderEdit, sdtGui: e.target.value })} style={{ ...inputStyle, marginBottom: '10px', background: '#fff', color: '#000' }} />
+
+            <label style={{ ...smallLabel, color: '#c4b5fd' }}>Địa chỉ người gửi</label>
+            <input type="text" value={senderEdit.diaChiGui} onChange={(e) => setSenderEdit({ ...senderEdit, diaChiGui: e.target.value })} style={{ ...inputStyle, marginBottom: '16px', background: '#fff', color: '#000' }} />
+
+            <button onClick={saveSenderEdit} style={modalButton}>
+              Lưu hồ sơ người gửi
+            </button>
+            <button 
+              onClick={() => setShowSenderEdit(false)} 
+              style={{ ...modalButton, background: '#64748b', marginTop: '10px' }}
+            >
+              Hủy
             </button>
           </div>
         </div>

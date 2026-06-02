@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
+import AuthGuard from '../core/auth/AuthGuard';
 
 const HomePage = lazy(() => import('../pages/HomePage'));
 const RegisterRolePage = lazy(() => import('../pages/RegisterRolePage'));
@@ -10,6 +11,7 @@ const WarehousePage = lazy(() => import('../pages/WarehousePage'));
 const DriverPage = lazy(() => import('../pages/DriverPage'));
 const TrackingPage = lazy(() => import('../pages/TrackingPage'));
 const ReceivePackagePage = lazy(() => import('../pages/ReceivePackagePage'));
+const CommunityFeedback = lazy(() => import('../pages/CommunityFeedback'));
 
 // Các trang đã tồn tại nhưng chưa được route
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
@@ -35,8 +37,15 @@ export const AppRoutes = () => {
           <Route path="dang-ky" element={<RegisterRolePage />} />
           <Route path="login" element={<LoginPage />} />
 
-          {/* Core logistics flows */}
-          <Route path="gui-hang" element={<CreateShipmentPage />} />
+          {/* Core logistics flows - protected for sender/admin (guard shows simple block for others; also soft check inside page) */}
+          <Route 
+            path="gui-hang" 
+            element={
+              <AuthGuard allowedRoles={['sender', 'admin']}>
+                <CreateShipmentPage />
+              </AuthGuard>
+            } 
+          />
           <Route path="tra-cuu-cuoc" element={<ShippingFeePage />} />
           <Route path="warehouse" element={<WarehousePage />} />
           <Route path="driver" element={<DriverPage />} />
@@ -51,7 +60,7 @@ export const AppRoutes = () => {
           <Route path="profile" element={<ProfilePage />} />
 
           {/* Advanced / Future pages (đã có code trong core) */}
-          <Route path="chat" element={<PlaceholderPage title="💬 Cộng đồng & Chat" desc="Tính năng chat cộng đồng sẽ sớm ra mắt trên Pi Testnet." />} />
+          <Route path="chat" element={<CommunityFeedback />} />
           <Route path="admin" element={<PlaceholderPage title="🛡️ Trang Quản trị" />} />
 
           {/* Pi Network Compliance */}

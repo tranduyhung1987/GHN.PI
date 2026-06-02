@@ -1,26 +1,29 @@
 import { useState } from 'react';
 
+const initialForm = {
+  loaiDon: 'hoatoc' as 'hoatoc' | 'duongdai',
+  nguoiGui: '',
+  sdtGui: '',
+  diaChiGui: '',
+  nguoiNhan: '',
+  sdtNhan: '',
+  diaChiNhan: '',
+  trongLuong: 0, // no forced default - user enters real package weight
+  dai: 0,        // no forced default - user enters real dimensions
+  rong: 0,
+  cao: 0,
+  ghiChu: '',
+  moTaHang: '',  // Mô tả hàng hóa - thực tế GHN cần để tra cứu, khiếu nại
+};
+
 export const useCreateShipment = () => {
-  const [form, setForm] = useState({
-    loaiDon: 'hoatoc' as 'hoatoc' | 'duongdai',
-    nguoiGui: '',
-    sdtGui: '',
-    diaChiGui: '',
-    nguoiNhan: '',
-    sdtNhan: '',
-    diaChiNhan: '',
-    trongLuong: 1,
-    dai: 30,
-    rong: 20,
-    cao: 10,
-    ghiChu: '',
-    moTaHang: '',  // Mô tả hàng hóa - thực tế GHN cần để tra cứu, khiếu nại
-  });
+  const [form, setForm] = useState(initialForm);
   
   const [paymentMethod, setPaymentMethod] = useState<'prepaid' | 'cod'>('prepaid');
   const [isProcessing, setIsProcessing] = useState(false);
   const [codAmount, setCodAmount] = useState<string>('0');
 
+  // Demo quick fills kept for dev/testing (not used in main UI - page uses auto-prefill + copy + danh bạ)
   const handleQuickFillSeller = () => {
     setForm(prev => ({
       ...prev,
@@ -37,11 +40,10 @@ export const useCreateShipment = () => {
     }));
   };
 
-  // === MỚI: Lấy nhanh từ tài khoản Pi ===
   const handleQuickFillPi = () => {
     setForm(prev => ({
       ...prev,
-      nguoiNhan: 'Thanh Pi User',           // Có thể lấy từ piUsername sau
+      nguoiNhan: 'Thanh Pi User',
       sdtNhan: '0987654321',
       diaChiNhan: 'Địa chỉ ví Pi - Quận 7, TP.HCM',
     }));
@@ -54,6 +56,14 @@ export const useCreateShipment = () => {
   const baseFee = form.loaiDon === 'hoatoc' ? effectiveWeight * 35000 : effectiveWeight * 22000;
   const shippingFee = Math.round(baseFee + 8000);
   const totalAmount = shippingFee;
+
+  // Reset toàn bộ form (dùng sau success / khi cần)
+  const resetForm = () => {
+    setForm(initialForm);
+    setPaymentMethod('prepaid');
+    setCodAmount('0');
+    setIsProcessing(false);
+  };
 
   // handleSubmit này chỉ dùng cho test nhanh. 
   // Trang CreateShipmentPage sẽ override bằng logic thật (Pi Payment + AppController)
@@ -83,8 +93,11 @@ export const useCreateShipment = () => {
     setCodAmount, 
     handleSubmit, 
     shippingFee, 
+    effectiveWeight,
+    volumeWeight,
     isProcessing, 
     totalAmount, 
+    resetForm,
     handleQuickFillSeller,
     handleQuickFillBuyer,
     handleQuickFillPi,

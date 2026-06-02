@@ -166,26 +166,24 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI GỬI HÀNG (sender) - 6 cards focused (clean & practical) */}
+        {/* NGƯỜI GỬI HÀNG (sender) - 5 cards focused (clean & practical) */}
         {role === 'sender' && (
           <>
             <Card title="GỬI HÀNG MỚI" icon="📦" desc="Tạo đơn gửi hàng" onClick={() => navigate('/gui-hang')} />
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã tạo" onClick={() => navigate('/orders')} />
             <Card title="TRA CỨU CƯỚC" icon="📊" desc="Ước tính phí" onClick={() => navigate('/tra-cuu-cuoc')} />
             <Card title="THEO DÕI ĐƠN" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
-            <Card title="HỖ TRỢ" icon="💬" desc="Chat hỗ trợ" onClick={() => navigate('/chat')} />
             <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
           </>
         )}
 
-        {/* NGƯỜI NHẬN HÀNG (receiver) - 6 cards focused (clean & practical) */}
+        {/* NGƯỜI NHẬN HÀNG (receiver) - 5 cards focused (clean & practical) */}
         {role === 'receiver' && (
           <>
             <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={() => navigate('/nhan-hang')} />
             <Card title="ĐƠN HÀNG CỦA TÔI" icon="📋" desc="Quản lý đơn đã nhận" onClick={() => navigate('/orders')} />
             <Card title="THEO DÕI ĐƠN" icon="🔍" desc="Theo dõi đơn hàng" onClick={() => navigate('/tracking')} />
             <Card title="KHO HUB" icon="🏬" desc="Trung chuyển kho" onClick={() => navigate('/warehouse')} />
-            <Card title="HỖ TRỢ" icon="💬" desc="Chat hỗ trợ" onClick={() => navigate('/chat')} />
             <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={() => navigate('/chat')} />
           </>
         )}
@@ -215,12 +213,10 @@ export default function HomePage() {
       </div>
 
       {/* WARNING */}
-      {/* WARNING BẢN CŨ - ĐÃ CHỈNH THEO YÊU CẦU CỦA BẠN */}
       <div style={warningStyle}>
         ⚠️ <strong>CẢNH BÁO BẢO MẬT QUAN TRỌNG</strong><br />
-        ❌ Tuyệt đối KHÔNG nhập Passphrase hoặc mật khẩu ví Pi vào bất kỳ đâu!<br />
-        Chỉ dùng Pi Browser chính thức • Cảnh giác lừa đảo<br />
-        Ai yêu cầu bạn nhập mật khẩu ví → 99% là lừa đảo!
+        ❌ Tuyệt đối KHÔNG nhập mật khẩu ví Pi vào bất kỳ đâu!<br />
+        ✅ Chỉ đăng nhập bằng Pi Network và chọn vai trò để sử dụng ứng dụng một cách an toàn.
       </div>
 
       {/* Pi Login Required Prompt Modal for Người mới (guest) - functional only, no change to existing cards/UI */}

@@ -28,7 +28,8 @@ export default function AuthGuard({ children, allowedRoles }: Props) {
   if (allowedRoles && !allowedRoles.includes(user?.role ?? '')) {
     return (
       <div style={blockStyle}>
-        ⛔ Không có quyền truy cập
+        ⛔ Không có quyền truy cập<br />
+        <span style={{ fontSize: '13px', fontWeight: 400 }}>Chỉ dành cho: Người gửi hàng hoặc Admin</span>
       </div>
     );
   }

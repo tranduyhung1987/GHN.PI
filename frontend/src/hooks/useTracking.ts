@@ -1,15 +1,26 @@
 import { useState, useEffect } from 'react';
 import { getAllOrders } from '../services/firebase/orderService';
+import { journeyStore } from '../core/journey/journeyStore';
 
 interface TrackingOrder {
   maDon: string;
   loaiDon?: string;
   nguoiNhan?: string;
   diaChiNhan?: string;
+  nguoiGui?: string;
+  sdtGui?: string;
+  diaChiGui?: string;
+  sdtNhan?: string;
   trangThai?: string;
   status?: string;
   totalAmount?: number;
+  codAmount?: string | number;
+  paymentMethod?: string;
+  moTaHang?: string;
+  trongLuong?: number;
   createdAt?: number | string;
+  updatedAt?: number;
+  piUsername?: string;
   [key: string]: any;
 }
 
@@ -54,5 +65,16 @@ export const useTracking = () => {
     loadOrders();
   }, []);
 
-  return { orders, loading, loadOrders };
+  // Attach journey data (from journeyStore) to each order for realistic timeline
+  const getOrdersWithJourney = () => {
+    return orders.map(order => {
+      const journey = journeyStore.getJourney(order.maDon);
+      return {
+        ...order,
+        journeySteps: journey ? journey.steps : [],
+      };
+    });
+  };
+
+  return { orders, loading, loadOrders, getOrdersWithJourney };
 };
