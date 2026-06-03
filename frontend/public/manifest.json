@@ -1,0 +1,15 @@
+﻿{
+  "name": "GHN.PI - Giao Hàng Nhanh Pi",
+  "short_name": "GHN.PI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3e8ff",
+  "theme_color": "#4c1d95",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -343,6 +343,23 @@ export default function TrackingPage() {
           <div style={{ fontSize: 11, color: '#64748b', marginTop: 6 }}>
             Nhấn "Mô phỏng di chuyển" để xem tài xế di chuyển giữa các điểm giao. Kết nối với đơn thực tế (demo).
           </div>
+
+          {/* Enhanced: Interactive list of deliveries in map mode for better UX */}
+          {filteredOrders.length > 0 && (
+            <div style={{ marginTop: 12, fontSize: 12 }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Các điểm giao hiện tại (click để di chuyển đến):</div>
+              {filteredOrders.slice(0, 3).map((o: any, idx: number) => (
+                <button key={idx} onClick={() => {
+                  // Update driver target to this order's mock pos
+                  const x = 0.15 + ((idx % 3) * 0.28);
+                  const y = 0.2 + (Math.floor(idx / 2) * 0.35);
+                  routeAnimationEngine.updateTarget?.('current_driver', y, x);
+                }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '4px 6px', marginBottom: 2, background: '#f8fafc', border: '1px solid #e0e7ff', borderRadius: 4, fontSize: 11 }}>
+                  📍 {o.maDon} - {o.nguoiNhan?.slice(0,20) || 'KH'}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

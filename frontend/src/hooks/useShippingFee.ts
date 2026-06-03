@@ -91,7 +91,7 @@ export const useShippingFee = () => {
   // - Service multiplier
   // - COD ~1% min fee, insurance 0.5%
   // - + fixed handling like real
-  const computeDetailedFee = (f: FeeForm): FeeResult => {
+const computeDetailedFee = (f: FeeForm): FeeResult => {
     const volWeight = (f.dai * f.rong * f.cao) / 6000;
     const effectiveWeight = Math.max(f.khoiLuong, volWeight);
 

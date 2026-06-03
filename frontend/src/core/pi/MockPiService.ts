@@ -18,7 +18,7 @@ export class MockPiService implements PiAdapter {
 
   async authenticate(): Promise<PiUser> {
     // === DEV HELPER: Ưu tiên username do dev đặt ===
-    // 1. devMockPiUsername (dùng để test dễ dàng, ví dụ: nguyenhoi123455)
+    // 1. devMockPiUsername (dùng để test dễ dàng, ví dụ: admin_demo)
     // 2. mockPiUsername (cách cũ)
     // 3. Random (mặc định)
     const devUsername = localStorage.getItem('devMockPiUsername');

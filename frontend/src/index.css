@@ -7,3 +7,19 @@ body,
   min-height: 100%;
   font-family: Arial, sans-serif;
 }
+
+/* Basic dark mode support (class-based from ThemeContext) - enhances existing purple theme */
+.dark {
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --text: #eee;
+  --accent: #0f3460;
+}
+.dark body, .dark #root {
+  background: var(--bg);
+  color: var(--text);
+}
+.dark .card, .dark [style*="background: 'white'"], .dark [style*='background: white'] {
+  background: var(--card) !important;
+  color: var(--text) !important;
+}

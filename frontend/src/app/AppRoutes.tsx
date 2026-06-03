@@ -18,6 +18,7 @@ const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const OrderPage = lazy(() => import('../pages/OrderPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const IncompletePaymentsPage = lazy(() => import('../pages/IncompletePaymentsPage'));
+const AdminPage = lazy(() => import('../pages/AdminPage'));
 
 // Simple placeholder cho các route chưa có UI đầy đủ
 const PlaceholderPage = ({ title, desc }: { title: string; desc?: string }) => (
@@ -61,7 +62,7 @@ export const AppRoutes = () => {
 
           {/* Advanced / Future pages (đã có code trong core) */}
           <Route path="chat" element={<CommunityFeedback />} />
-          <Route path="admin" element={<PlaceholderPage title="🛡️ Trang Quản trị" />} />
+          <Route path="admin" element={<AdminPage />} />
 
           {/* Pi Network Compliance */}
           <Route path="incomplete-payments" element={<IncompletePaymentsPage />} />

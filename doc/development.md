@@ -7,10 +7,9 @@ Hướng dẫn cài đặt và chạy dự án **GHN.PI** ở chế độ phát 
 ## 📋 Yêu cầu hệ thống
 
 - Node.js 18.x hoặc 20.x
-- Docker & Docker Compose (khuyến nghị)
 - Git
-- Pi Browser (để test Pi SDK)
-- MongoDB (nếu không dùng Docker)
+- Pi Browser (để test Pi SDK thật)
+- (Optional) Backend: xem backend/ + docker cho Pi platform demo (hiện tại UI dùng localStorage + Firebase chủ yếu)
 
 ---
 

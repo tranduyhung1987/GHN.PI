@@ -65,7 +65,7 @@ const CommunityFeedback: React.FC = () => {
       const mocks: CommunityPost[] = [
         {
           id: 1,
-          user: 'nguyenhoi123455',
+          user: 'demo_user',
           role: 'sender',
           type: 'Góp ý cải tiến',
           title: 'Nên thêm theo dõi realtime trên map',

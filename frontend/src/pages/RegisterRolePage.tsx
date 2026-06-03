@@ -12,8 +12,8 @@ const RegisterRolePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, login, logout, role, updateRole, isLoading: authLoading } = useAuth();
 
-  const [isPiConnected, setIsPiConnected] = useState(false);
-  const [piUsername, setPiUsername] = useState('');
+  const [isPiConnected, setIsPiConnected] = useState(!!user?.username);
+  const [piUsername, setPiUsername] = useState(user?.username || '');
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<AppRole | null>(role);
   const [isSaving, setIsSaving] = useState(false);
@@ -154,13 +154,13 @@ const RegisterRolePage: React.FC = () => {
       <h2 style={title}>Đăng ký vai trò</h2>
       <p style={subtitle}>Kết nối Pi Network và chọn vai trò để sử dụng GHN.PI</p>
 
-      {/* === BƯỚC 1: KẾT NỐI PI === */}
-      <div style={card}>
-        <div style={{ marginBottom: 12, fontWeight: 600, color: '#4c1d95' }}>
-          Bước 1: Xác thực với Pi Network
-        </div>
+      {/* Bước 1: chỉ hiển thị nếu chưa kết nối (khi đến từ Home sau khi đã login Pi, bỏ qua bước này) */}
+      {!isPiConnected && (
+        <div style={card}>
+          <div style={{ marginBottom: 12, fontWeight: 600, color: '#4c1d95' }}>
+            Bước 1: Xác thực với Pi Network
+          </div>
 
-        {!isPiConnected ? (
           <button
             onClick={handlePiConnect}
             disabled={isConnecting || authLoading}
@@ -168,28 +168,27 @@ const RegisterRolePage: React.FC = () => {
           >
             {isConnecting ? 'Đang kết nối Pi...' : '⭐ Kết nối Pi Network'}
           </button>
-        ) : (
-          <div style={connectedBox}>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>✅ Đã kết nối</div>
-            <div style={{ color: '#22d3ee', fontWeight: 700, marginTop: 4 }}>
-              @{piUsername}
+
+          {/* Inline error (thay alert, không đổi style card) */}
+          {error && (
+            <div style={{ marginTop: 10, fontSize: 12, color: '#dc2626', background: '#fef2f2', padding: '6px 10px', borderRadius: 8 }}>
+              ⚠️ {error}
             </div>
-            <button onClick={handleLogout} style={logoutSmallBtn}>Đăng xuất</button>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
-        {/* Inline error (thay alert, không đổi style card) */}
-        {error && (
-          <div style={{ marginTop: 10, fontSize: 12, color: '#dc2626', background: '#fef2f2', padding: '6px 10px', borderRadius: 8 }}>
-            ⚠️ {error}
-          </div>
-        )}
-      </div>
+      {/* Hiển thị trạng thái đã kết nối nếu đến trực tiếp sau login từ trang chủ */}
+      {isPiConnected && (
+        <div style={{ textAlign: 'center', marginBottom: 16, color: '#22d3ee', fontWeight: 600, fontSize: 14 }}>
+          ✅ Đã kết nối Pi Network: @{piUsername}
+        </div>
+      )}
 
-      {/* === BƯỚC 2: CHỌN VAI TRÒ === */}
+      {/* Chọn vai trò (Bước 2 hoặc trực tiếp nếu đã login Pi từ trang chủ) */}
       <div style={card}>
         <div style={{ marginBottom: 12, fontWeight: 600, color: '#4c1d95' }}>
-          Bước 2: Chọn vai trò của bạn
+          {isPiConnected ? 'Chọn vai trò của bạn' : 'Bước 2: Chọn vai trò của bạn'}
           {role && role !== 'guest' && (
             <span style={{ fontSize: 12, fontWeight: 400, color: '#64748b' }}> — đang thay đổi từ: {getRoleLabel(role)}</span>
           )}

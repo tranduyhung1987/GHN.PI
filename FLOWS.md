@@ -1,23 +1,27 @@
 # 📋 GHN.PI - Application Flows
 
-Các luồng chức năng chính của ứng dụng **GHN.PI - Giao Hàng Nhanh**.
+Các luồng chức năng chính của ứng dụng **GHN.PI - Giao Hàng Nhanh** (frontend-focused cho Pi Browser Testnet).
+
+**Lưu ý hiện tại**: Dữ liệu chủ yếu localStorage (primary cho tốc độ/offline) + Firebase (env-only). Backend (Express/Mongo + Pi platform) là optional cho Pi-specific (payments, notifications) và chưa fully integrated vào UI chính.
 
 ---
 
 ## 1. Luồng Xác thực người dùng (Authentication)
 
 1. User mở app → Click **"Đăng nhập bằng Pi"**
-2. Pi Browser hiện popup xác thực
-3. Nhận `accessToken` và `user` từ Pi SDK
-4. Backend verify token → Tạo session / JWT
-5. User vào được trang chính
+2. Pi Browser hiện popup xác thực (real SDK khi đúng env)
+3. Nhận `user` từ Pi SDK (Mock trên dev/local)
+4. (Optional) Backend verify nếu dùng session
+5. User vào Home với role guest → đăng ký vai trò → full app
 
 ---
 
-## 2. Luồng Đặt đơn hàng (Create Order)
+## 2. Luồng Đặt đơn hàng (Create Order) - như GHN thật
 
-1. User chọn sản phẩm / nhập địa chỉ
-2. Chọn phương thức vận chuyển
+1. (Sender) Gửi hàng mới: prefill từ profile, searchable Danh bạ, COD toggle, moTaHang, weight/dims
+2. Live fee calc (volume/weight, zone, COD line)
+3. Pi Payment via createPayment, save to local + journey
+4. Track in Đơn hàng của tôi / Tracking (with timeline steps)
 3. Tính phí ship + tổng tiền
 4. User click **"Đặt đơn"**
 5. Hiển thị form thanh toán Pi

@@ -6,11 +6,12 @@ import { useTracking } from '../hooks/useTracking';
 import { useAppController } from '../hooks/useAppController';
 import Modal from '../components/Modal';
 import { journeyStore } from '../core/journey/journeyStore';
+import { QRScanner } from '../components/QRScanner';
 import { REGISTRABLE_ROLES, ROLE_INFO, getRoleLabel } from '../utils/constants';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, role } = useAuth();
+  const { user, role, login } = useAuth();
   const piUsername = user?.username || '';
 
   const { orders: allOrders, loadOrders } = useTracking();
@@ -281,7 +282,7 @@ export default function HomePage() {
           </>
         )}
 
-        {/* NGƯỜI MỚI (guest) - locked cards (no direct role registration card here) */}
+        {/* NGƯỜI MỚI (guest) - locked cards (added direct "Đăng ký vai trò" card aligned with "Đóng góp" in last row) */}
         {(!role || role === 'guest') && (
           <>
             <Card title="GỬI HÀNG" icon="📦" desc="Tạo đơn gửi hàng" onClick={handleLockedGuestAction} />
@@ -291,6 +292,7 @@ export default function HomePage() {
             <Card title="TRACKING" icon="🔍" desc="Theo dõi đơn" onClick={handleLockedGuestAction} />
             <Card title="NHẬN HÀNG" icon="📥" desc="Đơn chờ nhận" onClick={handleLockedGuestAction} />
             <Card title="ĐÓNG GÓP" icon="❤️" desc="Góp ý cộng đồng" onClick={handleLockedGuestAction} />
+            <Card title="ĐĂNG KÝ VAI TRÒ" icon="📝" desc="Chọn vai trò để sử dụng đầy đủ" onClick={handleLockedGuestAction} />
           </>
         )}
       </div>
@@ -341,8 +343,9 @@ export default function HomePage() {
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
-                onClick={() => {
+                onClick={async () => {
                   setShowPiLoginPrompt(false);
+                  await login();
                   navigate('/dang-ky');
                 }}
                 style={{
@@ -389,32 +392,15 @@ export default function HomePage() {
           cancelText="Đóng"
         >
           <div style={{ fontSize: 14 }}>
-            {/* Simulated Camera View - CSS animation, matches app cyan/purple theme */}
-            <div style={{
-              height: 160,
-              background: '#0f172a',
-              borderRadius: 12,
-              position: 'relative',
-              overflow: 'hidden',
-              marginBottom: 12,
-              border: '2px solid #22d3ee'
-            }}>
-              <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(transparent, transparent 8px, rgba(34,211,238,0.15) 8px, rgba(34,211,238,0.15) 10px)' }} />
-              {/* Scanner line animation - keyframe defined inline for this modal */}
-              <style>{`@keyframes qrScanLine { 0%{top:15%} 50%{top:75%} 100%{top:15%} }`}</style>
-              <div style={{
-                position: 'absolute',
-                left: 10,
-                right: 10,
-                height: 4,
-                background: 'linear-gradient(transparent, #22d3ee, transparent)',
-                animation: 'qrScanLine 1.8s linear infinite',
-                top: '15%',
-                boxShadow: '0 0 8px #22d3ee'
-              }} />
-              <div style={{ position: 'absolute', bottom: 8, left: 8, color: '#67e8f9', fontSize: 11, fontWeight: 600 }}>
-                CAMERA ĐANG QUÉT • Pi Browser
-              </div>
+            {/* Real QR Scanner integration for consistency with Warehouse (use html5-qrcode) */}
+            <div style={{ marginBottom: 12 }}>
+              <QRScanner 
+                onScanSuccess={(code) => handleQRScan(code)}
+                onScanError={(err) => console.warn('QR scan error', err)}
+              />
+            </div>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 8, textAlign: 'center' }}>
+              Hoặc dùng camera thật bên trên • Hoặc nhập thủ công
             </div>
 
             {/* Manual input - essential for testnet / no camera */}
@@ -555,7 +541,7 @@ export default function HomePage() {
                   driver: 'driver_test',
                   warehouse: 'warehouse_test',
                   receiver: 'receiver_test',
-                  admin: 'nguyenhoi123455',
+                  admin: 'admin_demo',
                 };
                 if (mockMap[newRole]) {
                   localStorage.setItem('devMockPiUsername', mockMap[newRole]);
