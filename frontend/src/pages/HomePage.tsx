@@ -350,7 +350,8 @@ export default function HomePage() {
                 onClick={async () => {
                   setShowPiLoginPrompt(false);
                   await login();
-                  navigate('/dang-ky');
+                  // Pass state so Register page knows to skip Pi connect step and go straight to role choice
+                  navigate('/dang-ky', { state: { skipPiConnect: true, fromPiLogin: true } });
                 }}
                 style={{
                   background: 'linear-gradient(135deg, #4c1d95, #7c3aed)',

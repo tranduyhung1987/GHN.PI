@@ -1,6 +1,6 @@
 // src/pages/RegisterRolePage.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
 import type { AppRole } from '../utils/constants';
 import { REGISTRABLE_ROLES, ROLE_INFO, getRoleLabel } from '../utils/constants';
@@ -10,27 +10,34 @@ const roleOptions = REGISTRABLE_ROLES.map((key) => ROLE_INFO[key]);
 
 const RegisterRolePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, login, logout, role, updateRole, isLoading: authLoading } = useAuth();
 
-  const [isPiConnected, setIsPiConnected] = useState(!!user?.username);
-  const [piUsername, setPiUsername] = useState(user?.username || '');
+  // Derive from context + support flag from Home Pi login to skip connect step reliably
+  const fromHomePiLogin = (location.state as any)?.skipPiConnect || (location.state as any)?.fromPiLogin;
+  const isPiConnected = !!user?.username || fromHomePiLogin;
+  const piUsername = user?.username || '';
+
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<AppRole | null>(role);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string>('');
   const [justSaved, setJustSaved] = useState(false);
 
-  // Tối ưu: Tự động nhận diện đã đăng nhập Pi từ context (không cần bấm nút lại nếu đã login trước đó)
+  // Sync selected role when context updates (for cases where role pre-exists)
   useEffect(() => {
-    if (user?.username) {
-      setIsPiConnected(true);
-      setPiUsername(user.username);
-      setError(''); // clear lỗi cũ
-    }
     if (role) {
       setSelectedRole(role);
     }
-  }, [user?.username, role]);
+  }, [role]);
+
+  // If we arrived with skip flag but context user not yet set (race), still treat as connected
+  // The useEffect below for user will handle if it arrives later
+  useEffect(() => {
+    if (user?.username) {
+      setError(''); // clear any old errors
+    }
+  }, [user?.username]);
 
   // Auto navigate sau khi lưu thành công (hiển thị trạng thái success trước)
   useEffect(() => {
@@ -59,7 +66,7 @@ const RegisterRolePage: React.FC = () => {
     try {
       setIsConnecting(true);
       await login();
-      // Sau khi login, useEffect trên sẽ tự sync isPiConnected + username từ context user
+      // After login, isPiConnected derives from context (or skip flag passed from Home)
     } catch (error: any) {
       console.error(error);
       setError('Kết nối Pi thất bại: ' + (error?.message || 'Hãy mở trong Pi Browser (sdk.minepi.com)'));
@@ -139,11 +146,9 @@ const RegisterRolePage: React.FC = () => {
   const handleLogout = () => {
     clearError();
     logout();
-    setIsPiConnected(false);
-    setPiUsername('');
     setSelectedRole(null);
     setJustSaved(false);
-    // Now logout in context also removes selectedRole; go back to guest Home
+    // Context logout clears user/role/selectedRole; go back to guest Home with full reset
     navigate('/');
   };
 
@@ -154,7 +159,8 @@ const RegisterRolePage: React.FC = () => {
       <h2 style={title}>Đăng ký vai trò</h2>
       <p style={subtitle}>Kết nối Pi Network và chọn vai trò để sử dụng GHN.PI</p>
 
-      {/* Bước 1: chỉ hiển thị nếu chưa kết nối (khi đến từ Home sau khi đã login Pi, bỏ qua bước này) */}
+      {/* Bước 1: Kết nối Pi — chỉ hiển thị nếu chưa kết nối.
+          Nếu đến từ Home sau Pi login (skipPiConnect flag) hoặc user đã có trong context → bỏ qua bước này hoàn toàn, đi thẳng chọn vai trò. */}
       {!isPiConnected && (
         <div style={card}>
           <div style={{ marginBottom: 12, fontWeight: 600, color: '#4c1d95' }}>
@@ -178,14 +184,14 @@ const RegisterRolePage: React.FC = () => {
         </div>
       )}
 
-      {/* Hiển thị trạng thái đã kết nối nếu đến trực tiếp sau login từ trang chủ */}
+      {/* Hiển thị trạng thái đã kết nối (khi đến từ Home Pi login hoặc đã login trước đó) */}
       {isPiConnected && (
         <div style={{ textAlign: 'center', marginBottom: 16, color: '#22d3ee', fontWeight: 600, fontSize: 14 }}>
-          ✅ Đã kết nối Pi Network: @{piUsername}
+          ✅ Đã kết nối Pi Network: @{piUsername || 'Pi User'}
         </div>
       )}
 
-      {/* Chọn vai trò (Bước 2 hoặc trực tiếp nếu đã login Pi từ trang chủ) */}
+      {/* Chọn vai trò — đi thẳng nếu đã kết nối từ Home login */}
       <div style={card}>
         <div style={{ marginBottom: 12, fontWeight: 600, color: '#4c1d95' }}>
           {isPiConnected ? 'Chọn vai trò của bạn' : 'Bước 2: Chọn vai trò của bạn'}
