@@ -88,7 +88,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loadUser = async () => {
     try {
       setIsLoading(true);
-      const currentUser = await piService.getUser();
+      let currentUser = await piService.getUser();
+
+      // Fallback: if no user from Pi service (e.g. getUser failed silently in real Pi), 
+      // but we have persisted piUsername from previous real login + role register, use it for UI (display connected state).
+      // Full real features (payments etc) will still go through real piService when called.
+      if (!currentUser) {
+        const savedPiUsername = localStorage.getItem('piUsername');
+        if (savedPiUsername) {
+          currentUser = {
+            uid: `pi-${savedPiUsername}`,
+            username: savedPiUsername,
+            name: savedPiUsername,
+          };
+        }
+      }
+
       setUser(currentUser);
 
       const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
@@ -108,6 +123,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       const loggedInUser = await piService.authenticate();
       setUser(loggedInUser);
+
+      // Persist username so after role register / reload / getUser fallback, the Home shows "Đã kết nối: @realuser"
+      if (loggedInUser?.username) {
+        localStorage.setItem('piUsername', loggedInUser.username);
+      }
 
       const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
       const effectiveRole = resolveEffectiveRole(loggedInUser, savedRole);
