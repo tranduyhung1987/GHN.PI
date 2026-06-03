@@ -821,6 +821,7 @@ export default function CreateShipmentPage() {
             
             <input
               type="text"
+              aria-label="Tìm kiếm trong danh bạ người nhận theo tên hoặc số điện thoại"
               placeholder="Tìm theo tên hoặc số điện thoại..."
               value={addressBookSearch}
               onChange={(e) => setAddressBookSearch(e.target.value)}

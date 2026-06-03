@@ -47,6 +47,13 @@ Tất cả thay đổi đáng chú ý của dự án GHN.PI (frontend chính cho
 - All work strictly followed "NGHIÊM CẤM THAY ĐỔI GIAO DIỆN": no numeric/color/padding/shadow/border/grid/logo/header/feeBox/inputStyle values were altered in any active component. Only new logic, data sources, buttons for features, dead removal.
 - Result: Cleaner codebase (~20 files removed), better PWA feel, receiver role now has real flow, more tests/quality, all pushed.
 
+## [Category 8] Other Polish (this batch)
+- **Accessibility (a11y)**: Added ARIA roles, labels, aria-current, aria-modal, aria-labelledby to BottomNav (all role-specific tabs as nav + buttons), Modal (dialog, escape key support, labelled title, aria on buttons and overlay). Enhanced keyboard (Escape closes modals). Semantic <nav> instead of div where appropriate. Improves screen reader and keyboard nav for modals, bottom nav, without any style value changes.
+- **Versioning**: Bumped version to 0.2.0 in frontend/package.json and root package.json to reflect cumulative work (roles, features, cleanups, PWA, real flows).
+- **Security/CSP**: Reviewed public/_headers - CSP already includes necessary for Pi SDK + Firebase + camera=(self). No major changes needed; kept safe.
+- **Other**: Minor additional console guards if any remaining, manifest ready. All polish respects no UI visual edits.
+- Updated CHANGELOG.
+
 ---
 
 ## Previous Releases (summary highlights)

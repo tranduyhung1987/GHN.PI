@@ -1,10 +1,13 @@
 ﻿{
   "name": "GHN.PI - Giao Hàng Nhanh Pi",
   "short_name": "GHN.PI",
+  "description": "Ứng dụng giao hàng nhanh thực tế trên Pi Browser (Testnet) - 6 vai trò, Pi Payment, như GHN thật.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f3e8ff",
   "theme_color": "#4c1d95",
+  "lang": "vi",
+  "categories": ["logistics", "productivity", "utilities"],
   "icons": [
     {
       "src": "/favicon.svg",

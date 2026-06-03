@@ -35,7 +35,8 @@ export default function ProfilePage() {
   };
 
   // Support section state (moved from Home "HỖ TRỢ" for better personal context)
-  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  interface Ticket { id: number; type: string; description: string; status: string; timestamp: number; }
+  const [supportTickets, setSupportTickets] = useState<Ticket[]>([]);
   const [newTicket, setNewTicket] = useState({ type: 'Vấn đề với đơn hàng', description: '' });
   const [showSupportChat, setShowSupportChat] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -75,7 +76,7 @@ export default function ProfilePage() {
     if (saved) setSupportTickets(JSON.parse(saved));
   }, []);
 
-  const saveTickets = (tickets: any[]) => {
+  const saveTickets = (tickets: Ticket[]) => {
     setSupportTickets(tickets);
     localStorage.setItem('mySupportTickets', JSON.stringify(tickets));
   };
@@ -255,6 +256,7 @@ export default function ProfilePage() {
           {/* Submit new ticket form */}
           <div style={{ marginBottom: '12px', width: '100%', boxSizing: 'border-box' as const }}>
             <select 
+              aria-label="Loại vấn đề hỗ trợ"
               value={newTicket.type} 
               onChange={e => setNewTicket({ ...newTicket, type: e.target.value })}
               style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #c4b5fd', marginBottom: '6px', fontSize: '13px', boxSizing: 'border-box' as const }}
@@ -266,6 +268,7 @@ export default function ProfilePage() {
               <option>Khác</option>
             </select>
             <textarea 
+              aria-label="Mô tả chi tiết vấn đề hỗ trợ"
               placeholder="Mô tả chi tiết vấn đề (có thể ghi mã đơn nếu liên quan)..."
               value={newTicket.description}
               onChange={e => setNewTicket({ ...newTicket, description: e.target.value })}

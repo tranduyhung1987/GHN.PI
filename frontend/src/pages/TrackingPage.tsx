@@ -260,6 +260,7 @@ export default function TrackingPage() {
         <div style={{ marginBottom: 12, width: '100%', padding: '0 16px', boxSizing: 'border-box' as const }}>
           <input
             type="text"
+            aria-label="Tìm kiếm đơn hàng theo mã, người nhận, người gửi hoặc số điện thoại"
             placeholder="Tìm mã đơn, người nhận/gửi, SĐT..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

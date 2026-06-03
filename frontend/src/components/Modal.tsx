@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,14 +19,33 @@ const Modal: React.FC<ModalProps> = ({
   cancelText = "Đóng",
   onConfirm,
 }) => {
+  // Keyboard support: Escape to close (logic addition, no style change)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div style={overlay}>
-      <div style={modalContent} className="modal-enter">
+    <div style={overlay} role="presentation" onClick={onClose}>
+      <div 
+        style={modalContent} 
+        className="modal-enter"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div style={modalHeader}>
-          <h2 style={modalTitle}>{title}</h2>
+          <h2 id="modal-title" style={modalTitle}>{title}</h2>
         </div>
 
         {/* Body */}
@@ -36,11 +55,11 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Footer Buttons */}
         <div style={modalFooter}>
-          <button onClick={onClose} style={cancelBtn}>
+          <button onClick={onClose} style={cancelBtn} aria-label={cancelText}>
             {cancelText}
           </button>
           {onConfirm && (
-            <button onClick={onConfirm} style={confirmBtn} className="btn-press">
+            <button onClick={onConfirm} style={confirmBtn} className="btn-press" aria-label={confirmText}>
               {confirmText}
             </button>
           )}

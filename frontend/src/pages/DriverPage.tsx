@@ -268,6 +268,7 @@ export default function DriverPage() {
         {/* Search - containment fix (same pattern as Tracking/Order) */}
         <div style={{ padding: '0 16px 8px', boxSizing: 'border-box' }}>
           <input
+            aria-label="Tìm kiếm đơn hàng của tài xế theo mã, người nhận, SĐT hoặc địa chỉ"
             placeholder="Tìm mã đơn, người nhận, SĐT, địa chỉ..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}

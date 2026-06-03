@@ -1,7 +1,7 @@
 {
   "name": "ghn-pi",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GHN.PI monorepo - Frontend React + Vite (primary) for Pi Browser Testnet logistics app + optional backend demo",
   "scripts": {
     "dev": "cd frontend && npm run dev",
