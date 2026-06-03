@@ -143,7 +143,8 @@ const RegisterRolePage: React.FC = () => {
     setPiUsername('');
     setSelectedRole(null);
     setJustSaved(false);
-    localStorage.removeItem('selectedRole');
+    // Now logout in context also removes selectedRole; go back to guest Home
+    navigate('/');
   };
 
   return (

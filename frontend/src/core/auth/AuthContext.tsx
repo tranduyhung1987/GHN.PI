@@ -129,6 +129,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     setRole(null);
 
+    // Full reset to guest (Người mới) state: clear selected role so Home shows original 8 cards + Pi login
+    localStorage.removeItem('selectedRole');
+
     // Xóa dev helper khi logout (giữ devForceGuest nếu user muốn test tiếp)
     // localStorage.removeItem('devForceGuest'); // Bỏ comment nếu muốn auto clear
   };

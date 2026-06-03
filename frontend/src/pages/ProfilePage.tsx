@@ -28,7 +28,8 @@ export default function ProfilePage() {
   const handleLogout = () => {
     if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
       logout();
-      navigate('/dang-ky');
+      // After full logout (role=null + selectedRole cleared), go to guest Home (original 8 cards for Người mới)
+      navigate('/');
     }
   };
 
@@ -321,12 +322,7 @@ export default function ProfilePage() {
       {/* Nút hành động - only logout now (Đổi vai trò moved to top right small button) */}
       <div style={{ padding: '0 20px' }}>
         <button
-          onClick={() => {
-            if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
-              // logout logic
-              navigate('/dang-ky');
-            }
-          }}
+          onClick={handleLogout}
           style={{
             width: '100%',
             padding: '14px',
