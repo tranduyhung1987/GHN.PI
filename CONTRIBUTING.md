@@ -38,28 +38,28 @@ git commit -m "Add: mô tả ngắn gọn những gì bạn đã làm"
 ```bash
 git push origin feature/tinh-nang-moi
 
-✅ Những đóng góp được chấp nhận
+📝 Quy tắc Code (Rất quan trọng)
 
-Sửa lỗi (Bug fix)
-Thêm tính năng mới
-Cải thiện UI/UX
-Tối ưu hiệu suất
-Cập nhật tài liệu
-Dịch ngôn ngữ
+- **Code sạch, dễ đọc**, có comment khi cần thiết.
+- **Test trước khi gửi Pull Request**: chạy `cd frontend && npm run test:run` (và `npm run build` nếu cần).
+- **Tuân thủ "NGHIÊM CẤM THAY ĐỔI GIAO DIỆN"**: Khi chỉnh sửa các trang Home, Profile, CreateShipment, ShippingFee, Order, Tracking, BottomNav, RegisterRole... **CHỈ thêm logic/functional** (modals, buttons, calculations, guards, flows). Tuyệt đối KHÔNG thay đổi các giá trị style inline (padding, font-size, colors, border-radius, widths, shadows, feeBoxStyle, inputStyle, card sizes, avatar 60px, v.v.).
+- **constants.ts là nguồn chân lý duy nhất** cho 6 vai trò (ROLES, ROLE_INFO, REGISTRABLE_ROLES). Mọi nơi (Home, BottomNav, Profile, Register, guards) phải dùng từ đây.
+- **Frontend-first**: Dự án chủ yếu là React SPA (frontend/). Backend (Express/Mongo) là optional/demo. Làm việc chủ yếu trong `frontend/`.
+- **Pi Testnet & localStorage primary**: Dữ liệu nhanh/offline-first. Firebase chỉ qua env vars trên Cloudflare.
+- Sử dụng Dev Role Switcher (chỉ local DEV) để test tất cả vai trò mà không cần Pi thật.
 
-📝 Quy tắc Code
-
-Code sạch, dễ đọc
-Có comment khi cần
-Test trước khi gửi Pull Request
-
+✅ Những đóng góp được khuyến khích
+- Thêm flow thực tế như GHN (Danh bạ, live fee, journey, QR, driver pipeline...).
+- Cải thiện Pi SDK handling, error states, offline sync.
+- Bổ sung test (vitest), docs, templates.
+- Tối ưu mobile/Pi Browser viewport (containment, không tràn).
 
 ❓ Hỗ trợ
 
-Mở Issue trên GitHub
-Liên hệ @tranduyhung1987 trên Pi Chat / Telegram
+Mở Issue trên GitHub repository hoặc tham gia thảo luận cộng đồng Pi Network.
 
 
 Cùng nhau xây dựng GHN.PI trở thành ứng dụng giao hàng nhanh tốt nhất trên Pi Network! 🚀
-Made with ❤️ by @tranduyhung1987
+
+**Made with ❤️ for the Pi Network community**
 

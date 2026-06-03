@@ -16,7 +16,7 @@ Hướng dẫn cài đặt và chạy dự án **GHN.PI** ở chế độ phát 
 ## 🚀 Cài đặt nhanh bằng Docker (Khuyến nghị)
 
 ```bash
-git clone https://github.com/tranduyhung1987/GHN.PI.git
+git clone https://github.com/tranduyhung1987/GHN.PI.git   # official repo (hoặc fork trước nếu muốn đóng góp)
 cd GHN.PI
 cp .env.example .env
 docker-compose up --build

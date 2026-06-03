@@ -26,7 +26,7 @@ Project này được cấp phép theo **PiOS License** của **Pi Core Team**.
 
 ### Bản quyền
 
-© 2025 **Trần Duy Hưng** (@tranduyhung1987)  
+© 2025 **GHN.PI Contributors** (initial author: Trần Duy Hưng @tranduyhung1987)  
 All rights reserved within the scope of PiOS License.
 
 ---

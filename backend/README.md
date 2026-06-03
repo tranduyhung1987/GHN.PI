@@ -1,4 +1,6 @@
-# Pi Demo App - Backend
+# Pi Demo App - Backend (Optional / Demo)
+
+**Lưu ý quan trọng**: GHN.PI là **frontend-primary** (React SPA + localStorage primary + Firebase qua env). Backend này (Express + Mongo + Docker) là **optional** cho demo Pi-specific (payments, session) và chưa fully integrated vào UI chính. Xem root README + doc/development.md + frontend docs để biết architecture hiện tại.
 
 An Express API server with MongoDB for storing user data and session details.
 

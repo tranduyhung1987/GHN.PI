@@ -71,4 +71,4 @@ Các luồng chức năng chính của ứng dụng **GHN.PI - Giao Hàng Nhanh*
 
 **File này sẽ được cập nhật khi có thêm tính năng mới.**
 
-**Made with ❤️ by @tranduyhung1987**
+**Made with ❤️ for the Pi Network community**
