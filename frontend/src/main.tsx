@@ -77,6 +77,15 @@ try {
       </ErrorBoundary>
     </StrictMode>
   );
+
+  // Register PWA service worker (basic offline shell)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // silent fail ok for testnet
+      });
+    });
+  }
 } catch (err: unknown) {
   console.error('[Critical] Failed to mount React root:', err);
   const rootEl = document.getElementById('root');

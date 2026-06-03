@@ -41,7 +41,7 @@ export class MockPiService implements PiAdapter {
       localStorage.setItem('mockPiUsername', username);
     }
 
-    console.log('%c[Mock Pi] Authenticated as', 'color: orange', mockUser);
+    if (import.meta.env.DEV) console.log('%c[Mock Pi] Authenticated as', 'color: orange', mockUser);
     return mockUser;
   }
 
@@ -49,11 +49,11 @@ export class MockPiService implements PiAdapter {
     this._currentUser = null;
     localStorage.removeItem('mockPiUsername');
     localStorage.removeItem('devMockPiUsername');
-    console.log('%c[Mock Pi] Logged out', 'color: orange');
+    if (import.meta.env.DEV) console.log('%c[Mock Pi] Logged out', 'color: orange');
   }
 
   async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
-    console.log('%c[Mock Pi] Simulating Pi Payment...', 'color:#f59e0b', payment);
+    if (import.meta.env.DEV) console.log('%c[Mock Pi] Simulating Pi Payment...', 'color:#f59e0b', payment);
 
     // Giả lập độ trễ mạng + user confirm
     await new Promise((r) => setTimeout(r, 1200));
@@ -63,7 +63,7 @@ export class MockPiService implements PiAdapter {
 
     if (success) {
       const txid = `MOCK-TX-${Date.now()}`;
-      console.log('%c[Mock Pi] Payment SUCCESS', 'color:#22c55e', txid);
+      if (import.meta.env.DEV) console.log('%c[Mock Pi] Payment SUCCESS', 'color:#22c55e', txid);
       return {
         success: true,
         transactionId: txid,

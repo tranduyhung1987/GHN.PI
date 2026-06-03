@@ -13,21 +13,12 @@ const TrackingPage = lazy(() => import('../pages/TrackingPage'));
 const ReceivePackagePage = lazy(() => import('../pages/ReceivePackagePage'));
 const CommunityFeedback = lazy(() => import('../pages/CommunityFeedback'));
 
-// Các trang đã tồn tại nhưng chưa được route
+// Routed pages (some have internal role guards)
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const OrderPage = lazy(() => import('../pages/OrderPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const IncompletePaymentsPage = lazy(() => import('../pages/IncompletePaymentsPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
-
-// Simple placeholder cho các route chưa có UI đầy đủ
-const PlaceholderPage = ({ title, desc }: { title: string; desc?: string }) => (
-  <div style={{ padding: 40, textAlign: 'center', minHeight: '60vh' }}>
-    <h2 style={{ color: '#4c1d95' }}>{title}</h2>
-    <p style={{ color: '#64748b', marginTop: 12 }}>{desc || 'Tính năng đang được hoàn thiện cho Pi Testnet.'}</p>
-    <p style={{ marginTop: 20, fontSize: 13, color: '#94a3b8' }}>GHN.PI • Pi Network</p>
-  </div>
-);
 
 export const AppRoutes = () => {
   return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
 import { getRoleLabel } from '../utils/constants';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -41,6 +42,33 @@ export default function ProfilePage() {
     { id: 1, text: "Xin chào! Đội hỗ trợ GHN.PI sẵn sàng giúp bạn với đơn hàng, thanh toán Pi hoặc tài khoản.", isUser: false, time: 'Bây giờ' }
   ]);
   const [newChatMsg, setNewChatMsg] = useState('');
+
+  // Theme & PWA install (functional only, no style value changes to existing UI)
+  const { isDark, toggleTheme } = useTheme();
+  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      // @ts-ignore - standard beforeinstallprompt
+      if (e && (e as any).prompt) {
+        e.preventDefault();
+        setDeferredPrompt(e);
+      }
+    };
+    window.addEventListener('beforeinstallprompt', handler as any);
+    return () => window.removeEventListener('beforeinstallprompt', handler as any);
+  }, []);
+
+  const handlePwaInstall = async () => {
+    if (!deferredPrompt) return;
+    // @ts-ignore
+    deferredPrompt.prompt();
+    // @ts-ignore
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('mySupportTickets');
@@ -294,7 +322,26 @@ export default function ProfilePage() {
               Ẩn số điện thoại khi giao hàng
               <input type="checkbox" style={{ transform: 'scale(1.2)' }} />
             </label>
+            {/* Theme toggle - pure logic using existing ThemeContext, no change to protected style values */}
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Chế độ tối (dark)
+              <button
+                onClick={toggleTheme}
+                style={{ fontSize: '11px', color: '#4c1d95', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                {isDark ? 'Tắt' : 'Bật'}
+              </button>
+            </label>
           </div>
+          {/* PWA install prompt - functional addition only */}
+          {deferredPrompt && (
+            <button
+              onClick={handlePwaInstall}
+              style={{ fontSize: '11px', color: '#4c1d95', background: 'none', border: 'none', cursor: 'pointer', marginTop: '8px', padding: 0 }}
+            >
+              📱 Thêm vào màn hình chính (PWA)
+            </button>
+          )}
           <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px', marginBottom: 0 }}>Cài đặt được lưu trên thiết bị này.</p>
         </div>
       </div>

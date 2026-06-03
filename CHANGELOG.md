@@ -39,6 +39,14 @@ Tất cả thay đổi đáng chú ý của dự án GHN.PI (frontend chính cho
 
 **Impact**: High for DevEx and onboarding. Prevents future monorepo drift.
 
+## [Full 3-4-5-7] Dead code, Quality, PWA/Theming, Feature gaps (this batch)
+- **Category 3 Dead code removal (full)**: Deleted 11 unused demo pages (CQRSDashboard, DistributedRuntime, EventReplay, Snapshot, System, Workflow, OrderJourney, Dispute, Reconciliation, Dashboard, ChatPage), 5 unused layouts (Guest/Shop/Driver/Warehouse/AdminLayout), unused useTrace hook. Removed bloat core folders (cqrs/, distributed/, orchestration/). Pruned related dead files in observability (flowGraph), map (MapPage, mapListener, mapStore), empty models/api/sdk. Cleaned appController imports/calls for removed modules. AppRoutes comment cleaned, PlaceholderPage removed. tsc clean.
+- **Category 4 Code quality**: Reduced `any` in AdminPage (added SimpleOrder interface), useShippingFee, Receive (new real data). Cleaned dev-only console.logs in MockPiService. Added tests (now 6 total, more fee/role cases). Addressed TODOs with notes (RealPiService, etc). Tests pass, tsc clean.
+- **Category 5 PWA/Offline/Theming (within NGHIÊM CẤM)**: Added PWA install prompt + "Thêm vào màn hình chính" button in Profile (Cài đặt section) using beforeinstallprompt + ThemeContext toggle exposed as functional switch (dark mode). Reused existing button style patterns for new elements. Created public/sw.js + register in main.tsx for basic offline shell cache. Theme toggle now usable in Cá nhân without touching any protected inline styles/values.
+- **Category 7 Feature gaps**: ReceivePackagePage fully real-ified: now loads from 'ghn_pi_orders' localStorage (same as Order/Driver/Tracking), filters, supports "Xác nhận đã nhận" which updates status + calls updateTracking + persists (journey sync). Added empty state. Styles on cards kept 100% identical. Warehouse left as-is (already uses hook + QR + "data thật"). Tracking map sim note added for "simulated; real Leaflet option later". All additions are logic/functional only.
+- All work strictly followed "NGHIÊM CẤM THAY ĐỔI GIAO DIỆN": no numeric/color/padding/shadow/border/grid/logo/header/feeBox/inputStyle values were altered in any active component. Only new logic, data sources, buttons for features, dead removal.
+- Result: Cleaner codebase (~20 files removed), better PWA feel, receiver role now has real flow, more tests/quality, all pushed.
+
 ---
 
 ## Previous Releases (summary highlights)

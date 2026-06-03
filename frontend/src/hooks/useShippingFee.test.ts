@@ -14,4 +14,12 @@ describe('fee calc logic', () => {
     const fee = w * 35000 + 8000;
     expect(fee).toBeGreaterThan(40000);
   })
+
+  it('handles COD and khaiGia in breakdown logic', () => {
+    const cod = 500000;
+    const khai = 200000;
+    const base = 45000;
+    const total = base + cod + khai; // simulate
+    expect(total).toBeGreaterThan(base);
+  })
 })

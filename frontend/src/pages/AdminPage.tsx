@@ -5,20 +5,22 @@ import { useNavigate } from 'react-router-dom'; // 1. Hook điều hướng mớ
 const AdminPage: React.FC = () => {
   const navigate = useNavigate(); // 2. Khởi tạo hook
 
-  const [orders, setOrders] = useState<any[]>([]);
+  // Minimal order shape to reduce `any` usage (logic only)
+  interface SimpleOrder { maDon?: string; nguoiNhan?: string; status?: string; trangThai?: string; totalAmount?: number; [k: string]: unknown; }
+  const [orders, setOrders] = useState<SimpleOrder[]>([]);
   const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, totalPi: 0 });
 
   useEffect(() => {
     // Load from localStorage (primary for testnet)
     try {
       const saved = localStorage.getItem('ghn_pi_orders');
-      const loaded = saved ? JSON.parse(saved) : [];
+      const loaded: SimpleOrder[] = saved ? JSON.parse(saved) : [];
       setOrders(loaded.slice(0, 10)); // limit for admin view
 
       const total = loaded.length;
-      const pending = loaded.filter((o: any) => !['delivered', 'completed'].some(s => (o.status || o.trangThai || '').includes(s))).length;
+      const pending = loaded.filter((o) => !['delivered', 'completed'].some(s => (o.status || o.trangThai || '').includes(s))).length;
       const completed = total - pending;
-      const totalPi = loaded.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
+      const totalPi = loaded.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
       setStats({ total, pending, completed, totalPi: Math.round(totalPi) });
     } catch {}
   }, []);
@@ -47,7 +49,7 @@ const AdminPage: React.FC = () => {
         <h3 style={{ margin: 0, color: '#4c1d95' }}>Đơn hàng gần đây (10)</h3>
         {orders.length === 0 ? <p>Chưa có dữ liệu.</p> : orders.map((o, i) => (
           <div key={i} style={{ padding: '8px 0', borderBottom: '1px solid #eee', fontSize: 13 }}>
-            {o.maDon} | {o.nguoiNhan} | {o.status || o.trangThai} | {o.totalAmount || 0} Pi
+            {o.maDon} | {String(o.nguoiNhan || '')} | {o.status || o.trangThai} | {o.totalAmount || 0} Pi
           </div>
         ))}
       </div>

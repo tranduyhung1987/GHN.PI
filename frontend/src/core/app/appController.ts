@@ -1,21 +1,19 @@
 import { flowState } from "./flowState";
 import { eventBus } from "../events/eventBus";
 
-// Engines
+// Engines (core logistics)
 import { OrderEngine } from "../engines/OrderEngine";
 import { TrackingEngine } from "../engines/TrackingEngine";
 import { DriverEngine } from "../engines/DriverEngine";
 import { WarehouseEngine } from "../engines/WarehouseEngine";
 import { journeyEngine } from "../journey/journeyEngine";
 import { eventSourcingEngine } from "../events/eventSourcingEngine";
-import { projectionEngine } from "../cqrs/projectionEngine";
-import { distributedRuntimeEngine } from "../distributed/distributedRuntimeEngine";
 
 // State Management
 import { autoSnapshotService } from "../state/autoSnapshotService";
 import { stateRestoreEngine } from "../state/stateRestoreEngine";
 
-// STEP 8–11 LAYERS
+// Realtime & observability layers (used)
 import { offlineQueue } from "../realtime/offlineQueue";
 import { replayEngine } from "../realtime/replayEngine";
 import { realtimeConsistencyEngine } from "../realtime/consistencyEngine";
@@ -151,8 +149,6 @@ class AppController {
     await DriverEngine.init?.();
     journeyEngine.init();
     eventSourcingEngine.init();
-    projectionEngine.init();
-    distributedRuntimeEngine.init("admin");
 
     offlineQueue.load();
     replayEngine.init();

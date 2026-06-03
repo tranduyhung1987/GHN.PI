@@ -341,7 +341,7 @@ export default function TrackingPage() {
           </div>
 
           <div style={{ fontSize: 11, color: '#64748b', marginTop: 6 }}>
-            Nhấn "Mô phỏng di chuyển" để xem tài xế di chuyển giữa các điểm giao. Kết nối với đơn thực tế (demo).
+            Nhấn "Mô phỏng di chuyển" để xem tài xế di chuyển giữa các điểm giao. Kết nối với đơn thực tế (demo). Bản đồ hiện tại là simulated; real map (Leaflet) có thể thêm sau.
           </div>
 
           {/* Enhanced: Interactive list of deliveries in map mode for better UX */}

@@ -103,7 +103,7 @@ export class RealPiService implements PiAdapter {
           {
             onReadyForServerApproval: (paymentId: string) => {
               console.log('[Pi Payment] Ready for server approval:', paymentId);
-              // TODO: Gọi backend /payments/approve
+              // TODO: Gọi backend /payments/approve (backend optional, hiện tại frontend primary)
             },
             onReadyForServerCompletion: (paymentId: string, txid: string) => {
               console.log('[Pi Payment] Completed! txid=', txid);
