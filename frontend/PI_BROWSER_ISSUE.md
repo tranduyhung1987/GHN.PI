@@ -1,56 +1,43 @@
-# Pi Browser Blocking Issue - Diagnosis
+# Pi Browser & Real Pi SDK - Diagnosis & Setup
 
-## Current Status (as of latest conversation)
+## Current Status (Updated)
 
-- ✅ Site works perfectly on normal browsers (Chrome, Edge, etc.)
-- ❌ Site is blocked / cannot be accessed in Pi Browser (both raw Vercel URLs and ghn-pi.vercel.app)
+- ✅ Trang load tốt trên Cloudflare Pages (`ghn-pi.pages.dev`) trong Pi Browser (không còn bị chặn như Vercel).
+- ✅ Code đã fix detection: Khi mở trong Pi Browser thật (có `window.Pi` hoặc userAgent `pibrowser`), sẽ dùng **Real Pi SDK** thay vì Mock, ngay cả trên `*.pages.dev`.
+- ❌ **Vấn đề phổ biến còn lại**: Dù mở trong Pi Browser, vẫn chỉ thấy **Mock / Demo** nếu **chưa khai báo domain** trong Pi Developer Portal.
 
-## Root Cause
+## Root Cause (Real Pi không hoạt động)
 
-**Pi Browser is aggressively filtering / blocking Vercel-hosted applications.**
+Pi Network yêu cầu bạn **phải khai báo link web** của app trong Pi Developer Console để Real SDK (authenticate + createPayment) được phép chạy từ domain đó.
 
-This is a known issue in the Pi developer community:
-- Vercel subdomains (*.vercel.app) are frequently blocked by Pi Browser.
-- Even when using custom domains pointing to Vercel, if the underlying infrastructure is Vercel, it can still be affected.
-- Pi Browser has very strict security policies and often flags CDNs like Vercel, especially when the app uses Firebase + external SDKs (Pi SDK).
+Cụ thể:
+- Vào **Pi Browser → Developer** (hoặc https://developers.minepi.com)
+- Mở app của bạn
+- Vào phần **Develop** (có khoảng 10 mục cấu hình)
+- Tìm mục liên quan đến **Web / Domain / Allowed URLs / Pi Browser Link / Sandbox Web App**
+- Thêm `https://ghn-pi.pages.dev` (và `*.pages.dev` nếu cho phép)
 
-## What We Have Tried
+Nếu không làm bước này → Pi Browser sẽ không inject quyền real Pi cho domain lạ → code rơi về Mock.
 
-- Multiple production deployments on Vercel
-- Custom domain aliasing (`ghn-pi.vercel.app`)
-- Content-Security-Policy (CSP) tuned for Pi SDK + Firebase
-- Relaxed security headers (X-Frame-Options, etc.)
-- Adding Asian regions for lower latency
-- Various header configurations
+## Hướng dẫn đầy đủ
 
-**Result**: Still blocked in Pi Browser.
+Xem chi tiết tại:
+- `CLOUDFLARE_PAGES_DEPLOY.md` (có phần Bước 4: Khai báo Domain vào Pi Developer Portal)
+- `DEPLOY_CHECKLIST.md` (có checklist rõ ràng bước khai báo domain)
 
-## Recommended Solution
+## Code đã hỗ trợ tốt
 
-**Migrate to Cloudflare Pages**
+- Detection thông minh trong `src/core/pi/piService.ts`: Ưu tiên Real khi phát hiện Pi Browser.
+- RealPiService đã có graceful fallback và log rõ.
+- UI có thông báo "Đã kết nối Pi thật" khi thành công.
 
-Cloudflare Pages tends to have much better compatibility with Pi Browser compared to Vercel.
+## Checklist nhanh khi test Real Pi
 
-See file: `CLOUDFLARE_PAGES_DEPLOY.md` for detailed migration guide.
+1. Deploy thành công lên Cloudflare → lấy link `*.pages.dev`
+2. **Khai báo domain trong Pi Developer Portal (Develop section)**
+3. Mở link **bằng Pi Browser** (không browser thường)
+4. Hard refresh
+5. Nhấn "Đăng nhập với Pi" → phải hiện popup Pi thật
+6. Sau login → nút hiển thị username thật của bạn (không phải mock)
 
-## Temporary Workarounds (Not Recommended for Production)
-
-- Ask users to open in normal browser (bad UX)
-- Use a reverse proxy (Cloudflare Worker) in front of Vercel (complex, may still be detected)
-
-## Decision Made (2026)
-
-✅ User đã chọn **bỏ Vercel hoàn toàn** và chuyển sang **Cloudflare Pages**.
-
-## Files Prepared for Migration
-
-- `CLOUDFLARE_PAGES_DEPLOY.md` — Hướng dẫn chi tiết
-- `.github/workflows/deploy-cloudflare-pages.yml` — Auto deploy
-- `public/_headers` + `public/_redirects`
-- `wrangler.toml`
-
-## Current Recommended URL for Pi Browser Testing
-
-Sử dụng link từ Cloudflare Pages (`*.pages.dev`) thay vì `ghn-pi.vercel.app`.
-
-Last updated: 2026
+Last updated: 2026 (sau khi fix detection + cập nhật docs)

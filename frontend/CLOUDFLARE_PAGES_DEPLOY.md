@@ -57,19 +57,41 @@ hoặc tương tự (tên có thể khác một chút).
 
 **Đây là link bạn sẽ dùng để mở trên Pi Browser.**
 
+**Lưu ý quan trọng về Pi Domain**:
+- Pi Browser chỉ cho phép app của bạn dùng Real Pi SDK (window.Pi) nếu domain đã được khai báo trong Pi Developer Portal.
+- Nếu chưa khai báo, code sẽ tự động rơi về Mock (demo) dù bạn mở trong Pi Browser.
+- Sau khi fix code detection (đã làm), bước khai báo domain trong "Develop" section là bước quyết định để có Pi thật.
+
 ---
 
-## Bước 4: Test trên Pi Browser
+## Bước 4: Khai báo Domain vào Pi Developer Portal (BẮT BUỘC cho Real Pi)
+
+Sau khi có link `https://ghn-pi.pages.dev`:
+
+1. Mở **Pi Browser**.
+2. Vào phần **Developer** (hoặc mở https://developers.minepi.com trong Pi Browser).
+3. Chọn app GHN.PI (hoặc app bạn đang dùng).
+4. Vào tab **Develop** (hoặc phần cấu hình app).
+5. Tìm trong **10 mục** cấu hình (thường có các mục như: App Info, Sandbox, Production, Web Settings, Domains, Allowed Origins, Pi Browser URLs...).
+6. **Khai báo / thêm link**:
+   - `https://ghn-pi.pages.dev`
+   - Nếu có ô "Allowed Domains" hoặc "Web App URL" hoặc "Pi Browser Link" → paste link vào.
+7. Save và chờ 30-60 giây.
+
+**Đây là bước quan trọng nhất để dùng Pi thật (không phải Mock).** Nếu bỏ qua, dù mở trong Pi Browser bạn vẫn chỉ thấy demo.
+
+## Bước 5: Test trên Pi Browser
 
 1. Copy link `*.pages.dev` vừa có.
 2. Mở **Pi Browser**.
 3. Dán link vào và thử dùng app.
-4. Nếu cần, nhấn giữ nút reload để hard refresh.
+4. **Hard refresh**: Kéo thật mạnh xuống hoặc đóng tab mở lại.
+5. Nhấn nút "Đăng nhập với Pi Network" → phải hiện popup Pi thật.
 
 **Sau khi test xong, hãy báo tôi kết quả**:
-- App có mở được không?
-- Pi login có hoạt động không?
-- Có bị chặn nữa không?
+- Có hiện popup đăng nhập Pi thật không?
+- Sau login có hiện username thật của bạn không?
+- Khi tạo đơn có thanh toán Pi thật không (không phải mock)?
 
 ---
 

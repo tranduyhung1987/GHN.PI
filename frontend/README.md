@@ -25,7 +25,10 @@ npm test
 ```
 
 - Trên localhost: dùng Mock Pi Service (có devMockPiUsername, dev role switcher top-right).
-- Pi Browser thật: tự động dùng Real SDK khi hostname phù hợp.
+- Pi Browser thật: 
+  - Mở link trong Pi Browser.
+  - **Phải khai báo domain `https://ghn-pi.pages.dev` trong Pi Developer Portal (Develop → app config, phần Web/Domains)** nếu muốn dùng Real Pi (không phải mock).
+  - Code sẽ tự động chuyển sang Real khi phát hiện đúng Pi Browser.
 
 ## Build & Deploy
 

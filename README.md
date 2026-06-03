@@ -76,7 +76,10 @@ GHN.PI/
 **[→ Mở GHN.PI ngay (Pi Browser khuyến nghị)](https://ghn-pi.pages.dev)**
 
 - Dùng **Dev Role Switcher** (chỉ local DEV) để test tất cả 6 vai trò mà không cần Pi login thật.
-- Trên Pi Browser thật: login Pi → chọn vai trò (4 registrable) → full features.
+- Trên Pi Browser thật: 
+  1. Mở link `ghn-pi.pages.dev` **bên trong Pi Browser**.
+  2. **Bắt buộc**: Vào Pi Developer Portal (Developer section) → app của bạn → Develop → khai báo domain `https://ghn-pi.pages.dev` (trong 10 mục cấu hình, thường ở phần Web/Domains/Allowed URLs).
+  3. Hard refresh → login Pi thật → chọn vai trò → full features (Real SDK).
 
 ---
 

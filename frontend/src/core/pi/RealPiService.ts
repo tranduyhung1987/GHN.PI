@@ -51,6 +51,11 @@ export class RealPiService implements PiAdapter {
       return this.currentUser;
     } catch (error) {
       console.error('[Real Pi] Authenticate failed:', error);
+      // Hướng dẫn rõ ràng cho developer/user
+      const errMsg = (error as any)?.message?.toLowerCase?.() || '';
+      if (errMsg.includes('origin') || errMsg.includes('domain')) {
+        console.warn('%c[Real Pi] Có thể do chưa khai báo domain trong Pi Developer Portal (Develop → Allowed domains / Web URL). Hãy thêm https://ghn-pi.pages.dev vào app config.', 'color: orange');
+      }
       throw error;
     }
   }
