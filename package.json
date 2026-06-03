@@ -1,51 +1,37 @@
 {
-  "name": "ghn.pi-frontend",
+  "name": "ghn-pi",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "description": "GHN.PI monorepo - Frontend React + Vite (primary) for Pi Browser Testnet logistics app + optional backend demo",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
-    "type-check": "tsc --noEmit"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "test": "cd frontend && npm run test:run",
+    "test:ui": "cd frontend && npm run test:ui",
+    "deploy:cloudflare": "cd frontend && npm run deploy:cloudflare",
+    "install:frontend": "cd frontend && npm ci",
+    "install:backend": "cd backend && yarn install",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "lint": "cd frontend && npm run build"
   },
-  "dependencies": {
-    "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^7.3.8",
-    "@mui/styled-engine-sc": "^7.3.9",
-    "axios": "^1.8.4",
-    "lucide-react": "^1.14.0",
-    "pi-sdk-react": "^2.0.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.5.0",
-    "react-qr-code": "^2.0.15",
-    "styled-components": "^6.3.12"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tranduyhung1987/GHN.PI.git"
   },
-  "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.0",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "globals": "^16.5.0",
-    "postcss": "^8.5.14",
-    "prettier": "^3.7.4",
-    "tailwindcss": "^4.2.4",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vite": "^8.0.13"
-  },
-  "resolutions": {
-    "@mui/styled-engine": "@mui/styled-engine-sc"
+  "keywords": [
+    "pi-network",
+    "ghn",
+    "logistics",
+    "vietnam",
+    "react",
+    "vite",
+    "pi-browser",
+    "testnet"
+  ],
+  "author": "GHN.PI Community",
+  "license": "PiOS",
+  "engines": {
+    "node": ">=18"
   }
 }

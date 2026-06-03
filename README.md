@@ -19,6 +19,32 @@ GHN.PI là frontend **React + Vite + TypeScript + Tailwind** dành riêng cho **
 
 ---
 
+## 📁 Cấu trúc dự án (Monorepo)
+
+```
+GHN.PI/
+├── frontend/          # ❤️ CHÍNH: React 18 + Vite + TS + Tailwind (Pi Browser app)
+│   ├── src/           # Toàn bộ UI, 6 roles, engines, pages (Home, Create, Driver, Order, Tracking...)
+│   ├── public/        # manifest, _headers (CSP + camera), favicon
+│   └── package.json   # Đúng deps hiện tại (React 18, vitest, html5-qrcode, firebase...)
+├── backend/           # Optional: Express + Mongo (demo Pi payment/session). Không bắt buộc.
+├── doc/               # Development, deployment, docker guides
+├── .github/workflows/ # CI test + Cloudflare deploy (đều trỏ vào frontend/)
+├── docker-compose.yml # (Optional) full stack với backend + mongo
+├── .env.example       # Chủ yếu cho backend/docker (frontend dùng Cloudflare env vars)
+├── CHANGELOG.md
+├── FLOWS.md
+├── CONTRIBUTING.md
+└── README.md          # Bạn đang đọc
+```
+
+**Quan trọng**:
+- **Luôn làm việc chính trong `frontend/`**.
+- Chạy lệnh ở **gốc repo** (`npm run dev`) sẽ tự động cd vào frontend (xem root package.json đã được dọn).
+- Tránh `npm install` trực tiếp ở gốc nếu không cần backend (sẽ chỉ cài frontend qua script).
+
+---
+
 ## 🚀 Tính năng chính (như GHN thật trên Pi)
 
 ### Vai trò & Giao diện
@@ -56,9 +82,18 @@ GHN.PI là frontend **React + Vite + TypeScript + Tailwind** dành riêng cho **
 
 ## 🛠 Hướng dẫn & Tài liệu
 
+**Chạy nhanh từ gốc repo (khuyến nghị sau khi dọn monorepo)**:
+```bash
+npm install          # hoặc npm run install:frontend
+npm run dev          # tự động vào frontend + start Vite
+npm test             # chạy vitest ở frontend
+npm run build
+```
+
 **Frontend (chính)**:
-- `cd frontend && npm install && npm run dev`
-- Dev tools xuất hiện tự động khi `import.meta.env.DEV`.
+- `cd frontend && npm install && npm run dev` (cách cũ vẫn hoạt động)
+- Hoặc dùng script ở gốc: `npm run dev`
+- Dev tools (Role Switcher) xuất hiện tự động khi `import.meta.env.DEV`.
 - Pi mock trên localhost / pages.dev / vercel; real Pi SDK chỉ khi hostname chứa minepi.com hoặc userAgent pibrowser.
 - Xem chi tiết deploy & env:
   - [CLOUDFLARE_ENV_VARS.md](./frontend/CLOUDFLARE_ENV_VARS.md) (Firebase keys + VITE_ADMIN_USERNAMES=your_admin_username)
@@ -71,6 +106,7 @@ GHN.PI là frontend **React + Vite + TypeScript + Tailwind** dành riêng cho **
 - [Luồng chức năng](./FLOWS.md)
 - [Hướng dẫn đóng góp](./CONTRIBUTING.md)
 - Backend (nếu dùng): xem backend/README.md + doc/docker-setup.md
+- Xem cấu trúc chi tiết ở phần "📁 Cấu trúc dự án (Monorepo)" phía trên.
 
 **Admin**: Chỉ gán qua `VITE_ADMIN_USERNAMES` (Cloudflare Variables/Secrets) hoặc dev override `localStorage.setItem('devAdminUsernames', 'username')`.
 

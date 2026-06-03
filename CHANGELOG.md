@@ -25,6 +25,20 @@ Tất cả thay đổi đáng chú ý của dự án GHN.PI (frontend chính cho
 - This batch was pure documentation & community polish (no src/ or style changes).
 - See previous commits for full feature history (6 immutable roles, live fee + COD, Danh bạ CRUD, Driver pipeline + QR + map sim, Order/Tracking role-aware, Profile restructure, etc.).
 
+### [Category 2+6] Monorepo Root Cleanup & DevEx (this batch)
+- **Root package.json full rewrite**: Removed completely wrong/outdated React 19 + MUI + styled-components + React Router 7 stack (was causing confusion with real `frontend/package.json` React 18 Vite setup).
+  - New clean monorepo orchestrator: name "ghn-pi", proxy scripts (`npm run dev`, `npm test`, `npm run build`, `npm run deploy:cloudflare`, `npm run install:frontend`, `npm run install:backend`, `npm run install:all`) that safely `cd frontend && ...`
+  - Removed heavy wrong deps, added proper description, keywords, engines, repository.
+- **Stale root package-lock.json**: Will be removed (was generated from the bad root package.json).
+- **Root README.md**: Added clear "📁 Cấu trúc dự án (Monorepo)" section with tree + warnings. Updated "🛠 Hướng dẫn & Tài liệu" to show root-level npm scripts first.
+- **frontend/README.md** (local): Updated run instructions to mention both direct and root-proxy ways.
+- **.env.example** (root): Enhanced header with explicit warning: "Frontend KHÔNG dùng .env local mặc định. Frontend dùng Cloudflare VITE_ vars. This file is backend/docker focused."
+- **doc/development.md**: Added "⚡ Chạy chỉ Frontend (nhanh nhất cho dev UI)" section + notes on proxy scripts and that frontend doesn't need .env.
+- All changes keep "NGHIÊM CẤM THAY ĐỔI GIAO DIỆN" (no frontend/src or style touched) and make contributor experience much clearer: "Luôn làm việc chính trong frontend/".
+- Result: Running `npm run dev` or `npm test` from repo root now just works and delegates correctly. No more "cd .. && npm install will install wrong deps".
+
+**Impact**: High for DevEx and onboarding. Prevents future monorepo drift.
+
 ---
 
 ## Previous Releases (summary highlights)

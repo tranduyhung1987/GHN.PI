@@ -12,9 +12,16 @@ Xem README chính của dự án tại [../README.md](../README.md) (root) để
 
 ## Chạy local
 
+**Từ thư mục này (frontend/)**:
 ```bash
 npm install
 npm run dev
+```
+
+**Từ gốc repo (sau khi root package.json đã proxy)**:
+```bash
+npm run dev     # tự động cd frontend + chạy
+npm test
 ```
 
 - Trên localhost: dùng Mock Pi Service (có devMockPiUsername, dev role switcher top-right).
