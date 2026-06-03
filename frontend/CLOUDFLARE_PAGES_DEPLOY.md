@@ -80,6 +80,18 @@ Sau khi có link `https://ghn-pi.pages.dev`:
 
 **Đây là bước quan trọng nhất để dùng Pi thật (không phải Mock).** Nếu bỏ qua, dù mở trong Pi Browser bạn vẫn chỉ thấy demo.
 
+## Bước 4.5: Xác minh domain bằng validation-key.txt (nếu Pi yêu cầu)
+
+Khi bạn cấu hình domain trong Pi Developer Portal, nó có thể yêu cầu xác minh bằng file:
+
+1. Pi sẽ đưa cho bạn một mã xác minh dài (ví dụ: 12d24e17...).
+2. Trong project, tạo hoặc cập nhật file `frontend/public/validation-key.txt` với **chỉ nội dung là đúng mã đó** (không thêm dòng nào khác, không comment).
+3. Commit + push code.
+4. Chờ Cloudflare build xong.
+5. Kiểm tra trực tiếp trên trình duyệt: https://ghn-pi.pages.dev/validation-key.txt phải trả về đúng mã bạn nhận được.
+
+File này nằm trong `public/` nên sẽ được Vite tự động copy vào `dist/` và serve tại root khi deploy.
+
 ## Bước 5: Test trên Pi Browser
 
 1. Copy link `*.pages.dev` vừa có.
