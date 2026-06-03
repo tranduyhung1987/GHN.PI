@@ -1,73 +1,38 @@
-# React + TypeScript + Vite
+# GHN.PI Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**React + Vite + TypeScript + Tailwind** cho ứng dụng Giao Hàng Nhanh trên **Pi Browser Testnet**.
 
-Currently, two official plugins are available:
+Xem README chính của dự án tại [../README.md](../README.md) (root) để biết đầy đủ:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 6 vai trò (Người mới, Người gửi, Tài xế, Kho, Người nhận, Admin)
+- Tích hợp Pi SDK thật (createPayment, onIncomplete)
+- Các flow thực tế: Gửi hàng (Danh bạ full), Tra cứu cước live, Đơn hàng của tôi, Theo dõi + journey, QR Scanner cho driver, Đóng góp, Cá nhân + hỗ trợ...
+- Dev tools (role switcher + force guest)
+- Deploy Cloudflare Pages + env vars (Firebase + VITE_ADMIN_USERNAMES)
 
-## React Compiler
+## Chạy local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Trên localhost: dùng Mock Pi Service (có devMockPiUsername, dev role switcher top-right).
+- Pi Browser thật: tự động dùng Real SDK khi hostname phù hợp.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Build & Deploy
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
+npm run deploy:cloudflare   # cần wrangler + secrets
 ```
+
+Chi tiết: xem `CLOUDFLARE_*.md`, `DEPLOY_CHECKLIST.md`, `wrangler.toml`, `.github/workflows/deploy-cloudflare-pages.yml`
+
+**Lưu ý**: localStorage primary cho testnet (nhanh, offline). Firebase chỉ qua env (xem CLOUDFLARE_ENV_VARS.md).
+
+**Tech**: Vite 5, React 18, TS, React Router, TanStack Query, Firebase, html5-qrcode (cho QR).
+
+---
+
+**Made for Pi Network Testnet** • Pi Browser optimized (2-col grid, containment, no overflow).
