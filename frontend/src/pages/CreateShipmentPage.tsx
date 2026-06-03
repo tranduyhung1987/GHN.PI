@@ -4,7 +4,7 @@ import { useCreateShipment } from '../hooks/useCreateShipment';
 import { useAuth } from '../core/auth/AuthContext';
 import { getRoleLabel } from '../utils/constants';
 import { useAppController } from '../hooks/useAppController';
-import { piService } from '../core/pi/piService';
+import { piService, isUsingRealPi } from '../core/pi/piService';
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate();
@@ -754,11 +754,13 @@ export default function CreateShipmentPage() {
         )}
 
         <p style={{ textAlign: 'center', fontSize: '12px', color: '#64748b', marginTop: '-8px' }}>
-          {piService.isAuthenticated?.() ? '✓ Đã kết nối Pi' : '⚠️ Chưa kết nối Pi (dùng Mock Payment)'}
+          {piService.isAuthenticated?.() 
+            ? (isUsingRealPi() ? '✓ Đã kết nối Pi thật' : '✓ Đã kết nối (Mock)') 
+            : '⚠️ Chưa kết nối Pi'}
         </p>
-        {typeof window !== 'undefined' && !window.Pi && (
-          <p style={{ fontSize: '11px', color: '#f59e0b', textAlign: 'center', marginTop: 4 }}>
-            Thanh toán Pi thật chỉ hoạt động khi mở trong <strong>Pi Browser</strong>
+        {typeof window !== 'undefined' && (window.Pi || isUsingRealPi()) && (
+          <p style={{ fontSize: '11px', color: '#16a34a', textAlign: 'center', marginTop: 2 }}>
+            Sẽ dùng thanh toán Pi thật khi tạo đơn
           </p>
         )}
       </form>
