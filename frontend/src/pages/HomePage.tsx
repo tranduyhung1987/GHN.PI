@@ -340,6 +340,10 @@ export default function HomePage() {
             </h3>
             <p style={{ margin: '0 0 20px', color: '#64748b', fontSize: '14px', lineHeight: 1.4 }}>
               Bạn cần đăng nhập với Pi Network và chọn vai trò để sử dụng tính năng này.
+              <br />
+              <span style={{ fontSize: '12px', color: '#16a34a' }}>
+                Mở link này trong Pi Browser để dùng tài khoản Pi thật.
+              </span>
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
