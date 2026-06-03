@@ -3,7 +3,7 @@ import { PiAdapter } from "./PiAdapter";
 import { MockPiService } from "./MockPiService";
 import { RealPiService } from "./RealPiService";
 
-// ==================== IMPROVED PI BROWSER DETECTION ====================
+// ==================== PI BROWSER DETECTION (runtime, not only at load) ====================
 // Hỗ trợ mở link pages.dev trực tiếp từ trong Pi Browser thật
 const isRunningInPiBrowser = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -16,45 +16,72 @@ const isRunningInPiBrowser = (): boolean => {
   return hasPiSDK || userAgent.includes('pibrowser');
 };
 
-const createPiService = (): PiAdapter => {
+let activeService: PiAdapter | null = null;
+
+const decideAndGetService = (): PiAdapter => {
+  if (activeService) {
+    // If we previously chose Mock, but now Pi SDK is available (late injection), upgrade to Real
+    if (activeService.constructor.name === 'MockPiService' && isRunningInPiBrowser()) {
+      console.log('%c[Pi Service] Upgrading to Real Pi SDK (late detection of Pi Browser)', 'color: lime; font-weight: bold');
+      activeService = new RealPiService();
+    }
+    return activeService;
+  }
+
   try {
     const hostname = (typeof window !== 'undefined' && window.location) ? window.location.hostname : '';
     const inPiBrowser = isRunningInPiBrowser();
 
-    // Nếu đang ở trong Pi Browser thật → ưu tiên Real Pi SDK (dù URL là pages.dev)
+    // Prioritize real if we detect Pi Browser environment (at decision time, which is on user click)
     if (inPiBrowser) {
       console.log('%c[Pi Service] → Real Pi SDK (Detected inside Pi Browser on ' + hostname + ')', 'color: lime; font-weight: bold');
-      return new RealPiService();
+      activeService = new RealPiService();
+      return activeService;
     }
 
-    // Trên desktop / trình duyệt thường: ép Mock cho các deploy preview (pages.dev, vercel) + localhost
+    // Only force Mock for preview hosts when NOT in actual Pi Browser
     if (hostname.includes('pages.dev') || hostname.includes('vercel.app') || hostname === 'localhost') {
       console.log('%c[Pi Service] → Mock Pi SDK (Forced on ' + hostname + ' - not in Pi Browser)', 'color: orange; font-weight: bold');
-      return new MockPiService();
+      activeService = new MockPiService();
+      return activeService;
     }
 
-    // Các trường hợp khác (custom domain production...)
+    // Other cases (prod custom domain etc)
     console.log('%c[Pi Service] → Real Pi SDK (Production domain)', 'color: lime; font-weight: bold');
-    return new RealPiService();
+    activeService = new RealPiService();
+    return activeService;
   } catch (e) {
     console.error('[Pi Service] Detection failed, falling back to Mock:', e);
-    return new MockPiService();
+    activeService = new MockPiService();
+    return activeService;
   }
 };
 
-export const piService = (createPiService());
+// Proxy so that code using `piService.authenticate()` etc. works, but decision is lazy (on first call, e.g. user click login)
+// This fixes timing issues where window.Pi is not yet injected at module load time.
+export const piService: PiAdapter = {
+  authenticate: () => decideAndGetService().authenticate(),
+  getUser: () => decideAndGetService().getUser(),
+  isAuthenticated: () => decideAndGetService().isAuthenticated(),
+  logout: () => decideAndGetService().logout(),
+  createPayment: (payment) => {
+    const svc = decideAndGetService();
+    return svc.createPayment ? svc.createPayment(payment) : Promise.resolve({ success: false, error: 'createPayment not available' });
+  },
+};
 
 /** Helper để UI biết đang dùng real hay mock */
 export const isUsingRealPi = (): boolean => {
-  // Kiểm tra lại runtime (hữu ích sau khi reload)
+  // Re-check at call time
   if (typeof window !== 'undefined') {
     const ua = navigator.userAgent.toLowerCase();
     if (ua.includes('pibrowser') || typeof window.Pi !== 'undefined') {
       return true;
     }
   }
-  // Fallback dựa trên instance type (không hoàn hảo nhưng dùng được)
-  return piService.constructor.name === 'RealPiService';
+  // Force decision if not yet, then check
+  const svc = decideAndGetService() as any;
+  return svc && svc.constructor && svc.constructor.name === 'RealPiService';
 };
 
 export * from './PiAdapter';
