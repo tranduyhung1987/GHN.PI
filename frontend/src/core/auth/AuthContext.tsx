@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { piService, type PiUser } from '../pi/piService';
+import { piService, type PiUser, isUsingRealPi } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
 
 // ==================== ADMIN HARDCODE (Phương án 1 - Tối ưu cho giai đoạn hiện tại) ====================
@@ -61,7 +61,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
-  updateRole: (newRole: AppRole) => void;   // ← MỚI: Cho phép chọn vai trò sau login
+  updateRole: (newRole: AppRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,19 +90,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       let currentUser = await piService.getUser();
 
-      // Fallback: if no user from Pi service (e.g. getUser failed silently in real Pi), 
-      // but we have persisted piUsername from previous real login + role register, use it for UI (display connected state).
-      // Full real features (payments etc) will still go through real piService when called.
+      // ==================== FIX: Không resurrect tên demo khi dùng Pi thật ====================
       if (!currentUser) {
         const savedPiUsername = localStorage.getItem('piUsername');
+        const inRealPiMode = isUsingRealPi();
+
         if (savedPiUsername) {
-          currentUser = {
-            uid: `pi-${savedPiUsername}`,
-            username: savedPiUsername,
-            name: savedPiUsername,
-          };
+          const looksLikeDemo =
+            savedPiUsername.toLowerCase().includes('demo') ||
+            savedPiUsername.toLowerCase().includes('mock') ||
+            savedPiUsername.toLowerCase().includes('test') ||
+            savedPiUsername.toLowerCase().includes('user_');
+
+          if (!inRealPiMode || !looksLikeDemo) {
+            currentUser = {
+              uid: `pi-${savedPiUsername}`,
+              username: savedPiUsername,
+              name: savedPiUsername,
+            };
+          } else {
+            console.warn('[Auth] ⚠️ Bỏ qua username demo từ localStorage vì đang ở môi trường Pi thật');
+          }
         }
       }
+      // ==================== HẾT PHẦN FIX ====================
 
       setUser(currentUser);
 
@@ -124,7 +135,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const loggedInUser = await piService.authenticate();
       setUser(loggedInUser);
 
-      // Persist username so after role register / reload / getUser fallback, the Home shows "Đã kết nối: @realuser"
       if (loggedInUser?.username) {
         localStorage.setItem('piUsername', loggedInUser.username);
       }
@@ -133,7 +143,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const effectiveRole = resolveEffectiveRole(loggedInUser, savedRole);
       setRole(effectiveRole);
 
-      // Nếu là admin do hardcode → cũng lưu lại để lần sau load nhanh
       if (effectiveRole === 'admin') {
         localStorage.setItem('selectedRole', 'admin');
       }
@@ -148,21 +157,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     piService.logout();
     setUser(null);
     setRole(null);
-
-    // Full reset to guest (Người mới) state: clear selected role so Home shows original 8 cards + Pi login
     localStorage.removeItem('selectedRole');
-
-    // Xóa dev helper khi logout (giữ devForceGuest nếu user muốn test tiếp)
-    // localStorage.removeItem('devForceGuest'); // Bỏ comment nếu muốn auto clear
   };
 
   const refreshUser = async () => {
     await loadUser();
   };
 
-  // === CẬP NHẬT VAI TRÒ (dùng cho RegisterRolePage) ===
   const updateRole = (newRole: AppRole) => {
-    // Bảo vệ: Không cho phép user thường tự set thành admin
     if (newRole === 'admin' && user?.username && !isAdminUsername(user.username)) {
       console.warn('[Auth] Cảnh báo: Chỉ tài khoản Admin được phép có quyền Admin.');
       return;
@@ -170,25 +172,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setRole(newRole);
 
-    // Cập nhật vào user object nếu có
     if (user) {
       const updatedUser = { ...user, role: newRole };
       setUser(updatedUser);
     }
 
-    // Lưu vào localStorage để giữ sau khi reload (dùng cho cả Mock và Real)
     localStorage.setItem('selectedRole', newRole);
-
     console.log(`[Auth] Role updated to: ${newRole}`);
   };
 
   useEffect(() => {
     loadUser();
 
-    // Khôi phục role từ localStorage (sẽ bị override nếu là admin hardcode)
     const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
     if (savedRole) {
-      // Chỉ set tạm, loadUser() sẽ resolve đúng (ưu tiên admin hardcode)
       setRole(savedRole);
     }
   }, []);
