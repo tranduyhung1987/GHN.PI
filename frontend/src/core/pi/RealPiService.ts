@@ -10,7 +10,7 @@ import type { PiAuthResult } from '@/types/pi-sdk';
 import { saveIncompletePayment } from '@/services/firebase/incompletePaymentService';
 
 export class RealPiService implements PiAdapter {
-  public readonly isReal = true;           // ← Dùng để check nhanh: if (service.isReal)
+  public readonly isReal = true;
 
   private currentUser: PiUser | null = null;
   private accessToken: string | null = null;
@@ -45,7 +45,7 @@ export class RealPiService implements PiAdapter {
       };
       this.accessToken = auth.accessToken;
 
-      console.log('%c[Real Pi] Đăng nhập thành công', 'color: green; font-weight: bold', this.currentUser);
+      console.log('%c[Real Pi] ✅ Đăng nhập thành công - Username thật:', 'color: #22c55e; font-weight: bold', this.currentUser.username);
       return this.currentUser;
     } catch (error) {
       console.error('[Real Pi] Authenticate failed:', error);
@@ -54,7 +54,14 @@ export class RealPiService implements PiAdapter {
   }
 
   async getUser(): Promise<PiUser | null> {
-    if (!this.currentUser && window.Pi) {
+    // === FIX NHANH QUAN TRỌNG ===
+    // Nếu đã có currentUser từ lần authenticate() trước → trả ngay (không re-auth lại)
+    // Điều này đảm bảo sau khi login thành công trên Pi Browser, mọi nơi gọi getUser() đều nhận được tên thật
+    if (this.currentUser) {
+      return this.currentUser;
+    }
+
+    if (window.Pi) {
       try {
         const auth = await window.Pi.authenticate(['username'], {});
         this.currentUser = {
@@ -63,8 +70,8 @@ export class RealPiService implements PiAdapter {
           name: auth.user.name,
         };
         this.accessToken = auth.accessToken;
-      } catch {
-        // user chưa login
+      } catch (err) {
+        console.warn('[Real Pi] getUser() re-auth không thành công (bình thường nếu thiếu user gesture). Sẽ dùng cached user nếu có.');
       }
     }
     return this.currentUser;
@@ -112,7 +119,6 @@ export class RealPiService implements PiAdapter {
     });
   }
 
-  /** Thông tin môi trường — hỗ trợ hiển thị badge */
   getEnvironmentInfo() {
     return {
       type: 'real' as const,
