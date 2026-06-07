@@ -18,7 +18,6 @@ export class RealPiService implements PiAdapter {
   async authenticate(): Promise<PiUser> {
     try {
       if (typeof window === 'undefined' || !window.Pi) {
-        console.warn('[Real Pi] Pi SDK not available');
         throw new Error('Pi SDK not available');
       }
 
@@ -26,26 +25,27 @@ export class RealPiService implements PiAdapter {
         ['payments', 'username'],
         {
           onIncompletePaymentFound: async (payment: any) => {
-            console.warn('[Pi SDK] Incomplete payment found:', payment);
             await saveIncompletePayment({
               identifier: payment.identifier,
               amount: payment.amount,
               memo: payment.memo,
               metadata: payment.metadata,
               detectedAt: Date.now(),
-            }, auth.user?.uid);
+            }, (auth as any).user?.uid);
           },
         }
       );
 
-      this.currentUser = {
-        uid: auth.user.uid,
-        username: auth.user.username,
-        name: auth.user.name,
-      };
-      this.accessToken = auth.accessToken;
+      // === FIX MẠNH: Lấy username cực kỳ phòng thủ (hỗ trợ nhiều cấu trúc Pi SDK trên mobile) ===
+      const piUserData: any = auth?.user || auth || {};
 
-      console.log('%c[Real Pi] ✅ Đăng nhập thành công - Username thật:', 'color: #22c55e; font-weight: bold', this.currentUser.username);
+      this.currentUser = {
+        uid: piUserData.uid || piUserData.id || `pi-${piUserData.username || piUserData.userName || 'unknown'}`,
+        username: piUserData.username || piUserData.userName || piUserData.name || piUserData.piUsername || 'pi-user',
+        name: piUserData.name || piUserData.username || piUserData.userName || 'Pi User',
+      };
+      this.accessToken = (auth as any).accessToken || null;
+
       return this.currentUser;
     } catch (error) {
       console.error('[Real Pi] Authenticate failed:', error);
@@ -54,24 +54,24 @@ export class RealPiService implements PiAdapter {
   }
 
   async getUser(): Promise<PiUser | null> {
-    // === FIX NHANH QUAN TRỌNG ===
-    // Nếu đã có currentUser từ lần authenticate() trước → trả ngay (không re-auth lại)
-    // Điều này đảm bảo sau khi login thành công trên Pi Browser, mọi nơi gọi getUser() đều nhận được tên thật
+    // Ưu tiên trả ngay user đã cache từ lần authenticate thành công
     if (this.currentUser) {
       return this.currentUser;
     }
 
     if (window.Pi) {
       try {
-        const auth = await window.Pi.authenticate(['username'], {});
+        const auth: any = await window.Pi.authenticate(['username'], {});
+        const piUserData = auth?.user || auth || {};
+
         this.currentUser = {
-          uid: auth.user.uid,
-          username: auth.user.username,
-          name: auth.user.name,
+          uid: piUserData.uid || piUserData.id || `pi-${piUserData.username || 'unknown'}`,
+          username: piUserData.username || piUserData.userName || piUserData.name || 'pi-user',
+          name: piUserData.name || piUserData.username || 'Pi User',
         };
-        this.accessToken = auth.accessToken;
-      } catch (err) {
-        console.warn('[Real Pi] getUser() re-auth không thành công (bình thường nếu thiếu user gesture). Sẽ dùng cached user nếu có.');
+        this.accessToken = auth?.accessToken || null;
+      } catch {
+        // im lặng nếu không lấy được
       }
     }
     return this.currentUser;
@@ -84,7 +84,6 @@ export class RealPiService implements PiAdapter {
   logout(): void {
     this.currentUser = null;
     this.accessToken = null;
-    console.log('%c[Real Pi] Logout', 'color: red; font-weight: bold');
   }
 
   async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
@@ -102,17 +101,15 @@ export class RealPiService implements PiAdapter {
           metadata: payment.metadata || {},
         },
         {
-          onReadyForServerApproval: (paymentId: string) => {
-            console.log('[Pi Payment] Ready for server approval:', paymentId);
-          },
+          onReadyForServerApproval: () => {},
           onReadyForServerCompletion: (paymentId: string, txid: string) => {
             resolve({ success: true, transactionId: txid });
           },
-          onCancel: (paymentId: string) => {
-            resolve({ success: false, error: 'Người dùng đã hủy thanh toán' });
+          onCancel: () => {
+            resolve({ success: false, error: 'Người dùng đã hủy' });
           },
           onError: (error: Error) => {
-            resolve({ success: false, error: error?.message || 'Lỗi thanh toán Pi' });
+            resolve({ success: false, error: error?.message || 'Lỗi thanh toán' });
           },
         }
       );
