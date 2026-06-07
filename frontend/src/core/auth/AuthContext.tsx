@@ -2,54 +2,24 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { piService, type PiUser, isUsingRealPi } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
 
-// ==================== ADMIN HARDCODE (Phương án 1 - Tối ưu cho giai đoạn hiện tại) ====================
-// Chỉ những Pi username trong danh sách này mới được tự động gán quyền Admin.
-// Khuyến nghị: Đặt trong .env dưới dạng VITE_ADMIN_USERNAMES=username1,username2
 const getAdminUsernames = (): string[] => {
   const fromEnv = import.meta.env.VITE_ADMIN_USERNAMES as string | undefined;
   const envList = fromEnv ? fromEnv.split(',').map(u => u.trim().toLowerCase()) : [];
-
-  // Hỗ trợ override trong development (rất hữu ích khi test)
   const devOverride = localStorage.getItem('devAdminUsernames');
   const devList = devOverride ? devOverride.split(',').map(u => u.trim().toLowerCase()) : [];
-
-  // Kết hợp + loại trùng
   return Array.from(new Set([...envList, ...devList]));
 };
 
 const isAdminUsername = (username?: string): boolean => {
   if (!username) return false;
-
-  // Normalize: remove @ if user pastes with it, and lowercase
   const normalized = username.replace(/^@/, '').toLowerCase();
-
   const admins = getAdminUsernames().map(u => u.replace(/^@/, '').toLowerCase());
-
-  const isAdmin = admins.includes(normalized);
-  if (isAdmin) {
-    console.log(`[Auth] ✓ Auto-assigned ADMIN role for username: ${username}`);
-  }
-  return isAdmin;
+  return admins.includes(normalized);
 };
 
-/**
- * Resolve role với ưu tiên (dành cho dev + production):
- * - devForceGuest (chỉ dùng khi test local): ép về trạng thái Người mới để test flow khóa thẻ
- * - Admin hardcode
- * - Role đã lưu
- */
 const resolveEffectiveRole = (loggedInUser: PiUser | null, savedRole: AppRole | null): AppRole | null => {
-  // 1. Dev helper: ép về guest để dễ test luồng "Người mới bị khóa thẻ"
-  if (localStorage.getItem('devForceGuest') === 'true') {
-    return null;
-  }
-
-  // 2. Admin hardcode (ưu tiên cao)
-  if (loggedInUser?.username && isAdminUsername(loggedInUser.username)) {
-    return 'admin';
-  }
-
-  // 3. Role đã lưu hoặc từ service
+  if (localStorage.getItem('devForceGuest') === 'true') return null;
+  if (loggedInUser?.username && isAdminUsername(loggedInUser.username)) return 'admin';
   return savedRole || (loggedInUser?.role as AppRole) || null;
 };
 
@@ -68,9 +38,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
@@ -90,30 +58,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       let currentUser = await piService.getUser();
 
-      // ==================== FIX: Không resurrect tên demo khi dùng Pi thật ====================
+      // === FIX MẠNH: Ưu tiên tên thật Pi khi ở Pi Browser ===
       if (!currentUser) {
         const savedPiUsername = localStorage.getItem('piUsername');
-        const inRealPiMode = isUsingRealPi();
+        const inRealPi = isUsingRealPi();
 
         if (savedPiUsername) {
-          const looksLikeDemo =
-            savedPiUsername.toLowerCase().includes('demo') ||
-            savedPiUsername.toLowerCase().includes('mock') ||
-            savedPiUsername.toLowerCase().includes('test') ||
-            savedPiUsername.toLowerCase().includes('user_');
+          const looksLikeDemo = savedPiUsername.toLowerCase().includes('demo') ||
+                                savedPiUsername.toLowerCase().includes('mock') ||
+                                savedPiUsername.toLowerCase().includes('test');
 
-          if (!inRealPiMode || !looksLikeDemo) {
+          if (!inRealPi || !looksLikeDemo) {
             currentUser = {
               uid: `pi-${savedPiUsername}`,
               username: savedPiUsername,
               name: savedPiUsername,
             };
-          } else {
-            console.warn('[Auth] ⚠️ Bỏ qua username demo từ localStorage vì đang ở môi trường Pi thật');
           }
         }
       }
-      // ==================== HẾT PHẦN FIX ====================
 
       setUser(currentUser);
 
@@ -137,6 +100,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (loggedInUser?.username) {
         localStorage.setItem('piUsername', loggedInUser.username);
+        // Đánh dấu lần đăng nhập này là real Pi để loadUser ưu tiên sau này
+        if (isUsingRealPi()) {
+          localStorage.setItem('lastLoginRealPi', 'true');
+        }
       }
 
       const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
@@ -158,6 +125,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     setRole(null);
     localStorage.removeItem('selectedRole');
+    localStorage.removeItem('lastLoginRealPi');
   };
 
   const refreshUser = async () => {
@@ -169,25 +137,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.warn('[Auth] Cảnh báo: Chỉ tài khoản Admin được phép có quyền Admin.');
       return;
     }
-
     setRole(newRole);
-
     if (user) {
       const updatedUser = { ...user, role: newRole };
       setUser(updatedUser);
     }
-
     localStorage.setItem('selectedRole', newRole);
-    console.log(`[Auth] Role updated to: ${newRole}`);
   };
 
   useEffect(() => {
     loadUser();
-
     const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
-    if (savedRole) {
-      setRole(savedRole);
-    }
+    if (savedRole) setRole(savedRole);
   }, []);
 
   const value: AuthContextType = {
