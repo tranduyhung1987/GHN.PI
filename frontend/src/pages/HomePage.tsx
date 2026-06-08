@@ -11,7 +11,7 @@ import { REGISTRABLE_ROLES, ROLE_INFO, getRoleLabel } from '../utils/constants';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, role, login } = useAuth();
+  const { user, role, login, isLoading } = useAuth();
   const piUsername = user?.username || '';
 
   const { orders: allOrders, loadOrders } = useTracking();
@@ -210,21 +210,35 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* NÚT ĐĂNG NHẬP PI */}
-      <div style={piButtonContainer}>
-        <button 
-          style={piButton} 
-          onClick={async () => {
-            if (!user) {
-              await login();
-            } else {
-              navigate('/dang-ky');
-            }
-          }}
-        >
-          {piUsername ? `Đã kết nối: ${piUsername}` : '⭐ Đăng nhập với Pi Network'}
-        </button>
-      </div>
+{/* NÚT ĐĂNG NHẬP PI - ĐÃ FIX LỖI ĐỎ */}
+<div style={piButtonContainer}>
+  <button 
+    style={{
+      ...piButton,
+      opacity: isLoading ? 0.7 : 1,
+      cursor: isLoading ? 'wait' : 'pointer'
+    }} 
+    disabled={isLoading}
+    onClick={async () => {
+      if (!user) {
+        try {
+          await login();
+        } catch (err) {
+          alert('Đăng nhập thất bại. Vui lòng thử lại.');
+        }
+      } else {
+        navigate('/dang-ky');
+      }
+    }}
+  >
+    {isLoading 
+      ? 'Đang kết nối với Pi...' 
+      : piUsername 
+        ? `Đã kết nối: ${piUsername}` 
+        : '★ Đăng nhập với Pi Network'
+    }
+  </button>
+</div>
 
       {/* GRID CARDS - Role Specific (original beautiful layout) */}
       <div style={cardsGrid}>
