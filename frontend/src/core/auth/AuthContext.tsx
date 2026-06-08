@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { piService, type PiUser } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
 
@@ -9,7 +9,6 @@ interface AuthContextType {
   role: AppRole | null;
   login: () => Promise<void>;
   logout: () => void;
-  refreshUser: () => Promise<void>;
   updateRole: (newRole: AppRole) => void;
 }
 
@@ -23,49 +22,26 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<PiUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [role, setRole] = useState<AppRole | null>(
+    (localStorage.getItem('selectedRole') as AppRole) || null
+  );
 
   const isAuthenticated = !!user;
-
-  const loadUser = async () => {
-    setIsLoading(true);
-    try {
-      let currentUser = await piService.getUser();
-
-      // Fallback đơn giản cho MVP
-      if (!currentUser) {
-        const saved = localStorage.getItem('piUsername');
-        if (saved) {
-          currentUser = { uid: `pi-${saved}`, username: saved, name: saved };
-        }
-      }
-
-      setUser(currentUser);
-
-      const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
-      setRole(savedRole);
-    } catch {
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const login = async () => {
     setIsLoading(true);
     try {
+      // Gọi trực tiếp Real Pi
       const loggedInUser = await piService.authenticate();
-      setUser(loggedInUser);
 
       if (loggedInUser?.username) {
+        // Lưu ngay và set state ngay lập tức
         localStorage.setItem('piUsername', loggedInUser.username);
+        setUser(loggedInUser);
       }
-
-      const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
-      setRole(savedRole);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -75,25 +51,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     piService.logout();
     setUser(null);
     setRole(null);
-    localStorage.removeItem('selectedRole');
     localStorage.removeItem('piUsername');
-  };
-
-  const refreshUser = async () => {
-    await loadUser();
+    localStorage.removeItem('selectedRole');
   };
 
   const updateRole = (newRole: AppRole) => {
     setRole(newRole);
     localStorage.setItem('selectedRole', newRole);
-    if (user) {
-      setUser({ ...user, role: newRole });
-    }
   };
-
-  useEffect(() => {
-    loadUser();
-  }, []);
 
   return (
     <AuthContext.Provider
@@ -104,7 +69,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role,
         login,
         logout,
-        refreshUser,
         updateRole,
       }}
     >

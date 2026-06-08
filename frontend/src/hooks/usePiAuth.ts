@@ -4,12 +4,11 @@ export const usePiAuth = () => {
   const auth = useAuth();
 
   return {
-    piUsername: auth.user?.username || '',
+    piUsername: auth.user?.username || localStorage.getItem('piUsername') || '',
     isPiConnected: auth.isAuthenticated,
     userRole: auth.role,
     loading: auth.isLoading,
     loginWithPi: auth.login,
     logout: auth.logout,
-    refreshUser: auth.refreshUser,
   };
 };
