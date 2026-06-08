@@ -1,11 +1,6 @@
 // src/core/pi/RealPiService.ts
 
-import type {
-  PiAdapter,
-  PiPayment,
-  PiPaymentResult,
-  PiUser,
-} from './PiAdapter';
+import type { PiAdapter, PiPayment, PiPaymentResult, PiUser } from './PiAdapter';
 import type { PiAuthResult } from '@/types/pi-sdk';
 import { saveIncompletePayment } from '@/services/firebase/incompletePaymentService';
 
@@ -16,69 +11,57 @@ export class RealPiService implements PiAdapter {
   private accessToken: string | null = null;
 
   async authenticate(): Promise<PiUser> {
-    try {
-      if (typeof window === 'undefined' || !window.Pi) {
-        throw new Error('Pi SDK not available');
-      }
-
-      const auth: PiAuthResult = await window.Pi.authenticate(
-        ['payments', 'username'],
-        {
-          onIncompletePaymentFound: async (payment: any) => {
-            await saveIncompletePayment({
-              identifier: payment.identifier,
-              amount: payment.amount,
-              memo: payment.memo,
-              metadata: payment.metadata,
-              detectedAt: Date.now(),
-            }, (auth as any).user?.uid);
-          },
-        }
-      );
-
-      // === FIX MẠNH: Lấy username cực kỳ phòng thủ (hỗ trợ nhiều cấu trúc Pi SDK trên mobile) ===
-      const piUserData: any = auth?.user || auth || {};
-
-      this.currentUser = {
-        uid: piUserData.uid || piUserData.id || `pi-${piUserData.username || piUserData.userName || 'unknown'}`,
-        username: piUserData.username || piUserData.userName || piUserData.name || piUserData.piUsername || 'pi-user',
-        name: piUserData.name || piUserData.username || piUserData.userName || 'Pi User',
-      };
-      this.accessToken = (auth as any).accessToken || null;
-
-      return this.currentUser;
-    } catch (error) {
-      console.error('[Real Pi] Authenticate failed:', error);
-      throw error;
+    if (typeof window === 'undefined' || !window.Pi) {
+      throw new Error('Pi SDK not available');
     }
+
+    const auth: PiAuthResult = await window.Pi.authenticate(['payments', 'username'], {
+      onIncompletePaymentFound: async (payment: any) => {
+        await saveIncompletePayment({
+          identifier: payment.identifier,
+          amount: payment.amount,
+          memo: payment.memo,
+          metadata: payment.metadata,
+          detectedAt: Date.now(),
+        }, (auth as any).user?.uid);
+      },
+    });
+
+    // Lấy username một cách phòng thủ nhất có thể
+    const piUser: any = auth?.user || auth || {};
+
+    this.currentUser = {
+      uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
+      username: piUser.username || piUser.userName || piUser.name || 'pi-user',
+      name: piUser.name || piUser.username || 'Pi User',
+    };
+    this.accessToken = (auth as any).accessToken || null;
+
+    return this.currentUser;
   }
 
   async getUser(): Promise<PiUser | null> {
-    // Ưu tiên trả ngay user đã cache từ lần authenticate thành công
-    if (this.currentUser) {
-      return this.currentUser;
-    }
+    if (this.currentUser) return this.currentUser;
 
     if (window.Pi) {
       try {
         const auth: any = await window.Pi.authenticate(['username'], {});
-        const piUserData = auth?.user || auth || {};
+        const piUser: any = auth?.user || auth || {};
 
         this.currentUser = {
-          uid: piUserData.uid || piUserData.id || `pi-${piUserData.username || 'unknown'}`,
-          username: piUserData.username || piUserData.userName || piUserData.name || 'pi-user',
-          name: piUserData.name || piUserData.username || 'Pi User',
+          uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
+          username: piUser.username || piUser.userName || piUser.name || 'pi-user',
+          name: piUser.name || piUser.username || 'Pi User',
         };
-        this.accessToken = auth?.accessToken || null;
       } catch {
-        // im lặng nếu không lấy được
+        // Không làm gì nếu không lấy được
       }
     }
     return this.currentUser;
   }
 
   isAuthenticated(): boolean {
-    return this.currentUser !== null;
+    return !!this.currentUser;
   }
 
   logout(): void {
@@ -87,8 +70,9 @@ export class RealPiService implements PiAdapter {
   }
 
   async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
+    // Giữ nguyên logic createPayment (sẽ làm sau)
     return new Promise((resolve) => {
-      if (typeof window === 'undefined' || !window.Pi) {
+      if (!window.Pi) {
         resolve({ success: false, error: 'Pi SDK không khả dụng' });
         return;
       }
@@ -102,25 +86,11 @@ export class RealPiService implements PiAdapter {
         },
         {
           onReadyForServerApproval: () => {},
-          onReadyForServerCompletion: (paymentId: string, txid: string) => {
-            resolve({ success: true, transactionId: txid });
-          },
-          onCancel: () => {
-            resolve({ success: false, error: 'Người dùng đã hủy' });
-          },
-          onError: (error: Error) => {
-            resolve({ success: false, error: error?.message || 'Lỗi thanh toán' });
-          },
+          onReadyForServerCompletion: (_: string, txid: string) => resolve({ success: true, transactionId: txid }),
+          onCancel: () => resolve({ success: false, error: 'Đã hủy' }),
+          onError: (e: Error) => resolve({ success: false, error: e.message }),
         }
       );
     });
-  }
-
-  getEnvironmentInfo() {
-    return {
-      type: 'real' as const,
-      hasPiSDK: typeof window !== 'undefined' && !!window.Pi,
-      username: this.currentUser?.username || null,
-    };
   }
 }
