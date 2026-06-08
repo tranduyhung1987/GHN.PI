@@ -214,9 +214,9 @@ export default function HomePage() {
       <div style={piButtonContainer}>
         <button 
           style={piButton} 
-          onClick={() => {
-            if (!role || role === 'guest') {
-              setShowPiLoginPrompt(true);
+          onClick={async () => {
+            if (!user) {
+              await login();
             } else {
               navigate('/dang-ky');
             }
