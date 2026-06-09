@@ -8,17 +8,27 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
-// ==================== PI SDK INIT (QUAN TRỌNG NHẤT) ====================
-if (typeof window !== 'undefined' && (window as any).Pi) {
-  try {
-    (window as any).Pi.init({
-      version: "2.0",
-      sandbox: true,           // Đang test trên Testnet → để true
-      // sandbox: false,       // Khi lên production thì đổi thành false
-    });
-    console.log('%c[Pi] Pi SDK initialized successfully', 'color:#22c55e');
-  } catch (e) {
-    console.warn('[Pi] Pi.init() failed or already initialized', e);
+// ==================== PI SDK INIT (Improved for Sandbox) ====================
+if (typeof window !== 'undefined') {
+  const initPi = () => {
+    if ((window as any).Pi) {
+      try {
+        (window as any).Pi.init({
+          version: "2.0",
+          sandbox: true,
+        });
+        console.log('%c[Pi] Pi SDK initialized (Sandbox mode)', 'color:#22c55e');
+      } catch (e) {
+        console.warn('[Pi] Pi.init failed', e);
+      }
+    }
+  };
+
+  // Chỉ init 1 lần, tránh bị message spam gây re-init
+  if (document.readyState === 'complete') {
+    initPi();
+  } else {
+    window.addEventListener('load', initPi, { once: true });
   }
 }
 
