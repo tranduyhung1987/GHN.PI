@@ -11,9 +11,9 @@
     <title>GHN.PI - Giao Hàng Nhanh Thanh Toán Bằng Pi</title>
     <meta name="description" content="Giao hàng nhanh nhất Việt Nam - Thanh toán liền mạch bằng Pi Network" />
     
-    <!-- Pi Network SDK -->
+    <!-- Pi Network SDK (CDN) -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    
+
     <!-- Open Graph / Social Share -->
     <meta property="og:title" content="GHN.PI - Giao Hàng Nhanh Thanh Toán Bằng Pi" />
     <meta property="og:description" content="Giao hàng nhanh nhất Việt Nam - Thanh toán liền mạch bằng Pi Network" />
@@ -56,7 +56,6 @@
         opacity: 0.9;
       }
 
-      /* Improve Pi SDK loading */
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
@@ -65,7 +64,7 @@
   <body>
     <div id="root"></div>
 
-    <!-- Ultra early error catcher - runs before React loads -->
+    <!-- Ultra early error catcher -->
     <script>
       (function() {
         var shown = false;
@@ -86,7 +85,6 @@
           } catch(e) {}
         }
 
-        // Catch synchronous errors during script loading
         window.addEventListener('error', function(e) {
           console.error('[Early Error]', e.error || e.message);
           showHardError(e.error ? (e.error.message || e.error.toString()) : e.message);
