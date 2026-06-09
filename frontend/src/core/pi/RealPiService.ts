@@ -15,19 +15,23 @@ export class RealPiService implements PiAdapter {
       throw new Error('Pi SDK not available');
     }
 
-    const auth: PiAuthResult = await window.Pi.authenticate(['payments', 'username'], {
-      onIncompletePaymentFound: async (payment: any) => {
-        await saveIncompletePayment({
-          identifier: payment.identifier,
-          amount: payment.amount,
-          memo: payment.memo,
-          metadata: payment.metadata,
-          detectedAt: Date.now(),
-        }, (auth as any).user?.uid);
-      },
-    });
+    // Callback trực tiếp (đúng runtime Sandbox)
+    const onIncompletePaymentFound = async (payment: any) => {
+      await saveIncompletePayment({
+        identifier: payment.identifier,
+        amount: payment.amount,
+        memo: payment.memo,
+        metadata: payment.metadata,
+        detectedAt: Date.now(),
+      });
+    };
 
-    // Lấy username một cách phòng thủ nhất có thể
+    // Ép kiểu để TypeScript không báo lỗi
+    const auth: PiAuthResult = await (window.Pi.authenticate as any)(
+      ['payments', 'username'],
+      onIncompletePaymentFound
+    );
+
     const piUser: any = auth?.user || auth || {};
 
     this.currentUser = {
@@ -45,7 +49,7 @@ export class RealPiService implements PiAdapter {
 
     if (window.Pi) {
       try {
-        const auth: any = await window.Pi.authenticate(['username'], {});
+        const auth: any = await (window.Pi.authenticate as any)(['username'], {});
         const piUser: any = auth?.user || auth || {};
 
         this.currentUser = {
@@ -54,7 +58,7 @@ export class RealPiService implements PiAdapter {
           name: piUser.name || piUser.username || 'Pi User',
         };
       } catch {
-        // Không làm gì nếu không lấy được
+        // ignore
       }
     }
     return this.currentUser;
@@ -70,7 +74,6 @@ export class RealPiService implements PiAdapter {
   }
 
   async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
-    // Giữ nguyên logic createPayment (sẽ làm sau)
     return new Promise((resolve) => {
       if (!window.Pi) {
         resolve({ success: false, error: 'Pi SDK không khả dụng' });
