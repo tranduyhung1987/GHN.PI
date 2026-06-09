@@ -8,12 +8,8 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
-// ==================== SANDBOX OPTIMIZATION ====================
+// ==================== SANDBOX MESSAGE FILTER ====================
 if (typeof window !== 'undefined') {
-  const hostname = window.location.hostname;
-  const isSandbox = hostname.includes('sandbox.minepi.com');
-
-  // Lọc message spam từ Sandbox (giảm nhiễu + tránh re-render)
   window.addEventListener('message', (event) => {
     if (event.origin.includes('sandbox.minepi.com')) {
       const data = event.data || {};
@@ -25,28 +21,6 @@ if (typeof window !== 'undefined') {
       }
     }
   });
-
-  // Khởi tạo Pi SDK
-  const initPi = () => {
-    const Pi = (window as any).Pi;
-    if (Pi && typeof Pi.init === 'function') {
-      try {
-        Pi.init({
-          version: "2.0",
-          sandbox: isSandbox,
-        });
-        console.log(`%c[Pi] Initialized (${isSandbox ? 'Sandbox' : 'Production'} mode)`, 'color:#22c55e');
-      } catch (e) {
-        console.warn('[Pi] Init error:', e);
-      }
-    }
-  };
-
-  if (document.readyState === 'complete') {
-    initPi();
-  } else {
-    window.addEventListener('load', initPi, { once: true });
-  }
 }
 
 // ==================== STATUS BANNER ====================

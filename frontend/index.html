@@ -11,8 +11,11 @@
     <title>GHN.PI - Giao Hàng Nhanh Thanh Toán Bằng Pi</title>
     <meta name="description" content="Giao hàng nhanh nhất Việt Nam - Thanh toán liền mạch bằng Pi Network" />
     
-    <!-- Pi Network SDK (CDN) -->
+    <!-- Pi Network SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script type="module">
+      await Pi.init({ version: "2.0", sandbox: true });
+    </script>
 
     <!-- Open Graph / Social Share -->
     <meta property="og:title" content="GHN.PI - Giao Hàng Nhanh Thanh Toán Bằng Pi" />
