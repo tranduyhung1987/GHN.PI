@@ -8,35 +8,25 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
-// ==================== PI SDK + SANDBOX NOISE FILTER ====================
+// ==================== PI SDK + SANDBOX FILTER ====================
 if (typeof window !== 'undefined') {
-  // Lọc bớt message spam từ Pi Sandbox
+  // Lọc message spam từ Sandbox
   window.addEventListener('message', (event) => {
-    const origin = event.origin || '';
-    const data = event.data || {};
-
-    // Bỏ qua các message nội bộ của Sandbox (không cần thiết)
-    if (origin.includes('sandbox.minepi.com')) {
-      if (
-        data?.type === 'installHooks' ||
-        data?.action === 'No action for this app message' ||
-        typeof data === 'string'
-      ) {
-        return; // bỏ qua
+    if (event.origin.includes('sandbox.minepi.com')) {
+      const data = event.data || {};
+      if (data?.type === 'installHooks' || (typeof data?.action === 'string' && data.action.includes('No action'))) {
+        return;
       }
     }
   });
 
-  // Khởi tạo Pi SDK an toàn
+  // Khởi tạo Pi SDK
   const initPi = () => {
     const Pi = (window as any).Pi;
     if (Pi && typeof Pi.init === 'function') {
       try {
-        Pi.init({
-          version: "2.0",
-          sandbox: true,
-        });
-        console.log('%c[Pi] Initialized in Sandbox mode', 'color:#22c55e');
+        Pi.init({ version: "2.0", sandbox: true });
+        console.log('%c[Pi] Initialized (Sandbox mode)', 'color:#22c55e');
       } catch (e) {
         console.warn('[Pi] Init error:', e);
       }
@@ -50,30 +40,60 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// ==================== GLOBAL ERROR DISPLAY (cho điện thoại) ====================
-// Cho phép các nơi khác trong app gọi window.showGlobalError(msg)
-(window as any).showGlobalError = (msg: string) => {
-  const banner = document.getElementById('global-error-banner');
-  if (banner) {
-    banner.innerHTML = `⚠️ ${msg}`;
-    banner.style.display = 'block';
-    setTimeout(() => {
-      if (banner) banner.style.display = 'none';
-    }, 6000);
-  }
-};
+// ==================== STATUS BANNER (HIỆN TRÊN ĐIỆN THOẠI) ====================
+function createStatusBanner() {
+  if (document.getElementById('app-status-banner')) return;
 
-// Tạo thanh hiển thị lỗi/status (nếu chưa có)
-if (typeof document !== 'undefined' && !document.getElementById('global-error-banner')) {
   const banner = document.createElement('div');
-  banner.id = 'global-error-banner';
+  banner.id = 'app-status-banner';
   banner.style.cssText = `
-    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-    background: #fee2e2; color: #991b1b; padding: 8px 12px;
-    font-size: 13px; text-align: center; display: none;
-    border-bottom: 1px solid #fca5a5;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #4c1d95;
+    color: white;
+    padding: 6px 12px;
+    font-size: 13px;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   `;
-  document.body.appendChild(banner);
+
+  const hostname = window.location?.hostname || '';
+  const isSandbox = hostname.includes('sandbox.minepi.com');
+
+  banner.innerHTML = isSandbox 
+    ? '🟣 <b>Pi Sandbox Mode</b> — Đang test' 
+    : '🟢 Production Mode';
+
+  document.body.prepend(banner);
+
+  // Hàm toàn cục để hiển thị lỗi
+  (window as any).showAppError = (msg: string) => {
+    if (!banner) return;
+    banner.style.background = '#991b1b';
+    banner.innerHTML = `⚠️ ${msg}`;
+
+    setTimeout(() => {
+      if (banner) {
+        banner.style.background = '#4c1d95';
+        banner.innerHTML = isSandbox 
+          ? '🟣 <b>Pi Sandbox Mode</b> — Đang test' 
+          : '🟢 Production Mode';
+      }
+    }, 5000);
+  };
+}
+
+// Tạo banner an toàn
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', createStatusBanner);
+  } else {
+    createStatusBanner();
+  }
 }
 
 // ==================== REACT ROOT ====================
@@ -83,8 +103,10 @@ const queryClient = new QueryClient({
   },
 });
 
-try {
-  createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+
+if (rootElement) {
+  createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
@@ -97,10 +119,6 @@ try {
       </ErrorBoundary>
     </StrictMode>
   );
-} catch (err) {
-  console.error('[Critical] Failed to mount React:', err);
-  const root = document.getElementById('root');
-  if (root) {
-    root.innerHTML = `<div style="padding:40px;text-align:center;color:#991b1b">Lỗi khởi động ứng dụng. Vui lòng tải lại trang.</div>`;
-  }
+} else {
+  console.error('Root element not found');
 }
