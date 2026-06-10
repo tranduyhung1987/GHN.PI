@@ -1,5 +1,4 @@
-// src/core/auth/AuthContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { piService, type PiUser } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
 
@@ -25,16 +24,20 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<PiUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState<AppRole | null>(
-    (localStorage.getItem('selectedRole') as AppRole) || null
-  );
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // ✅ Load role từ localStorage khi app khởi động
+  const [role, setRole] = useState<AppRole | null>(() => {
+    const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
+    return savedRole;
+  });
 
   const isAuthenticated = !!user;
 
   const login = async () => {
     setIsLoading(true);
     setLoginError(null);
+
     try {
       const loggedInUser = await piService.authenticate();
       if (loggedInUser?.username) {
@@ -43,8 +46,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error?.message || 'Đăng nhập thất bại';
-      setLoginError(`Đăng nhập thất bại: ${errorMessage}`);
+      setLoginError(error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }

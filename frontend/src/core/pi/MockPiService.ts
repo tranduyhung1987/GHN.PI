@@ -18,12 +18,17 @@ export class MockPiService implements PiAdapter {
 
   async authenticate(): Promise<PiUser> {
     // === DEV HELPER: Ưu tiên username do dev đặt ===
-    // 1. devMockPiUsername (dùng để test dễ dàng, ví dụ: admin_demo)
-    // 2. mockPiUsername (cách cũ)
-    // 3. Random (mặc định)
     const devUsername = localStorage.getItem('devMockPiUsername');
     const saved = localStorage.getItem('mockPiUsername');
     const username = devUsername || saved || `pi_user_${Math.floor(Math.random() * 10000)}`;
+
+    // ✅ TỰ ĐỘNG SET ROLE MẶC ĐỊNH = 'sender' nếu chưa có (dành cho dev)
+    if (!localStorage.getItem('selectedRole')) {
+      localStorage.setItem('selectedRole', 'sender');
+      if (import.meta.env.DEV) {
+        console.log('%c[Mock Pi] Auto set default role = sender', 'color: #22c55e');
+      }
+    }
 
     const mockUser: PiUser = {
       uid: `mock-uid-${Date.now()}`,
@@ -34,14 +39,18 @@ export class MockPiService implements PiAdapter {
 
     this._currentUser = mockUser;
 
-    // Lưu lại để lần sau dùng (ưu tiên dev key nếu có)
+    // Lưu lại để lần sau dùng
     if (devUsername) {
       localStorage.setItem('devMockPiUsername', username);
     } else {
       localStorage.setItem('mockPiUsername', username);
     }
 
-    if (import.meta.env.DEV) console.log('%c[Mock Pi] Authenticated as', 'color: orange', mockUser);
+    if (import.meta.env.DEV) {
+      console.log('%c[Mock Pi] Authenticated as', 'color: orange', mockUser);
+      console.log('%c[Mock Pi] Current role from localStorage:', 'color: orange', localStorage.getItem('selectedRole'));
+    }
+
     return mockUser;
   }
 
@@ -55,10 +64,8 @@ export class MockPiService implements PiAdapter {
   async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
     if (import.meta.env.DEV) console.log('%c[Mock Pi] Simulating Pi Payment...', 'color:#f59e0b', payment);
 
-    // Giả lập độ trễ mạng + user confirm
     await new Promise((r) => setTimeout(r, 1200));
 
-    // 95% success rate trong mock
     const success = Math.random() > 0.05;
 
     if (success) {
