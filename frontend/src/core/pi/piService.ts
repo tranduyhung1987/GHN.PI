@@ -3,7 +3,7 @@ import { PiAdapter } from "./PiAdapter";
 import { MockPiService } from "./MockPiService";
 import { RealPiService } from "./RealPiService";
 
-// ==================== PI BROWSER / SANDBOX DETECTION (Improved for Pi Sandbox) ====================
+// ==================== PI BROWSER / SANDBOX DETECTION ====================
 
 const isPiSdkAvailable = (): boolean => {
   return typeof window !== 'undefined' && typeof (window as any).Pi !== 'undefined';
@@ -18,17 +18,17 @@ const isRunningInPiBrowser = (): boolean => {
 const isPiSandboxOrMinepiContext = (): boolean => {
   if (typeof window === 'undefined' || !window.location) return false;
   const hostname = window.location.hostname.toLowerCase();
-  // Covers both real Pi and Sandbox environments when hostname is minepi.com domains
   return hostname.includes('minepi.com') || hostname.includes('sandbox.minepi.com');
 };
 
 let activeService: PiAdapter | null = null;
 
 const decideAndGetService = (): PiAdapter => {
+  // SỬA LỖI: Nếu đã có Service và nó đã là RealPiService, dùng luôn, tuyệt đối không tạo lại
   if (activeService) {
-    // Late upgrade: if Mock but Pi SDK appears later (common in sandbox injection)
     if (activeService.constructor.name === 'MockPiService' && (isPiSdkAvailable() || isRunningInPiBrowser())) {
-      console.log('%c[Pi Service] Upgrading to Real Pi SDK (late detection - Sandbox or Pi Browser)', 'color: lime; font-weight: bold');
+      console.log('%c[Pi Service] Upgrading to Real Pi SDK (late detection)', 'color: lime; font-weight: bold');
+      // Chỉ nâng cấp 1 lần duy nhất từ Mock lên Real
       activeService = new RealPiService();
     }
     return activeService;
@@ -45,21 +45,18 @@ const decideAndGetService = (): PiAdapter => {
 
     const hostname = (typeof window !== 'undefined' && window.location) ? window.location.hostname : '';
 
-    // Only use Mock for pure local/dev environments WITHOUT Pi SDK
     if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
       console.log('%c[Pi Service] → Mock Pi SDK (localhost dev)', 'color: orange; font-weight: bold');
       activeService = new MockPiService();
       return activeService;
     }
 
-    // For deployed previews (pages.dev / vercel) without Pi context → Mock (safe for normal visitors)
     if (hostname.includes('pages.dev') || hostname.includes('vercel.app')) {
-      console.log('%c[Pi Service] → Mock Pi SDK (deployed preview without Pi context)', 'color: orange; font-weight: bold');
+      console.log('%c[Pi Service] → Mock Pi SDK (deployed preview)', 'color: orange; font-weight: bold');
       activeService = new MockPiService();
       return activeService;
     }
 
-    // Default to Real for other cases
     activeService = new RealPiService();
     return activeService;
   } catch (e) {
@@ -80,7 +77,6 @@ export const piService: PiAdapter = {
   },
 };
 
-/** Kiểm tra đang dùng Real Pi SDK hay không */
 export const isUsingRealPi = (): boolean => {
   if (typeof window !== 'undefined') {
     const ua = navigator.userAgent.toLowerCase();
@@ -92,7 +88,6 @@ export const isUsingRealPi = (): boolean => {
   return svc && svc.constructor && svc.constructor.name === 'RealPiService';
 };
 
-/** Trả về môi trường Pi hiện tại — dùng để hiển thị badge */
 export type PiEnvironment = 'real' | 'sandbox' | 'mock';
 
 export const getPiEnvironment = (): PiEnvironment => {
@@ -112,8 +107,5 @@ export const getPiEnvironment = (): PiEnvironment => {
   }
   return 'mock';
 };
-
-// Optional: Hỗ trợ VITE_PI_SANDBOX=true để force sandbox mode trong tương lai
-// if (import.meta.env.VITE_PI_SANDBOX === 'true') { ... }
 
 export * from './PiAdapter';

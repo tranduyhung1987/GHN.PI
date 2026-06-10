@@ -9,6 +9,7 @@ export class RealPiService implements PiAdapter {
 
   async authenticate(): Promise<PiUser> {
     if (typeof window === 'undefined' || !(window as any).Pi) {
+      // Trả user giả để app không crash trong Sandbox khi thiếu SDK
       return {
         uid: 'sandbox-dummy',
         username: 'sandbox_user',
@@ -30,6 +31,8 @@ export class RealPiService implements PiAdapter {
       return this.currentUser;
     } catch (err) {
       console.error('[RealPiService] authenticate error (Sandbox):', err);
+      
+      // Trả user giả để app không crash + không nhảy loạn màn hình
       return {
         uid: 'sandbox-dummy',
         username: 'sandbox_user',
@@ -73,43 +76,61 @@ export class RealPiService implements PiAdapter {
         return;
       }
       try {
-        // --- ĐOẠN XỬ LÝ SỬA LỖI METADATA ---
-        let safeMetadata: Record<string, any> = {};
-        
+        // 1. CHUẨN HÓA METADATA: Biến đổi thành Object phẳng (chỉ chứa string/number) 
+        // để tránh lỗi "[object Object]" khét tiếng của Pi SDK ngầm.
+        let safeMetadata: Record<string, string | number> = {};
         if (payment.metadata) {
-          if (typeof payment.metadata === 'string') {
-            try {
-              // Nếu truyền vào là chuỗi JSON, ta parse ra thành object phẳng
-              safeMetadata = JSON.parse(payment.metadata);
-            } catch {
-              // Nếu chuỗi thường, gán vào 1 key mặc định
-              safeMetadata = { data: payment.metadata };
-            }
-          } else if (typeof payment.metadata === 'object' && payment.metadata !== null) {
-            // Đảm bảo tất cả các value bên trong metadata đều là String/Number đơn giản, không chứa object lồng nhau
-            safeMetadata = {};
-            for (const [key, value] of Object.entries(payment.metadata)) {
-              safeMetadata[key] = typeof value === 'object' ? JSON.stringify(value) : value;
+          const rawMetadata = typeof payment.metadata === 'string' 
+            ? JSON.parse(payment.metadata) 
+            : payment.metadata;
+
+          for (const [key, value] of Object.entries(rawMetadata)) {
+            if (value !== null && value !== undefined) {
+              safeMetadata[key] = typeof value === 'object' ? JSON.stringify(value) : String(value);
             }
           }
         }
-        // ------------------------------------
+
+        // 2. CỜ KIỂM SOÁT (FLAG): Đảm bảo Promise chỉ resolve/reject DUY NHẤT 1 lần
+        let isSettled = false;
 
         (window as any).Pi.createPayment(
           {
             identifier: payment.identifier,
             amount: payment.amount,
             memo: payment.memo,
-            metadata: safeMetadata, // Sử dụng metadata đã được chuẩn hóa an toàn
+            metadata: safeMetadata,
           },
           {
-            onReadyForServerApproval: () => {},
-            onReadyForServerCompletion: (_: string, txid: string) => resolve({ success: true, transactionId: txid }),
-            onCancel: () => resolve({ success: false, error: 'Đã hủy' }),
-            onError: (e: Error) => resolve({ success: false, error: e.message }),
+            onReadyForServerApproval: (paymentId: string) => {
+              console.log('[Pi SDK] Sẵn sàng phê duyệt trên Server, Payment ID:', paymentId);
+              // Lưu ý: Chỗ này thường cần một API gửi paymentId lên Backend của bạn để gọi REST API của Pi Approve.
+            },
+            onReadyForServerCompletion: (paymentId: string, txid: string) => {
+              console.log('[Pi SDK] Hoàn thành giao dịch:', txid);
+              if (!isSettled) {
+                isSettled = true;
+                resolve({ success: true, transactionId: txid });
+              }
+            },
+            onCancel: (paymentId: string) => {
+              console.warn('[Pi SDK] Người dùng đã hủy giao dịch:', paymentId);
+              if (!isSettled) {
+                isSettled = true;
+                resolve({ success: false, error: 'Đã hủy giao dịch' });
+              }
+            },
+            onError: (error: Error, paymentId?: string) => {
+              console.error('[Pi SDK] Lỗi trong quá trình thanh toán:', error, paymentId);
+              if (!isSettled) {
+                isSettled = true;
+                resolve({ success: false, error: error.message || 'Lỗi thanh toán SDK' });
+              }
+            },
           }
         );
       } catch (err) {
+        console.error('[RealPiService] Lỗi nghiêm trọng tại createPayment:', err);
         resolve({ success: false, error: (err as Error).message });
       }
     });

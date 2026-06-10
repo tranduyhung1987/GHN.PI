@@ -1,3 +1,4 @@
+// src/pages/OrderPage.tsx
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../core/auth/AuthContext';
@@ -7,7 +8,6 @@ import { updateOrderStatus as fbUpdateOrderStatus } from '../services/firebase/o
 import Modal from '../components/Modal';
 import PullToRefresh from '../components/PullToRefresh';
 
-// Realistic GHN-like statuses for Sender "Đơn hàng của tôi"
 const STATUS_LABELS: Record<string, string> = {
   pending_payment: 'Chờ thanh toán Pi',
   pending: 'Chờ xử lý',
@@ -39,12 +39,10 @@ const getStatusStyle = (status?: string): React.CSSProperties => {
   if (['in_transit', 'picked_up', 'at_warehouse', 'out_for_delivery'].some(k => s.includes(k))) {
     return { background: '#dbeafe', color: '#1e40af', border: '1px solid #93c5fd' };
   }
-  // pending / paid / created
   return { background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' };
 };
 
 const CANCELLABLE = ['pending_payment', 'pending', 'created', 'paid', 'confirmed'];
-
 const isCancellable = (status?: string) => CANCELLABLE.includes(status || '');
 
 const TAB_OPTIONS = [
@@ -71,49 +69,41 @@ const OrdersPage: React.FC = () => {
 
   const isDriverHistory = role === 'driver' || role === 'admin';
 
-  // For driver Lịch sử giao, default to completed tab when role known
+  // SỬA LỖI: Thêm mảng dependency chuẩn xác để tránh gán lại tab liên tục khi re-render
   useEffect(() => {
     if (isDriverHistory && activeTab === 'all') {
       setActiveTab('completed');
     }
-  }, [isDriverHistory]);
+  }, [isDriverHistory, activeTab]);
 
-  // Role-aware filter:
-  // - sender/receiver: their shipments (existing logic)
-  // - driver: "Lịch sử giao" = completed deliveries they handled (tagged driverUsername when they deliver)
   const myOrders = useMemo(() => {
     const uname = (user?.username || '').toLowerCase().trim();
 
     if (isDriverHistory) {
-      // Driver history: prefer completed, and if tagged with driverUsername match "mine"
       return allOrders.filter((o: any) => {
         const s = (o.status || o.trangThai || '').toLowerCase();
         const isDone = ['delivered', 'completed'].some(k => s.includes(k));
         if (!isDone) return false;
 
         const d = (o.driverUsername || '').toLowerCase();
-        // If tagged, show only mine. If not tagged (old data or demo), still show completed for testnet usability
         if (d) {
           return d === uname || d.includes(uname) || !uname;
         }
-        return true; // untagged completed shown to driver for demo/history
+        return true;
       });
     }
 
-    // Sender / default (existing)
     if (!uname) return allOrders;
     return allOrders.filter((o: any) => {
       const p = (o.piUsername || '').toLowerCase();
       const g = (o.nguoiGui || '').toLowerCase();
       return p === uname || g.includes(uname) || p.includes(uname);
     });
-  }, [allOrders, user?.username, role]);
+  }, [allOrders, user?.username, isDriverHistory]);
 
-  // Apply tab + search
   const filteredOrders = useMemo(() => {
     let list = [...myOrders];
 
-    // Tab filter (realistic groups)
     if (activeTab !== 'all') {
       list = list.filter((o: any) => {
         const s = (o.status || o.trangThai || 'created').toLowerCase();
@@ -133,7 +123,6 @@ const OrdersPage: React.FC = () => {
       });
     }
 
-    // Search
     const q = search.trim().toLowerCase();
     if (q) {
       list = list.filter((o: any) =>
@@ -144,17 +133,14 @@ const OrdersPage: React.FC = () => {
       );
     }
 
-    // Newest first
     list.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0));
     return list;
   }, [myOrders, activeTab, search]);
 
-  // Stats - different for driver history vs sender
   const stats = useMemo(() => {
     const total = myOrders.length;
 
     if (isDriverHistory) {
-      // Driver "Lịch sử giao" stats
       const codCollected = myOrders.reduce((sum: number, o: any) => {
         const c = parseFloat(String(o.codAmount || 0)) || 0;
         return sum + c;
@@ -168,7 +154,6 @@ const OrdersPage: React.FC = () => {
       return { total, totalFee: 0, pendingCount: 0, codCollected: Math.round(codCollected), deliveredToday, isDriver: true };
     }
 
-    // Sender stats
     const totalFee = myOrders.reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0);
     const pendingCount = myOrders.filter((o: any) => {
       const s = (o.status || '').toLowerCase();
@@ -185,20 +170,17 @@ const OrdersPage: React.FC = () => {
         ? 'ĐƠN HÀNG CỦA TÔI (Liên quan nhận)' 
         : 'ĐƠN HÀNG CỦA TÔI';
 
-  // Copy mã đơn (functional)
   const copyMaDon = async (maDon: string) => {
     try {
       await navigator.clipboard.writeText(maDon);
       setCopiedId(maDon);
       setTimeout(() => setCopiedId(null), 1600);
     } catch {
-      // fallback
       setCopiedId(maDon);
       setTimeout(() => setCopiedId(null), 1600);
     }
   };
 
-  // Create similar order - reuse the prefill system in CreateShipmentPage
   const handleCreateSimilar = (order: any) => {
     if (order.nguoiNhan || order.sdtNhan || order.diaChiNhan) {
       localStorage.setItem('lastReceiverInfo', JSON.stringify({
@@ -207,40 +189,32 @@ const OrdersPage: React.FC = () => {
         diaChiNhan: order.diaChiNhan || '',
       }));
     }
-    // Also keep product info hint if wanted
     if (order.moTaHang) {
       localStorage.setItem('lastProductHint', order.moTaHang);
     }
     navigate('/gui-hang');
   };
 
-  // Cancel order - FULL real flow: local + firebase + engine emit + reload
   const handleCancelOrder = async (maDon: string) => {
     if (!window.confirm('Bạn chắc chắn muốn HỦY đơn này?\nHành động không thể hoàn tác.')) return;
 
     setIsCancelling(maDon);
     try {
       const now = Date.now();
-
-      // 1. Immediate localStorage update (ghn_pi_orders used by engine + tracking)
       const key = 'ghn_pi_orders';
       let list: any[] = [];
       try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
       list = list.map((o: any) => 
-        o.maDon === maDon 
-          ? { ...o, status: 'cancelled', updatedAt: now } 
-          : o
+        o.maDon === maDon ? { ...o, status: 'cancelled', updatedAt: now } : o
       );
       localStorage.setItem(key, JSON.stringify(list));
 
-      // 2. Firebase
       try {
         await fbUpdateOrderStatus(maDon, 'cancelled');
       } catch (e) {
         console.warn('[OrderPage] Firebase cancel update failed (offline ok)', e);
       }
 
-      // 3. Emit via controller (TrackingEngine + events for realtime / driver / journey)
       await updateTracking({ 
         maDon, 
         status: 'cancelled', 
@@ -248,24 +222,15 @@ const OrdersPage: React.FC = () => {
         note: 'Hủy bởi người gửi' 
       });
 
-      // 4. Refresh list from source of truth
       await loadOrders();
-
-      // Close modal if open
       if (selectedOrder?.maDon === maDon) setSelectedOrder(null);
     } catch (err) {
       console.error('Cancel failed', err);
-      alert('Hủy đơn thất bại. Vui lòng thử lại hoặc kiểm tra kết nối.');
+      alert('Hủy đơn thất bại. Vui lòng thử lại.');
     } finally {
       setIsCancelling(null);
     }
   };
-
-  // Open rich detail (full data from shipment payload)
-  const openDetail = (order: any) => setSelectedOrder(order);
-
-  // Recreate + track shortcuts from modal
-  const closeDetail = () => setSelectedOrder(null);
 
   return (
     <div style={pageContainer}>
@@ -285,7 +250,7 @@ const OrdersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats (role aware: driver history vs sender) */}
+      {/* Stats */}
       <div style={statsRow}>
         <div style={statCard}>
           <div style={statNum}>{stats.total}</div>
@@ -316,18 +281,18 @@ const OrdersPage: React.FC = () => {
         )}
       </div>
 
-      {/* Search (functional realtime) */}
+      {/* Search */}
       <div style={{ marginBottom: 12 }}>
         <input
           type="text"
-          placeholder={isDriverHistory ? "Tìm mã đơn, người nhận đã giao, SĐT, địa chỉ..." : "Tìm mã đơn, tên/SĐT/địa chỉ người nhận..."}
+          placeholder={isDriverHistory ? "Tìm mã đơn, người nhận đã giao..." : "Tìm mã đơn, tên/SĐT..."}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={searchInput}
         />
       </div>
 
-      {/* Tabs / Filter ô mục (đầy đủ như GHN thật) */}
+      {/* Tabs */}
       <div style={tabsContainer}>
         {TAB_OPTIONS.map(tab => (
           <button
@@ -341,17 +306,15 @@ const OrdersPage: React.FC = () => {
         ))}
       </div>
 
-      {/* List with PullToRefresh (mobile/Pi Browser friendly) */}
+      {/* List */}
       <PullToRefresh onRefresh={loadOrders}>
         {loading ? (
           <div style={emptyState}>⏳ Đang tải đơn hàng của bạn...</div>
         ) : filteredOrders.length === 0 ? (
           <div style={emptyState}>
             {search || activeTab !== 'all' 
-              ? 'Không có đơn khớp bộ lọc/tìm kiếm.' 
-              : isDriverHistory 
-                ? 'Chưa có lịch sử giao hàng. Hoàn tất một số đơn ở trang Đơn hàng của tài xế.' 
-                : 'Bạn chưa có đơn hàng nào.'}
+              ? 'Không có đơn khớp bộ lọc.' 
+              : 'Bạn chưa có đơn hàng nào.'}
             {!isDriverHistory && (
               <div style={{ marginTop: 16 }}>
                 <button onClick={() => navigate('/gui-hang')} style={createBtn}>
@@ -369,13 +332,11 @@ const OrdersPage: React.FC = () => {
 
               return (
                 <div key={order.maDon} style={orderCard}>
-                  {/* Top row: Mã + Status + Copy */}
                   <div style={cardTop}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <strong 
                         onClick={() => copyMaDon(order.maDon)} 
                         style={{ color: '#4c1d95', fontSize: 17, cursor: 'pointer' }}
-                        title="Nhấn để sao chép mã đơn"
                       >
                         {order.maDon}
                       </strong>
@@ -386,20 +347,17 @@ const OrdersPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Receiver info (full like real) */}
                   <div style={receiverBlock}>
                     <div><strong>Người nhận:</strong> {order.nguoiNhan || '—'}</div>
                     <div style={{ fontSize: 13, color: '#475569' }}>{order.sdtNhan || ''} • {order.diaChiNhan || ''}</div>
                   </div>
 
-                  {/* Service + goods meta */}
                   <div style={metaRow}>
                     <span>⚡ {order.loaiDon === 'hoatoc' ? 'Hỏa tốc' : 'Đường dài'}</span>
                     <span>⚖️ {order.trongLuong || '?'}kg</span>
                     {order.moTaHang && <span>📦 {order.moTaHang}</span>}
                   </div>
 
-                  {/* Money row: cước + COD if any */}
                   <div style={moneyRow}>
                     <div>
                       Cước: <strong style={{ color: '#22d3ee' }}>{(order.totalAmount || 0).toLocaleString()} Pi</strong>
@@ -414,7 +372,6 @@ const OrdersPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Time + actions */}
                   <div style={cardFooter}>
                     <div style={{ fontSize: 12, color: '#64748b' }}>
                       {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN', { 
@@ -423,7 +380,7 @@ const OrdersPage: React.FC = () => {
                     </div>
 
                     <div style={actionRow}>
-                      <button onClick={() => openDetail(order)} style={actionBtn}>Chi tiết</button>
+                      <button onClick={() => setSelectedOrder(order)} style={actionBtn}>Chi tiết</button>
                       <button onClick={() => navigate(`/tracking/${order.maDon}`)} style={actionBtn}>Theo dõi</button>
                       {!isDriverHistory && isCancellable(status) && (
                         <button 
@@ -434,13 +391,6 @@ const OrdersPage: React.FC = () => {
                           {isCancelling === order.maDon ? 'Đang hủy...' : 'Hủy'}
                         </button>
                       )}
-                      <button onClick={() => copyMaDon(order.maDon)} style={actionBtn}>Copy</button>
-                      {!isDriverHistory && (
-                        <button onClick={() => handleCreateSimilar(order)} style={actionBtn}>Tạo lại</button>
-                      )}
-                      {isDriverHistory && order.driverUsername && (
-                        <span style={{ fontSize: 10, color: '#166534', alignSelf: 'center' }}>✓ Giao bởi bạn</span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -450,30 +400,29 @@ const OrdersPage: React.FC = () => {
         )}
       </PullToRefresh>
 
-      {/* Detail Modal - đầy đủ tính năng như thật */}
+      {/* Detail Modal */}
       <Modal
         isOpen={!!selectedOrder}
-        onClose={closeDetail}
+        onClose={() => setSelectedOrder(null)}
         title={selectedOrder ? `Chi tiết đơn ${selectedOrder.maDon}` : ''}
         confirmText="Theo dõi đơn"
         onConfirm={() => {
           if (selectedOrder) {
-            closeDetail();
-            navigate(`/tracking/${selectedOrder.maDon}`);
+            const code = selectedOrder.maDon;
+            setSelectedOrder(null);
+            navigate(`/tracking/${code}`);
           }
         }}
         cancelText="Đóng"
       >
         {selectedOrder && (
           <div style={{ fontSize: 14, lineHeight: 1.5 }}>
-            {/* Status */}
             <div style={{ marginBottom: 12 }}>
               <span style={{ ...statusBadgeBase, ...getStatusStyle(selectedOrder.status), display: 'inline-block' }}>
                 {getStatusLabel(selectedOrder.status)}
               </span>
             </div>
 
-            {/* Sender / Receiver full */}
             <div style={{ marginBottom: 10 }}>
               <strong>Người gửi:</strong> {selectedOrder.nguoiGui} — {selectedOrder.sdtGui}<br />
               <span style={{ color: '#64748b' }}>{selectedOrder.diaChiGui}</span>
@@ -483,32 +432,20 @@ const OrdersPage: React.FC = () => {
               <span style={{ color: '#64748b' }}>{selectedOrder.diaChiNhan}</span>
             </div>
 
-            {/* Goods */}
             <div style={{ marginBottom: 8 }}>
               <strong>Mô tả hàng:</strong> {selectedOrder.moTaHang || '—'}<br />
               <strong>Loại:</strong> {selectedOrder.loaiDon === 'hoatoc' ? 'Hỏa tốc' : 'Đường dài'} | 
-              <strong> Cân nặng:</strong> {selectedOrder.trongLuong} kg<br />
-              <strong>Kích thước:</strong> {selectedOrder.dai}×{selectedOrder.rong}×{selectedOrder.cao} cm
+              <strong> Cân nặng:</strong> {selectedOrder.trongLuong} kg
             </div>
 
-            {/* Payment */}
             <div style={{ marginBottom: 8, padding: '8px 10px', background: '#f0f9ff', borderRadius: 8 }}>
               <strong>Thanh toán:</strong> {selectedOrder.paymentMethod === 'cod' ? 'Thu hộ (COD)' : 'Trả trước bằng Pi'}<br />
               Cước: <strong>{(selectedOrder.totalAmount || 0).toLocaleString()} Pi</strong><br />
               {selectedOrder.paymentMethod === 'cod' && (
                 <>Thu hộ người nhận: <strong>{parseFloat(selectedOrder.codAmount || '0').toLocaleString()} Pi</strong></>
               )}
-              {selectedOrder.paymentTxId && <div style={{ fontSize: 12 }}>Tx: {selectedOrder.paymentTxId}</div>}
             </div>
 
-            {selectedOrder.ghiChu && <div><strong>Ghi chú:</strong> {selectedOrder.ghiChu}</div>}
-
-            <div style={{ marginTop: 12, fontSize: 12, color: '#64748b' }}>
-              Tạo lúc: {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : '—'}<br />
-              Cập nhật: {selectedOrder.updatedAt ? new Date(selectedOrder.updatedAt).toLocaleString() : '—'}
-            </div>
-
-            {/* Quick actions inside modal - driver history hides sender actions */}
             <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {!isDriverHistory && isCancellable(selectedOrder.status) && (
                 <button 
@@ -516,32 +453,15 @@ const OrdersPage: React.FC = () => {
                   style={{ ...smallAction, background: '#fee2e2', color: '#991b1b' }}
                   disabled={isCancelling === selectedOrder.maDon}
                 >
-                  {isCancelling === selectedOrder.maDon ? 'Đang hủy...' : '🚫 Hủy đơn này'}
+                  {isCancelling === selectedOrder.maDon ? 'Đang hủy...' : '🚫 Hủy đơn'}
                 </button>
               )}
-              {!isDriverHistory && (
-                <button onClick={() => handleCreateSimilar(selectedOrder)} style={smallAction}>
-                  📋 Tạo đơn tương tự
-                </button>
-              )}
-              <button onClick={() => copyMaDon(selectedOrder.maDon)} style={smallAction}>
-                📋 Copy mã đơn
-              </button>
-              {isDriverHistory && (
-                <span style={{ fontSize: 12, color: '#166534', alignSelf: 'center' }}>
-                  Lịch sử giao - xem chi tiết hành trình tại "Theo dõi"
-                </span>
-              )}
-            </div>
-
-            <div style={{ marginTop: 12, fontSize: 12, color: '#94a3b8' }}>
-              Timeline chi tiết &amp; cập nhật realtime xem tại màn "Theo dõi đơn".
+              <button onClick={() => copyMaDon(selectedOrder.maDon)} style={smallAction}>📋 Copy mã đơn</button>
             </div>
           </div>
         )}
       </Modal>
 
-      {/* Bottom quick create - only for sender, not for driver history */}
       {!isDriverHistory && (
         <div style={{ textAlign: 'center', marginTop: 24 }}>
           <button onClick={() => navigate('/gui-hang')} style={createBtnBig}>
@@ -553,7 +473,7 @@ const OrdersPage: React.FC = () => {
   );
 };
 
-/* ===================== STYLES (kept minimal change to original structure, added functional) ===================== */
+/* ===================== STYLES ===================== */
 const pageContainer = { minHeight: '100vh', background: '#f3e8ff', padding: '16px 16px 110px', boxSizing: 'border-box' as const };
 const header = { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' };
 const title = { color: '#4c1d95', margin: 0, fontSize: 20 };
