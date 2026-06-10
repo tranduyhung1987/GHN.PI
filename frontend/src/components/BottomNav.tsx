@@ -97,7 +97,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
     </nav>
   );
 
-  // Mặc định cho buyer/seller hoặc các role khác
+  // Mặc định cho các role khác
   const renderDefaultNav = () => (
     <nav style={navContainer} role="navigation" aria-label="Điều hướng chính">
       <Tab icon="🏠" label="Trang chủ" path="/" isActive={isActive('/')} goTo={goTo} />

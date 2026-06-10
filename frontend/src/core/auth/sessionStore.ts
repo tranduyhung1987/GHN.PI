@@ -1,4 +1,23 @@
-import { defaultSession, Session, UserRole } from './session';
+// src/core/auth/sessionStore.ts
+
+import type { AppRole } from '@/utils/constants';
+
+// Dùng lại AppRole từ constants.ts để thống nhất
+export type UserRole = AppRole;
+
+export interface Session {
+  userId: string | null;
+  role: UserRole;
+  token: string | null;
+  isAuthenticated: boolean;
+}
+
+export const defaultSession: Session = {
+  userId: null,
+  role: 'guest',
+  token: null,
+  isAuthenticated: false,
+};
 
 const STORAGE_KEY = 'GHN_PI_SESSION';
 
