@@ -1,3 +1,4 @@
+// src/core/auth/AuthContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { piService, type PiUser } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
@@ -10,6 +11,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   logout: () => void;
   updateRole: (newRole: AppRole) => void;
+  loginError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,22 +28,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [role, setRole] = useState<AppRole | null>(
     (localStorage.getItem('selectedRole') as AppRole) || null
   );
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const isAuthenticated = !!user;
 
   const login = async () => {
     setIsLoading(true);
+    setLoginError(null);
     try {
-      // Gọi trực tiếp Real Pi
       const loggedInUser = await piService.authenticate();
-
       if (loggedInUser?.username) {
-        // Lưu ngay và set state ngay lập tức
         localStorage.setItem('piUsername', loggedInUser.username);
         setUser(loggedInUser);
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('Login error (Sandbox):', error);
+      setLoginError('Đăng nhập Pi thất bại (có thể do Sandbox). Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -51,6 +53,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     piService.logout();
     setUser(null);
     setRole(null);
+    setLoginError(null);
     localStorage.removeItem('piUsername');
     localStorage.removeItem('selectedRole');
   };
@@ -70,6 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         logout,
         updateRole,
+        loginError,
       }}
     >
       {children}
