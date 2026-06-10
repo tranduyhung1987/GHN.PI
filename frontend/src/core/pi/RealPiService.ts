@@ -13,9 +13,7 @@ async authenticate(): Promise<PiUser> {
   }
 
   try {
-    // Gọi đơn giản nhất có thể
     const auth: any = await (window as any).Pi.authenticate(['username']);
-
     const piUser = auth?.user || auth || {};
 
     this.currentUser = {
@@ -28,7 +26,9 @@ async authenticate(): Promise<PiUser> {
     return this.currentUser;
   } catch (err: any) {
     console.error('[RealPiService] authenticate error:', err);
-    throw new Error(err?.message || 'Pi authenticate failed');
+    
+    // Trả lỗi rõ ràng hơn
+    throw new Error(err?.message || 'Pi Authentication failed');
   }
 }
 
