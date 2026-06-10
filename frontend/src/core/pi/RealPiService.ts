@@ -1,7 +1,5 @@
-// FORCE DEPLOY - 10/06/2026 15:47 - Fix JSON Sandbox
 // src/core/pi/RealPiService.ts
 import type { PiAdapter, PiPayment, PiPaymentResult, PiUser } from './PiAdapter';
-import { saveIncompletePayment } from '@/services/firebase/incompletePaymentService';
 
 export class RealPiService implements PiAdapter {
   public readonly isReal = true;
@@ -14,22 +12,23 @@ export class RealPiService implements PiAdapter {
       throw new Error('Pi SDK not available');
     }
 
-    // ✅ TẠM TẮT CALLBACK để test (sẽ bật lại sau khi ổn)
-    const auth: any = await (window as any).Pi.authenticate(
-      ['payments', 'username']
-      // onIncompletePaymentFound đã tắt tạm
-    );
+    try {
+      // ✅ Không truyền object, không có callback
+      const auth: any = await (window as any).Pi.authenticate(['payments', 'username']);
+      const piUser = auth?.user || auth || {};
 
-    const piUser = auth?.user || auth || {};
+      this.currentUser = {
+        uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
+        username: piUser.username || piUser.userName || piUser.name || 'pi-user',
+        name: piUser.name || piUser.username || 'Pi User',
+      };
+      this.accessToken = auth?.accessToken || null;
 
-    this.currentUser = {
-      uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
-      username: piUser.username || piUser.userName || piUser.name || 'pi-user',
-      name: piUser.name || piUser.username || 'Pi User',
-    };
-    this.accessToken = auth?.accessToken || null;
-
-    return this.currentUser;
+      return this.currentUser;
+    } catch (err) {
+      console.error('[RealPiService] authenticate error:', err);
+      throw err;
+    }
   }
 
   async getUser(): Promise<PiUser | null> {
@@ -39,7 +38,6 @@ export class RealPiService implements PiAdapter {
       try {
         const auth: any = await (window as any).Pi.authenticate(['username']);
         const piUser = auth?.user || auth || {};
-
         this.currentUser = {
           uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
           username: piUser.username || piUser.userName || piUser.name || 'pi-user',
@@ -67,21 +65,24 @@ export class RealPiService implements PiAdapter {
         resolve({ success: false, error: 'Pi SDK không khả dụng' });
         return;
       }
-
-      (window as any).Pi.createPayment(
-        {
-          identifier: payment.identifier,
-          amount: payment.amount,
-          memo: payment.memo,
-          metadata: payment.metadata || {},
-        },
-        {
-          onReadyForServerApproval: () => {},
-          onReadyForServerCompletion: (_: string, txid: string) => resolve({ success: true, transactionId: txid }),
-          onCancel: () => resolve({ success: false, error: 'Đã hủy' }),
-          onError: (e: Error) => resolve({ success: false, error: e.message }),
-        }
-      );
+      try {
+        (window as any).Pi.createPayment(
+          {
+            identifier: payment.identifier,
+            amount: payment.amount,
+            memo: payment.memo,
+            metadata: payment.metadata || {},
+          },
+          {
+            onReadyForServerApproval: () => {},
+            onReadyForServerCompletion: (_: string, txid: string) => resolve({ success: true, transactionId: txid }),
+            onCancel: () => resolve({ success: false, error: 'Đã hủy' }),
+            onError: (e: Error) => resolve({ success: false, error: e.message }),
+          }
+        );
+      } catch (err) {
+        resolve({ success: false, error: (err as Error).message });
+      }
     });
   }
 }
