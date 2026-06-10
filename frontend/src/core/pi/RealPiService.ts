@@ -1,7 +1,6 @@
 // src/core/pi/RealPiService.ts
 
 import type { PiAdapter, PiPayment, PiPaymentResult, PiUser } from './PiAdapter';
-import type { PiAuthResult } from '@/types/pi-sdk';
 import { saveIncompletePayment } from '@/services/firebase/incompletePaymentService';
 
 export class RealPiService implements PiAdapter {
@@ -11,11 +10,10 @@ export class RealPiService implements PiAdapter {
   private accessToken: string | null = null;
 
   async authenticate(): Promise<PiUser> {
-    if (typeof window === 'undefined' || !window.Pi) {
+    if (typeof window === 'undefined' || !(window as any).Pi) {
       throw new Error('Pi SDK not available');
     }
 
-    // Callback trực tiếp (đúng runtime Sandbox)
     const onIncompletePaymentFound = async (payment: any) => {
       await saveIncompletePayment({
         identifier: payment.identifier,
@@ -26,20 +24,20 @@ export class RealPiService implements PiAdapter {
       });
     };
 
-    // Ép kiểu để TypeScript không báo lỗi
-    const auth: PiAuthResult = await (window.Pi.authenticate as any)(
+    // ✅ Truyền callback trực tiếp (không bọc object)
+    const auth: any = await (window as any).Pi.authenticate(
       ['payments', 'username'],
       onIncompletePaymentFound
     );
 
-    const piUser: any = auth?.user || auth || {};
+    const piUser = auth?.user || auth || {};
 
     this.currentUser = {
       uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
       username: piUser.username || piUser.userName || piUser.name || 'pi-user',
       name: piUser.name || piUser.username || 'Pi User',
     };
-    this.accessToken = (auth as any).accessToken || null;
+    this.accessToken = auth?.accessToken || null;
 
     return this.currentUser;
   }
@@ -47,19 +45,16 @@ export class RealPiService implements PiAdapter {
   async getUser(): Promise<PiUser | null> {
     if (this.currentUser) return this.currentUser;
 
-    if (window.Pi) {
+    if ((window as any).Pi) {
       try {
-        const auth: any = await (window.Pi.authenticate as any)(['username'], {});
-        const piUser: any = auth?.user || auth || {};
-
+        const auth: any = await (window as any).Pi.authenticate(['username'], {});
+        const piUser = auth?.user || auth || {};
         this.currentUser = {
           uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
           username: piUser.username || piUser.userName || piUser.name || 'pi-user',
           name: piUser.name || piUser.username || 'Pi User',
         };
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
     return this.currentUser;
   }
@@ -75,12 +70,12 @@ export class RealPiService implements PiAdapter {
 
   async createPayment(payment: PiPayment): Promise<PiPaymentResult> {
     return new Promise((resolve) => {
-      if (!window.Pi) {
+      if (!(window as any).Pi) {
         resolve({ success: false, error: 'Pi SDK không khả dụng' });
         return;
       }
 
-      window.Pi.createPayment(
+      (window as any).Pi.createPayment(
         {
           identifier: payment.identifier,
           amount: payment.amount,
