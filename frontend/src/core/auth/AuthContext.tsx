@@ -42,8 +42,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(loggedInUser);
       }
     } catch (error: any) {
-      console.error('Login error (Sandbox):', error);
-      setLoginError('Đăng nhập Pi thất bại (có thể do Sandbox). Vui lòng thử lại.');
+      console.error('Login error:', error);
+      setLoginError('Đăng nhập Pi thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
