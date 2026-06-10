@@ -1,3 +1,4 @@
+// FORCE DEPLOY - 10/06/2026 15:47 - Fix JSON Sandbox
 // src/core/pi/RealPiService.ts
 import type { PiAdapter, PiPayment, PiPaymentResult, PiUser } from './PiAdapter';
 import { saveIncompletePayment } from '@/services/firebase/incompletePaymentService';
