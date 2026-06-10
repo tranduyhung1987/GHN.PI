@@ -1,3 +1,4 @@
+// src/core/auth/AuthContext.tsx
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { piService, type PiUser } from '../pi/piService';
 import type { AppRole } from '@/utils/constants';
@@ -26,23 +27,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  // ✅ Load role từ localStorage khi app khởi động
+  // ==================== ROLE (Thống nhất qua selectedRole) ====================
   const [role, setRole] = useState<AppRole | null>(() => {
     const savedRole = localStorage.getItem('selectedRole') as AppRole | null;
+
+    // Trong môi trường dev: tự động set 'sender' nếu chưa có
+    if (!savedRole && import.meta.env.DEV) {
+      localStorage.setItem('selectedRole', 'sender');
+      return 'sender';
+    }
+
     return savedRole;
   });
 
   const isAuthenticated = !!user;
 
+  // ==================== RESTORE SESSION KHI REFRESH ====================
+  useEffect(() => {
+    const restoreSession = () => {
+      const savedUsername = localStorage.getItem('piUsername');
+
+      if (savedUsername) {
+        // Khôi phục user tối thiểu từ localStorage
+        setUser({
+          uid: savedUsername,
+          username: savedUsername,
+          name: savedUsername,
+        });
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  // ==================== LOGIN ====================
   const login = async () => {
     setIsLoading(true);
     setLoginError(null);
 
     try {
       const loggedInUser = await piService.authenticate();
+
       if (loggedInUser?.username) {
         localStorage.setItem('piUsername', loggedInUser.username);
         setUser(loggedInUser);
+
+        // Nếu dev và chưa có role → tự động set sender
+        if (import.meta.env.DEV && !localStorage.getItem('selectedRole')) {
+          localStorage.setItem('selectedRole', 'sender');
+          setRole('sender');
+        }
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -52,6 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // ==================== LOGOUT ====================
   const logout = () => {
     piService.logout();
     setUser(null);
@@ -61,6 +96,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('selectedRole');
   };
 
+  // ==================== UPDATE ROLE ====================
   const updateRole = (newRole: AppRole) => {
     setRole(newRole);
     localStorage.setItem('selectedRole', newRole);

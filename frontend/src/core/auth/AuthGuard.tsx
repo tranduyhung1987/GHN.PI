@@ -1,5 +1,4 @@
 // src/core/auth/AuthGuard.tsx
-
 import React from 'react';
 import { useAuth } from './AuthContext';
 
@@ -9,43 +8,39 @@ interface Props {
 }
 
 export default function AuthGuard({ children, allowedRoles }: Props) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, role, isAuthenticated } = useAuth();
 
-  /**
-   * ❌ NOT LOGGED IN
-   */
+  // Chưa đăng nhập
   if (!isAuthenticated || !user) {
     return (
       <div style={blockStyle}>
-        🚫 Bạn chưa đăng nhập
+        🚫 Bạn chưa đăng nhập<br />
+        <span style={{ fontSize: '13px', fontWeight: 400 }}>Vui lòng đăng nhập để tiếp tục</span>
       </div>
     );
   }
 
-  /**
-   * ❌ ROLE CHECK
-   */
-  if (allowedRoles && !allowedRoles.includes(user?.role ?? '')) {
+  // Kiểm tra role (đã sửa đúng)
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
     return (
       <div style={blockStyle}>
         ⛔ Không có quyền truy cập<br />
-        <span style={{ fontSize: '13px', fontWeight: 400 }}>Chỉ dành cho: Người gửi hàng hoặc Admin</span>
+        <span style={{ fontSize: '13px', fontWeight: 400 }}>
+          Trang này chỉ dành cho: {allowedRoles.join(', ')}
+        </span>
       </div>
     );
   }
 
-  /**
-   * ✅ PASS
-   */
   return <>{children}</>;
 }
 
-/**
- * SIMPLE GUARD UI STYLE
- */
 const blockStyle: React.CSSProperties = {
-  padding: 20,
+  padding: 24,
   textAlign: 'center',
   color: '#dc2626',
   fontWeight: 600,
+  background: '#fef2f2',
+  borderRadius: 16,
+  margin: 20,
 };
