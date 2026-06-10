@@ -84,7 +84,7 @@ async function startApp() {
   const rootElement = document.getElementById('root');
   if (rootElement) {
     createRoot(rootElement).render(
-      <StrictMode>
+      //<StrictMode>
         <ErrorBoundary>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
@@ -94,7 +94,7 @@ async function startApp() {
             </AuthProvider>
           </QueryClientProvider>
         </ErrorBoundary>
-      </StrictMode>
+      //</StrictMode>
     );
   }
 }
