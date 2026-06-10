@@ -62,12 +62,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ onNavigate, currentPage }) => {
   );
 
   const renderWarehouseNav = () => (
-    <nav style={navContainer} role="navigation" aria-label="Điều hướng Kho trung chuyển">
-      <Tab icon="🏠" label="Trang chủ" path="/" isActive={isActive('/')} goTo={goTo} />
-      <Tab icon="📥" label="Nhập kho" path="/warehouse" isActive={isActive('/warehouse')} goTo={goTo} />
-      <Tab icon="📤" label="Xuất kho" path="/warehouse" isActive={isActive('/warehouse')} goTo={goTo} />
-      <Tab icon="👤" label="Cá nhân" path="/ca-nhan" isActive={isActive('/ca-nhan') || isActive('/profile')} goTo={goTo} />
-    </nav>
+  <nav style={navContainer} role="navigation" aria-label="Điều hướng Kho trung chuyển">
+    <Tab icon="🏠" label="Trang chủ" path="/" isActive={isActive('/')} goTo={goTo} />
+    <Tab icon="🏬" label="Quản lý kho" path="/warehouse" isActive={isActive('/warehouse')} goTo={goTo} />
+    <Tab icon="👤" label="Cá nhân" path="/ca-nhan" isActive={isActive('/ca-nhan') || isActive('/profile')} goTo={goTo} />
+  </nav>
   );
 
   const renderShopNav = () => (
