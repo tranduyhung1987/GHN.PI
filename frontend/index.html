@@ -14,7 +14,15 @@
     <!-- Pi Network SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script type="module">
-      await Pi.init({ version: "2.0", sandbox: true });
+      (async () => {
+        try {
+          await Pi.init({ version: "2.0", sandbox: true });
+          console.log('%c[Pi SDK] Initialized successfully (sandbox mode)', 'color: #22c55e');
+
+        } catch (err) {
+          console.error('[Pi SDK] Init failed:', err);
+        }
+      })();
     </script>
 
     <!-- Open Graph / Social Share -->
