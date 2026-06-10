@@ -163,7 +163,12 @@ class AppController {
   private handleNavigate(route: string) {
     flowState.set("ROUTE_RESOLVE", { route });
 
-    window.location.href = route;
+    if (typeof window !== 'undefined') {
+     window.history.pushState({}, '', route);
+     window.dispatchEvent(new CustomEvent('GHN_NAVIGATE', {
+      detail: { route },
+     }));
+    }
 
     eventBus.emit("ROUTE_CHANGED", route);
     traceEngine.log("NAVIGATION", { route });
