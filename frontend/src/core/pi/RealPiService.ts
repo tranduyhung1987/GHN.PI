@@ -7,28 +7,30 @@ export class RealPiService implements PiAdapter {
   private currentUser: PiUser | null = null;
   private accessToken: string | null = null;
 
-  async authenticate(): Promise<PiUser> {
-    if (typeof window === 'undefined' || !(window as any).Pi) {
-      throw new Error('Pi SDK not available');
-    }
-
-    try {
-      const auth: any = await (window as any).Pi.authenticate(['payments', 'username']);
-      const piUser = auth?.user || auth || {};
-
-      this.currentUser = {
-        uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
-        username: piUser.username || piUser.userName || piUser.name || 'pi-user',
-        name: piUser.name || piUser.username || 'Pi User',
-      };
-      this.accessToken = auth?.accessToken || null;
-
-      return this.currentUser;
-    } catch (err) {
-      console.error('[RealPiService] authenticate error:', err);
-      throw err;
-    }
+async authenticate(): Promise<PiUser> {
+  if (typeof window === 'undefined' || !(window as any).Pi) {
+    throw new Error('Pi SDK not available');
   }
+
+  try {
+    // Gọi đơn giản nhất có thể
+    const auth: any = await (window as any).Pi.authenticate(['username']);
+
+    const piUser = auth?.user || auth || {};
+
+    this.currentUser = {
+      uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
+      username: piUser.username || piUser.userName || piUser.name || 'pi-user',
+      name: piUser.name || piUser.username || 'Pi User',
+    };
+    this.accessToken = auth?.accessToken || null;
+
+    return this.currentUser;
+  } catch (err: any) {
+    console.error('[RealPiService] authenticate error:', err);
+    throw new Error(err?.message || 'Pi authenticate failed');
+  }
+}
 
   async getUser(): Promise<PiUser | null> {
     if (this.currentUser) return this.currentUser;
