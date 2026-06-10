@@ -8,13 +8,31 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
-// ==================== SANDBOX MESSAGE FILTER ====================
+// ==================== CHỜ Pi SDK SẴN SÀNG (quan trọng với Sandbox) ====================
+const waitForPiSDK = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if ((window as any).Pi) {
+      resolve();
+      return;
+    }
+    const check = setInterval(() => {
+      if ((window as any).Pi) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 50);
+  });
+};
+
+// ==================== SANDBOX MESSAGE FILTER (lọc mạnh) ====================
 if (typeof window !== 'undefined') {
   window.addEventListener('message', (event) => {
     if (event.origin.includes('sandbox.minepi.com')) {
       const data = event.data || {};
+      // Lọc tất cả message nội bộ của Sandbox
       if (
         data?.type === 'installHooks' ||
+        data?.type === 'heartbeat' ||
         (typeof data?.action === 'string' && data.action.includes('No action'))
       ) {
         return;
@@ -51,34 +69,34 @@ function createStatusBanner() {
   document.body.prepend(banner);
 }
 
-if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', createStatusBanner);
-  } else {
-    createStatusBanner();
+// ==================== KHỞI ĐỘNG APP (chờ Pi SDK trước) ====================
+async function startApp() {
+  await waitForPiSDK(); // Chờ Pi SDK sẵn sàng (rất quan trọng trong Sandbox)
+
+  createStatusBanner();
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { refetchOnWindowFocus: false, retry: 1 },
+    },
+  });
+
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    createRoot(rootElement).render(
+      <StrictMode>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <ThemeProvider>
+                <App />
+              </ThemeProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </StrictMode>
+    );
   }
 }
 
-// ==================== REACT ROOT ====================
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchOnWindowFocus: false, retry: 1 },
-  },
-});
-
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  createRoot(rootElement).render(
-    <StrictMode>
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <ThemeProvider>
-              <App />
-            </ThemeProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </StrictMode>
-  );
-}
+startApp();
