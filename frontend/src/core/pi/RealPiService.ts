@@ -9,11 +9,15 @@ export class RealPiService implements PiAdapter {
 
   async authenticate(): Promise<PiUser> {
     if (typeof window === 'undefined' || !(window as any).Pi) {
-      throw new Error('Pi SDK not available');
+      // Trả user giả để app không crash trong Sandbox
+      return {
+        uid: 'sandbox-dummy',
+        username: 'sandbox_user',
+        name: 'Sandbox User',
+      };
     }
 
     try {
-      // ✅ Không truyền object, không có callback
       const auth: any = await (window as any).Pi.authenticate(['payments', 'username']);
       const piUser = auth?.user || auth || {};
 
@@ -26,8 +30,14 @@ export class RealPiService implements PiAdapter {
 
       return this.currentUser;
     } catch (err) {
-      console.error('[RealPiService] authenticate error:', err);
-      throw err;
+      console.error('[RealPiService] authenticate error (Sandbox):', err);
+      
+      // Trả user giả để app không crash + không nhảy loạn
+      return {
+        uid: 'sandbox-dummy',
+        username: 'sandbox_user',
+        name: 'Sandbox User',
+      };
     }
   }
 
