@@ -9,7 +9,6 @@ export class RealPiService implements PiAdapter {
 
   async authenticate(): Promise<PiUser> {
     if (typeof window === 'undefined' || !(window as any).Pi) {
-      // Trả user giả để app không crash trong Sandbox
       return {
         uid: 'sandbox-dummy',
         username: 'sandbox_user',
@@ -31,8 +30,6 @@ export class RealPiService implements PiAdapter {
       return this.currentUser;
     } catch (err) {
       console.error('[RealPiService] authenticate error (Sandbox):', err);
-      
-      // Trả user giả để app không crash + không nhảy loạn
       return {
         uid: 'sandbox-dummy',
         username: 'sandbox_user',
@@ -76,12 +73,34 @@ export class RealPiService implements PiAdapter {
         return;
       }
       try {
+        // --- ĐOẠN XỬ LÝ SỬA LỖI METADATA ---
+        let safeMetadata: Record<string, any> = {};
+        
+        if (payment.metadata) {
+          if (typeof payment.metadata === 'string') {
+            try {
+              // Nếu truyền vào là chuỗi JSON, ta parse ra thành object phẳng
+              safeMetadata = JSON.parse(payment.metadata);
+            } catch {
+              // Nếu chuỗi thường, gán vào 1 key mặc định
+              safeMetadata = { data: payment.metadata };
+            }
+          } else if (typeof payment.metadata === 'object' && payment.metadata !== null) {
+            // Đảm bảo tất cả các value bên trong metadata đều là String/Number đơn giản, không chứa object lồng nhau
+            safeMetadata = {};
+            for (const [key, value] of Object.entries(payment.metadata)) {
+              safeMetadata[key] = typeof value === 'object' ? JSON.stringify(value) : value;
+            }
+          }
+        }
+        // ------------------------------------
+
         (window as any).Pi.createPayment(
           {
             identifier: payment.identifier,
             amount: payment.amount,
             memo: payment.memo,
-            metadata: payment.metadata || {},
+            metadata: safeMetadata, // Sử dụng metadata đã được chuẩn hóa an toàn
           },
           {
             onReadyForServerApproval: () => {},
