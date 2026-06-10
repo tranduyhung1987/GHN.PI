@@ -9,12 +9,7 @@ export class RealPiService implements PiAdapter {
 
   async authenticate(): Promise<PiUser> {
     if (typeof window === 'undefined' || !(window as any).Pi) {
-      // Trả user giả để app không crash trong Sandbox khi thiếu SDK
-      return {
-        uid: 'sandbox-dummy',
-        username: 'sandbox_user',
-        name: 'Sandbox User',
-      };
+      throw new Error('Pi SDK not available');
     }
 
     try {
@@ -30,14 +25,8 @@ export class RealPiService implements PiAdapter {
 
       return this.currentUser;
     } catch (err) {
-      console.error('[RealPiService] authenticate error (Sandbox):', err);
-      
-      // Trả user giả để app không crash + không nhảy loạn màn hình
-      return {
-        uid: 'sandbox-dummy',
-        username: 'sandbox_user',
-        name: 'Sandbox User',
-      };
+      console.error('[RealPiService] authenticate error:', err);
+      throw err;
     }
   }
 
@@ -75,9 +64,9 @@ export class RealPiService implements PiAdapter {
         resolve({ success: false, error: 'Pi SDK không khả dụng' });
         return;
       }
+
       try {
-        // 1. CHUẨN HÓA METADATA: Biến đổi thành Object phẳng (chỉ chứa string/number) 
-        // để tránh lỗi "[object Object]" khét tiếng của Pi SDK ngầm.
+        // CHUẨN HÓA METADATA
         let safeMetadata: Record<string, string | number> = {};
         if (payment.metadata) {
           const rawMetadata = typeof payment.metadata === 'string' 
@@ -91,7 +80,6 @@ export class RealPiService implements PiAdapter {
           }
         }
 
-        // 2. CỜ KIỂM SOÁT (FLAG): Đảm bảo Promise chỉ resolve/reject DUY NHẤT 1 lần
         let isSettled = false;
 
         (window as any).Pi.createPayment(
@@ -103,34 +91,29 @@ export class RealPiService implements PiAdapter {
           },
           {
             onReadyForServerApproval: (paymentId: string) => {
-              console.log('[Pi SDK] Sẵn sàng phê duyệt trên Server, Payment ID:', paymentId);
-              // Lưu ý: Chỗ này thường cần một API gửi paymentId lên Backend của bạn để gọi REST API của Pi Approve.
+              console.log('[Pi SDK] Sẵn sàng phê duyệt trên Server:', paymentId);
             },
             onReadyForServerCompletion: (paymentId: string, txid: string) => {
-              console.log('[Pi SDK] Hoàn thành giao dịch:', txid);
               if (!isSettled) {
                 isSettled = true;
                 resolve({ success: true, transactionId: txid });
               }
             },
             onCancel: (paymentId: string) => {
-              console.warn('[Pi SDK] Người dùng đã hủy giao dịch:', paymentId);
               if (!isSettled) {
                 isSettled = true;
                 resolve({ success: false, error: 'Đã hủy giao dịch' });
               }
             },
             onError: (error: Error, paymentId?: string) => {
-              console.error('[Pi SDK] Lỗi trong quá trình thanh toán:', error, paymentId);
               if (!isSettled) {
                 isSettled = true;
-                resolve({ success: false, error: error.message || 'Lỗi thanh toán SDK' });
+                resolve({ success: false, error: error.message || 'Lỗi thanh toán' });
               }
             },
           }
         );
       } catch (err) {
-        console.error('[RealPiService] Lỗi nghiêm trọng tại createPayment:', err);
         resolve({ success: false, error: (err as Error).message });
       }
     });
