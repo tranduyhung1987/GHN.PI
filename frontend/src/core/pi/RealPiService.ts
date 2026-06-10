@@ -47,14 +47,16 @@ export class RealPiService implements PiAdapter {
 
     if ((window as any).Pi) {
       try {
-        const auth: any = await (window as any).Pi.authenticate(['username'], {});
+        const auth: any = await (window as any).Pi.authenticate(['username']);
         const piUser = auth?.user || auth || {};
         this.currentUser = {
           uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
           username: piUser.username || piUser.userName || piUser.name || 'pi-user',
           name: piUser.name || piUser.username || 'Pi User',
         };
-      } catch {}
+      } catch (err) {
+        console.warn('[RealPiService] getUser error:', err);
+      }
     }
     return this.currentUser;
   }
