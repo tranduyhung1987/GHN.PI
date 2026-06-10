@@ -43,7 +43,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      setLoginError('Đăng nhập Pi thất bại. Vui lòng thử lại.');
+      const errorMessage = error?.message || 'Đăng nhập thất bại';
+      setLoginError(`Đăng nhập thất bại: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
