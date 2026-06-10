@@ -7,6 +7,7 @@ import { AuthProvider } from '@/core/auth/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
+import { initEngines } from '@/core/engines/initEngines';
 
 // ==================== CHỜ Pi SDK SẴN SÀNG ====================
 const waitForPiSDK = (): Promise<void> => {
@@ -43,7 +44,7 @@ if (typeof window !== 'undefined') {
 // ==================== KHỞI ĐỘNG APP ====================
 async function startApp() {
   await waitForPiSDK();
-
+  initEngines();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { refetchOnWindowFocus: false, retry: 1 },

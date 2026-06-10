@@ -3,8 +3,6 @@ import { EVENTS } from "@/core/events/eventTypes";
 import { eventBus } from "@/core/events/eventBus";
 
 class TrackingEngineCore {
-  // ================= CORE LOGIC =================
-
   updateTracking(data: any) {
     syncEngine.emit(EVENTS.TRACKING_UPDATED, {
       ...data,
@@ -20,7 +18,6 @@ class TrackingEngineCore {
     });
   }
 
-  // ================= MAP UPDATE FOR DRIVER LOCATION (STEP 13.2) =================
   updateDriverLocation(payload: any) {
     eventBus.emit("DRIVER_LOCATION_UPDATED", {
       driverId: payload.driverId,
@@ -30,26 +27,60 @@ class TrackingEngineCore {
     });
   }
 
-  // ================= ADAPTER LAYER (FOR APP CONTROLLER) =================
-
   async update(payload: any) {
     return this.updateTracking(payload);
   }
 
   async sync() {
-    // placeholder cho realtime sync engine
     return true;
   }
 
   async init() {
-    // lifecycle init tracking system
     return true;
   }
 
-  // optional future-safe hook
   async process(payload: any) {
     return this.updateTracking(payload);
   }
 }
 
-export const TrackingEngine = new TrackingEngineCore();
+// ✅ FIX: Dùng singleton + lazy initialization để tránh circular dependency
+let instance: TrackingEngineCore | null = null;
+
+export const TrackingEngine = {
+  getInstance(): TrackingEngineCore {
+    if (!instance) {
+      instance = new TrackingEngineCore();
+    }
+    return instance;
+  },
+
+  // Giữ nguyên API cũ để không phải sửa nhiều chỗ khác
+  init() {
+    return this.getInstance().init();
+  },
+
+  updateTracking(data: any) {
+    return this.getInstance().updateTracking(data);
+  },
+
+  updateLocation(orderId: string, location: any) {
+    return this.getInstance().updateLocation(orderId, location);
+  },
+
+  updateDriverLocation(payload: any) {
+    return this.getInstance().updateDriverLocation(payload);
+  },
+
+  update(payload: any) {
+    return this.getInstance().update(payload);
+  },
+
+  sync() {
+    return this.getInstance().sync();
+  },
+
+  process(payload: any) {
+    return this.getInstance().process(payload);
+  },
+};
