@@ -1,5 +1,4 @@
 // src/core/pi/RealPiService.ts
-
 import type { PiAdapter, PiPayment, PiPaymentResult, PiUser } from './PiAdapter';
 import { saveIncompletePayment } from '@/services/firebase/incompletePaymentService';
 
@@ -14,20 +13,10 @@ export class RealPiService implements PiAdapter {
       throw new Error('Pi SDK not available');
     }
 
-    const onIncompletePaymentFound = async (payment: any) => {
-      await saveIncompletePayment({
-        identifier: payment.identifier,
-        amount: payment.amount,
-        memo: payment.memo,
-        metadata: payment.metadata,
-        detectedAt: Date.now(),
-      });
-    };
-
-    // ✅ Truyền callback trực tiếp (không bọc object)
+    // ✅ TẠM TẮT CALLBACK để test (sẽ bật lại sau khi ổn)
     const auth: any = await (window as any).Pi.authenticate(
-      ['payments', 'username'],
-      onIncompletePaymentFound
+      ['payments', 'username']
+      // onIncompletePaymentFound đã tắt tạm
     );
 
     const piUser = auth?.user || auth || {};
@@ -49,6 +38,7 @@ export class RealPiService implements PiAdapter {
       try {
         const auth: any = await (window as any).Pi.authenticate(['username']);
         const piUser = auth?.user || auth || {};
+
         this.currentUser = {
           uid: piUser.uid || piUser.id || `pi-${piUser.username || 'unknown'}`,
           username: piUser.username || piUser.userName || piUser.name || 'pi-user',
