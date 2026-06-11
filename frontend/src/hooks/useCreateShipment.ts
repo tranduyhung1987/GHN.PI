@@ -1,3 +1,4 @@
+// src/hooks/useCreateShipment.ts
 import { useState } from 'react';
 
 const initialForm = {
@@ -8,12 +9,12 @@ const initialForm = {
   nguoiNhan: '',
   sdtNhan: '',
   diaChiNhan: '',
-  trongLuong: 0, // no forced default - user enters real package weight
-  dai: 0,        // no forced default - user enters real dimensions
+  trongLuong: 0,
+  dai: 0,
   rong: 0,
   cao: 0,
   ghiChu: '',
-  moTaHang: '',  // Mô tả hàng hóa - thực tế GHN cần để tra cứu, khiếu nại
+  moTaHang: '',
 };
 
 export const useCreateShipment = () => {
@@ -23,15 +24,15 @@ export const useCreateShipment = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [codAmount, setCodAmount] = useState<string>('0');
 
-  // Demo quick fills kept for dev/testing (not used in main UI - page uses auto-prefill + copy + danh bạ)
-  const handleQuickFillSeller = () => {
+  // ==================== QUICK FILL HELPERS (Đã chuẩn hóa tên) ====================
+  const handleQuickFillSender = () => {
     setForm(prev => ({
       ...prev,
       diaChiGui: '123 Đường XYZ, Quận 1, TP.HCM',
     }));
   };
 
-  const handleQuickFillBuyer = () => {
+  const handleQuickFillReceiver = () => {
     setForm(prev => ({
       ...prev,
       nguoiNhan: 'Người nhận mẫu',
@@ -49,15 +50,13 @@ export const useCreateShipment = () => {
     }));
   };
 
-  // Logic tính toán phí (thực tế GHN phức tạp hơn: zone, loại hàng, COD fee, etc. - ở đây đơn giản hóa)
-  // Thêm yếu tố thể tích nếu dims lớn (volume weight)
-  const volumeWeight = (form.dai * form.rong * form.cao) / 6000; // common divisor
+  // ==================== TÍNH TOÁN PHÍ ====================
+  const volumeWeight = (form.dai * form.rong * form.cao) / 6000;
   const effectiveWeight = Math.max(form.trongLuong, volumeWeight);
   const baseFee = form.loaiDon === 'hoatoc' ? effectiveWeight * 35000 : effectiveWeight * 22000;
   const shippingFee = Math.round(baseFee + 8000);
   const totalAmount = shippingFee;
 
-  // Reset toàn bộ form (dùng sau success / khi cần)
   const resetForm = () => {
     setForm(initialForm);
     setPaymentMethod('prepaid');
@@ -65,8 +64,6 @@ export const useCreateShipment = () => {
     setIsProcessing(false);
   };
 
-  // handleSubmit này chỉ dùng cho test nhanh. 
-  // Trang CreateShipmentPage sẽ override bằng logic thật (Pi Payment + AppController)
   const handleSubmit = async () => {
     setIsProcessing(true);
     try {
@@ -98,9 +95,9 @@ export const useCreateShipment = () => {
     isProcessing, 
     totalAmount, 
     resetForm,
-    handleQuickFillSeller,
-    handleQuickFillBuyer,
+    // Đã đổi tên hàm cho nhất quán
+    handleQuickFillSender,
+    handleQuickFillReceiver,
     handleQuickFillPi,
-    // moTaHang is inside form now
   };
 };

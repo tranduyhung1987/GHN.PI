@@ -2,12 +2,9 @@
 
 import type { AppRole } from '@/utils/constants';
 
-// Dùng lại AppRole từ constants.ts để thống nhất
-export type UserRole = AppRole;
-
 export interface Session {
   userId: string | null;
-  role: UserRole;
+  role: AppRole;
   token: string | null;
   isAuthenticated: boolean;
 }
@@ -37,19 +34,18 @@ class SessionStore {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   }
 
-  setRole(role: UserRole) {
+  setRole(role: AppRole) {
     this.session.role = role;
     this.setSession(this.session);
   }
 
-  login(userId: string, token: string, role: UserRole) {
+  login(userId: string, token: string, role: AppRole) {
     this.session = {
       userId,
       token,
       role,
       isAuthenticated: true,
     };
-
     this.setSession(this.session);
   }
 
